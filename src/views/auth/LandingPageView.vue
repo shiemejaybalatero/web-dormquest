@@ -1,32 +1,55 @@
 <script setup>
 import { ref } from 'vue'
-
-const theme = ref('light')
-
-function onClick() {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-}
 </script>
 
 <template>
-  <v-responsive class="border rounded">
-    <v-app :theme="theme">
-      <v-app-bar class="px-3">
-        <v-spacer></v-spacer>
-
-        <v-btn
-          :prepend-icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-          text="Toggle Theme"
-          slim
-          @click="onClick"
-        ></v-btn>
-      </v-app-bar>
-
-      <v-main>
-        <v-container>
-          <h1>Main Content</h1>
-        </v-container>
-      </v-main>
-    </v-app>
-  </v-responsive>
+  <v-app>
+    <v-container
+      fluid
+      class="background d-flex justify-content-center align-items-center flex-column"
+    >
+      <v-row class="text-center ms-0 mb-0">
+        <v-col cols="12" md="6">
+          <img src="/public/23.png" alt="Logo" width="175px" height="175px" class="logo" />
+        </v-col>
+        <v-col cols="12">
+          <h1 class="text-black text-center fs-2 fs-md-1">
+            <b
+              >Are you a CSU student on a quest <br />
+              for the perfect place to stay?</b
+            ><br />
+            This app makes your quest quick and easy!
+          </h1>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
+
+<style scoped>
+.background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url('/public/landing1.jpg') no-repeat center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(220, 226, 219, 0.3); /* Adjust transparency here */
+}
+
+.logo {
+  margin-top: 0;
+  position: absolute;
+  top: 70px;
+  left: 49.2%;
+  transform: translateX(-50%);
+}
+</style>

@@ -9,16 +9,16 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: LoginView,
-    },
-    {
-      path: '/landing',
-      name: 'landing',
       component: LandingPageView,
     },
     {
-      path: '/landing',
-      name: 'landing',
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    },
+    {
+      path: '/register',
+      name: 'register',
       component: RegisterView,
     },
   ],
