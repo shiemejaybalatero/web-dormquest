@@ -126,7 +126,6 @@ function handleActiveState(event) {
             </v-col>
           </v-row>
 
-          <!-- Show formatted birthday -->
           <div v-if="formattedBirthday" class="text-white text-caption mt-1 mb-3">
             📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
           </div>
@@ -149,7 +148,6 @@ function handleActiveState(event) {
             hint="At least 8 characters"
             label="Password"
             color="green"
-            class="mb-n4"
             counter
             @click:append-inner="showPassword = !showPassword"
           />
