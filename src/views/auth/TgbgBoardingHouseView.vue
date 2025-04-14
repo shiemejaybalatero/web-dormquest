@@ -27,7 +27,6 @@ const images = ['/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png', '/TGBG/
           XH6W+5W3, Infront of CSU Main Campus, Butuan City, Agusan Del Norte
         </p>
         <p class="font-weight-bold mb-4 text-green-darken-4">120 km away</p>
-
         <v-row class="text-center">
           <!-- Messenger Section -->
           <v-col cols="6">
@@ -138,5 +137,11 @@ const images = ['/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png', '/TGBG/
   .details-card {
     font-size: 14px;
   }
+}
+.smallcardone {
+  color: #0c3b2e;
+  font-weight: bold;
+  background-color: #e0f2f1;
+  border-radius: 8px;
 }
 </style>
