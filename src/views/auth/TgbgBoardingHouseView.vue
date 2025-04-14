@@ -1,52 +1,109 @@
 <script setup>
+import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
-const mainImage = 'https://via.placeholder.com/600x300?text=Main+Image'
-const images = [
-  'https://via.placeholder.com/200x100?text=Photo+1',
-  'https://via.placeholder.com/200x100?text=Photo+2',
-  'https://via.placeholder.com/200x100?text=Photo+3',
-  'https://via.placeholder.com/200x100?text=Photo+4',
-  'https://via.placeholder.com/200x100?text=Photo+5',
-]
+const showMessenger = ref(false)
+const showContact = ref(false)
+
+const toggleMessenger = () => {
+  showMessenger.value = !showMessenger.value
+}
+
+const toggleContact = () => {
+  showContact.value = !showContact.value
+}
+const mainImage = '/TGBG/tgbgmain.png'
+const images = ['/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png', '/TGBG/tgbg.png']
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-img :src="mainImage" height="300" class="rounded mb-4" cover />
-          <v-row dense>
-            <v-col v-for="(img, index) in images" :key="index" cols="4">
-              <v-img :src="img" height="80" class="rounded" cover />
-            </v-col>
-          </v-row>
-        </v-col>
+      <v-col cols="12" md="6">
+        <v-img :src="mainImage" height="350" class="rounded-xl mb-4" cover />
 
-        <v-col cols="12" md="6">
-          <h3 class="font-weight-bold mb-1">TGBG Boarding House</h3>
-          <p>XH6W+5W3, Infront of CSU Main Campus, Butuan City, Agusan Del Norte</p>
-          <p class="font-weight-bold mb-4">120 km away</p>
+        <h3 class="font-weight-bold mb-1">TGBG Boarding House</h3>
+        <p class="text-body-2">
+          XH6W+5W3, Infront of CSU Main Campus, Butuan City, Agusan Del Norte
+        </p>
+        <p class="font-weight-bold mb-4 text-green-darken-4">120 km away</p>
 
-          <v-btn class="mb-4 price-btn" prepend-icon="mdi-tag"> Prices included all fees </v-btn>
+        <v-row class="text-center">
+          <!-- Messenger Section -->
+          <v-col cols="6">
+            <v-btn
+              class="w-100 d-flex align-center justify-center"
+              @click="toggleMessenger"
+              style="text-transform: none"
+            >
+              <v-icon class="mr-2">mdi-facebook-messenger</v-icon>
+              Messenger
+            </v-btn>
 
-          <v-row class="details-card" no-gutters>
-            <v-col cols="12" md="6">
-              <p><strong>Distance:</strong> 500m</p>
-              <p><strong>Room number:</strong> 4</p>
-              <p><strong>Amenities:</strong> Wifi, Laundry, Kitchen</p>
-            </v-col>
-            <v-col cols="12" md="6">
-              <p><strong>Room Capacity:</strong> 5</p>
-              <p><strong>Room Type:</strong> Bed Spacer</p>
-              <p><strong>Availability:</strong> Yes</p>
-            </v-col>
-          </v-row>
+            <v-expand-transition>
+              <div v-show="showMessenger" class="mt-1">
+                <v-card class="smallcardone" flat>
+                  <v-card-text>Shella Licayan</v-card-text>
+                </v-card>
+              </div>
+            </v-expand-transition>
+          </v-col>
 
-          <div class="mt-4 price">₱7,000 <span class="text-caption">For 10 nights</span></div>
-        </v-col>
-      </v-row>
+          <!-- Contact Section -->
+          <v-col cols="6">
+            <v-btn
+              class="w-100 d-flex align-center justify-center"
+              @click="toggleContact"
+              style="text-transform: none"
+            >
+              <v-icon class="mr-2">mdi-phone</v-icon>
+              Contact
+            </v-btn>
+
+            <v-expand-transition>
+              <div v-show="showContact" class="mt-1">
+                <v-card class="smallcardtwo" flat>
+                  <v-card-text>090923123</v-card-text>
+                </v-card>
+              </div>
+            </v-expand-transition>
+          </v-col>
+        </v-row>
+      </v-col>
+
+      <v-col cols="12" md="6">
+        <v-row dense class="mb-4">
+          <v-col v-for="(img, index) in images" :key="index" cols="6" md="6">
+            <v-img :src="img" height="130" class="rounded" cover />
+          </v-col>
+        </v-row>
+
+        <!-- Center the button -->
+        <div class="d-flex justify-center mb-4">
+          <v-btn class="price-btn" prepend-icon="mdi-tag">Prices included all fees</v-btn>
+        </div>
+
+        <v-row class="details-card" no-gutters>
+          <!-- Full-width price inside the card -->
+          <v-col cols="12">
+            <div class="price mb-3">₱7,000 <span class="text-caption">For 10 nights</span></div>
+          </v-col>
+
+          <!-- Left column -->
+          <v-col cols="12" md="6">
+            <p><strong>Distance:</strong> 500m</p>
+            <p><strong>Room number:</strong> 4</p>
+            <p><strong>Amenities:</strong> Wifi, Laundry, Kitchen</p>
+          </v-col>
+
+          <!-- Right column -->
+          <v-col cols="12" md="6">
+            <p><strong>Room Capacity:</strong> 5</p>
+            <p><strong>Room Type:</strong> Bed Spacer</p>
+            <p><strong>Availability:</strong> Yes</p>
+          </v-col>
+        </v-row>
+      </v-col>
     </template>
   </AppLayout>
 </template>
@@ -56,7 +113,9 @@ const images = [
   background-color: #ffba00;
   color: black;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: 20px;
+  padding: 25px 20%;
+  padding-bottom: 40px;
 }
 
 .details-card {

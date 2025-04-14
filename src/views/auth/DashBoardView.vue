@@ -124,14 +124,14 @@ const filteringDorms = computed(() => {
       </v-list>
     </v-navigation-drawer>
     <v-app-bar app flat class="gradient-app-bar">
-      <span class="fw-bolder ml-6">
+      <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
-      </span>
+      </router-link>
+
       <v-spacer />
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
     </v-app-bar>
 
-    <!-- 👇 Main Scrollable Content -->
     <v-main ref="mainContent" style="overflow-y: auto; height: 100vh">
       <div class="gradient-bg">
         <v-container>
