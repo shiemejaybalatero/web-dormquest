@@ -2,34 +2,25 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const showScrollTop = ref(false)
-const mainContent = ref(null)
 const drawer = ref(false)
 const search = ref('')
 const selectedPriceRange = ref(null)
 const selectedDistanceRange = ref(null)
 
 const handleScroll = () => {
-  if (!mainContent.value) return
-  const scrollTop = mainContent.value.$el.scrollTop
-  showScrollTop.value = scrollTop > 300
+  showScrollTop.value = window.scrollY > 300
 }
 
 const scrollToTop = () => {
-  if (mainContent.value) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(() => {
-  if (mainContent.value) {
-    mainContent.value.$el.addEventListener('scroll', handleScroll)
-  }
+  window.addEventListener('scroll', handleScroll)
 })
 
 onBeforeUnmount(() => {
-  if (mainContent.value) {
-    mainContent.value.$el.removeEventListener('scroll', handleScroll)
-  }
+  window.removeEventListener('scroll', handleScroll)
 })
 
 const priceRanges = [
@@ -69,7 +60,7 @@ const dorms = ref([
     address: '7 km away from CSU',
     availability: '7,000 php/month',
     image: '/dorm3.jpg',
-    route: { name: 'TgbgBoardingHouseDetails' },
+    route: { name: 'tgbgboardinghousedetails' },
   },
   {
     name: 'Blissful Dormitory',
@@ -123,6 +114,7 @@ const filteringDorms = computed(() => {
         />
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar app flat class="gradient-app-bar">
       <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
@@ -132,7 +124,7 @@ const filteringDorms = computed(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
     </v-app-bar>
 
-    <v-main ref="mainContent" style="overflow-y: auto; height: 100vh">
+    <v-main>
       <div class="gradient-bg">
         <v-container>
           <!-- Search & Buttons -->

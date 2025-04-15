@@ -3,6 +3,8 @@ import LoginView from '@/views/auth/LoginView.vue'
 import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import DashBoardView from '@/views/auth/DashBoardView.vue'
+import GoogleMapView from '@/views/auth/GoogleMapView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import TgbgBoardingHouseView from '@/views/auth/TgbgBoardingHouseView.vue'
 
 const router = createRouter({
@@ -23,14 +25,28 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
     },
+
     {
       path: '/dashboard',
       name: 'dashboard',
       component: DashBoardView,
     },
+
     {
-      path: '/TgbgBoardingHouse',
-      name: 'TgbgBoardingHouseDetails',
+      path: '/googlemap',
+      name: 'googleMap',
+      component: GoogleMapView,
+    },
+
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+    },
+
+    {
+      path: '/tgbgboardinghousedetails',
+      name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
     },
   ],

@@ -74,15 +74,24 @@ onBeforeUnmount(() => {
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
 
-            <v-btn icon class="mx-1 green-btn">
-              <v-icon>mdi-home-outline</v-icon>
-            </v-btn>
-            <v-btn icon class="mx-1">
-              <v-icon>mdi-map-marker-outline</v-icon>
-            </v-btn>
-            <v-btn icon class="mx-1">
-              <v-icon>mdi-account-circle-outline</v-icon>
-            </v-btn>
+            <router-link to="/dashboard" class="mx-1">
+              <v-btn icon class="green-btn">
+                <v-icon>mdi-home-outline</v-icon>
+              </v-btn>
+            </router-link>
+
+            <router-link to="/map" class="mx-1">
+              <v-btn icon>
+                <v-icon>mdi-map-marker-outline</v-icon>
+              </v-btn>
+            </router-link>
+
+            <router-link to="/profile" class="mx-1">
+              <v-btn icon>
+                <v-icon>mdi-account-circle-outline</v-icon>
+              </v-btn>
+            </router-link>
+
             <v-app-bar-nav-icon @click="drawer = !drawer" />
           </div>
 
