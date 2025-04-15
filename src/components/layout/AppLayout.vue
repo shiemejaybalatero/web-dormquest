@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
@@ -57,7 +59,7 @@ onBeforeUnmount(() => {
       <div class="gradient-bg">
         <v-container>
           <!-- Search & Buttons -->
-          <div class="d-flex align-center search-wrapper mb-4">
+          <div class="d-flex align-center search-wrapper mb-4 pl-2">
             <v-text-field
               v-model="search"
               placeholder="Search for dormitories or boarding house..."
@@ -74,20 +76,20 @@ onBeforeUnmount(() => {
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
 
-            <router-link to="/dashboard" class="mx-1">
-              <v-btn icon class="green-btn">
+            <router-link to="/dashboard">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
                 <v-icon>mdi-home-outline</v-icon>
               </v-btn>
             </router-link>
 
-            <router-link to="/map" class="mx-1">
-              <v-btn icon>
+            <router-link to="/map">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
                 <v-icon>mdi-map-marker-outline</v-icon>
               </v-btn>
             </router-link>
 
-            <router-link to="/profile" class="mx-1">
-              <v-btn icon>
+            <router-link to="/profile">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/profile' }">
                 <v-icon>mdi-account-circle-outline</v-icon>
               </v-btn>
             </router-link>
@@ -96,6 +98,7 @@ onBeforeUnmount(() => {
           </div>
 
           <hr class="search-divider" />
+
           <v-row> <slot name="content"></slot> </v-row>
         </v-container>
       </div>
@@ -118,6 +121,10 @@ onBeforeUnmount(() => {
   background: linear-gradient(290deg, #6d9773, #fffae6);
   min-height: 100vh;
   padding: 1rem;
+}
+.green-btn {
+  background-color: #0c3b2e;
+  color: white;
 }
 
 .gradient-app-bar {

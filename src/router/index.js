@@ -4,7 +4,7 @@ import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import DashBoardView from '@/views/auth/DashBoardView.vue'
 import GoogleMapView from '@/views/auth/GoogleMapView.vue'
-import ProfileView from '@/views/ProfileView.vue'
+import ProfileView from '@/views/auth/ProfileView.vue'
 import TgbgBoardingHouseView from '@/views/auth/TgbgBoardingHouseView.vue'
 
 const router = createRouter({
@@ -33,8 +33,8 @@ const router = createRouter({
     },
 
     {
-      path: '/googlemap',
-      name: 'googleMap',
+      path: '/map',
+      name: 'map',
       component: GoogleMapView,
     },
 

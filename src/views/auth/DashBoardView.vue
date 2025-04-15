@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const showScrollTop = ref(false)
 const drawer = ref(false)
 const search = ref('')
@@ -59,7 +61,7 @@ const dorms = ref([
     name: 'TGBG Boarding House',
     address: '7 km away from CSU',
     availability: '7,000 php/month',
-    image: '/dorm3.jpg',
+    image: '/TGBG/tgbgmain.png',
     route: { name: 'tgbgboardinghousedetails' },
   },
   {
@@ -145,22 +147,31 @@ const filteringDorms = computed(() => {
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
 
-            <v-btn icon class="mx-1 green-btn">
-              <v-icon>mdi-home-outline</v-icon>
-            </v-btn>
-            <v-btn icon class="mx-1">
-              <v-icon>mdi-map-marker-outline</v-icon>
-            </v-btn>
-            <v-btn icon class="mx-1">
-              <v-icon>mdi-account-circle-outline</v-icon>
-            </v-btn>
+            <router-link to="/dashboard">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
+                <v-icon>mdi-home-outline</v-icon>
+              </v-btn>
+            </router-link>
+
+            <router-link to="/map">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
+                <v-icon>mdi-map-marker-outline</v-icon>
+              </v-btn>
+            </router-link>
+
+            <router-link to="/profile">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/profile' }">
+                <v-icon>mdi-account-circle-outline</v-icon>
+              </v-btn>
+            </router-link>
+
             <v-app-bar-nav-icon @click="drawer = !drawer" />
           </div>
 
           <hr class="search-divider" />
 
           <!-- Filters -->
-          <div class="filter-row mb-n5">
+          <div class="filter-row mt-n2 mb-n5">
             <v-col cols="6">
               <v-select
                 v-model="selectedPriceRange"
@@ -271,7 +282,6 @@ const filteringDorms = computed(() => {
 
 .filter-row {
   display: flex;
-  gap: 16px;
   flex-wrap: nowrap;
 }
 
