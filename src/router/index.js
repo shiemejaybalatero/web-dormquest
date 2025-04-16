@@ -6,6 +6,7 @@ import DashBoardView from '@/views/auth/DashBoardView.vue'
 import GoogleMapView from '@/views/auth/GoogleMapView.vue'
 import ProfileView from '@/views/auth/ProfileView.vue'
 import TgbgBoardingHouseView from '@/views/auth/TgbgBoardingHouseView.vue'
+import RatingsView from '@/views/auth/RatingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,12 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+    },
+
+    {
+      path: '/ratings',
+      name: 'ratings',
+      component: RatingsView,
     },
 
     {

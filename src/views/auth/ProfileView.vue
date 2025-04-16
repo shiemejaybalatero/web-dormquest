@@ -43,22 +43,24 @@ const status = ref('Single')
               </div>
             </v-list-item>
 
-            <v-list-item>
-              <div class="">
-                <v-icon class="mr-2">mdi-star</v-icon>
-                <span>Ratings</span>
-              </div>
-            </v-list-item>
+            <RouterLink to="/ratings" class="text-decoration-none text-black">
+              <v-list-item>
+                <div>
+                  <v-icon class="mr-2">mdi-star</v-icon>
+                  <span>Ratings</span>
+                </div>
+              </v-list-item>
+            </RouterLink>
 
             <v-list-item>
-              <div class="">
+              <div>
                 <v-icon class="mr-2">mdi-information</v-icon>
                 <span>About app</span>
               </div>
             </v-list-item>
 
             <v-list-item>
-              <div class="">
+              <div>
                 <v-icon class="mr-2">mdi-logout</v-icon>
                 <span>Log out</span>
               </div>
