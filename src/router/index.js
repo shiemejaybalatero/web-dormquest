@@ -33,73 +33,61 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
     },
-
     {
       path: '/dashboard',
       name: 'dashboard',
       component: DashBoardView,
     },
-
     {
       path: '/map',
       name: 'map',
       component: GoogleMapView,
     },
-
     {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
     },
-
     {
-      path: '/ratings',
+      path: '/profile/ratings',
       name: 'ratings',
       component: RatingsView,
     },
-
     {
       path: '/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',
       component: AmplayoBoardingHouseView,
     },
-
     {
       path: '/blissfulboardinghousedetails',
       name: 'blissfulboardinghousedetails',
       component: BlissfulBoardingHouseView,
     },
-
     {
       path: '/blueboardinghousedetails',
       name: 'blueboardinghousedetails',
       component: BlueBoardingHouseView,
     },
-
     {
       path: '/chelseaboardinghousedetails',
       name: 'chelseaboardinghousedetails',
       component: ChelseaBoardingHouseView,
     },
-
     {
       path: '/karmoboardinghousedetails',
       name: 'karmoboardinghousedetails',
       component: KarmoBoardingHouseView,
     },
-
     {
       path: '/licayanboardinghousedetails',
       name: 'licayanboardinghousedetails',
       component: LicayanBoardingHouseView,
     },
-
     {
       path: '/magduraboardinghousedetails',
       name: 'magduraboardinghousedetails',
       component: MagduraBoardingHouseView,
     },
-
     {
       path: '/tgbgboardinghousedetails',
       name: 'tgbgboardinghousedetails',
