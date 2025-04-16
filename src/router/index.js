@@ -49,11 +49,10 @@ const router = createRouter({
       component: ProfileView,
     },
     {
-      path: '/profile/ratings',
-      name: 'Ratings',
+      path: '/ratings', // CHANGED: was /profile/ratings
+      name: 'ratings',
       component: RatingsView,
     },
-
     {
       path: '/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',

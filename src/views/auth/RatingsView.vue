@@ -20,12 +20,10 @@ const handleFileUpload = (event) => {
   }
 }
 
-// User data
 const name = ref('SHIEME JAY G. BALATERO')
 const email = ref('Shiemejay@gmail.com')
 const averageRating = ref(4.2)
 
-// Sample dorm ratings
 const dormRatings = ref([
   { name: 'Blue Heavens Dorm', rating: 4.5 },
   { name: 'Justine Boarding House', rating: 4.0 },
@@ -38,41 +36,39 @@ const dormRatings = ref([
     <template #content>
       <v-row>
         <!-- Sidebar -->
-<v-col cols="12" md="3">
-  <v-list dense nav class="sidebar pa-4">
-    <v-list-item class="mt-3 mb-2">
-      <div class="d-flex align-center pl-2">
-        <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
-        <span>Personal Information</span>
-      </div>
-    </v-list-item>
+        <v-col cols="12" md="3">
+          <v-list dense nav class="sidebar pa-4">
+            <v-list-item class="mt-3 mb-2">
+              <div class="d-flex align-center pl-2">
+                <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
+                <span>Personal Information</span>
+              </div>
+            </v-list-item>
 
-    <!-- Wrapped Ratings in a router-link -->
-    <router-link to="/profile/ratings" style="text-decoration: none">
-      <v-list-item class="selected mb-2">
-        <div class="d-flex align-center pl-2">
-          <v-icon class="mr-2">mdi-star</v-icon>
-          <span class="font-weight-bold text-body-1">Ratings</span>
-        </div>
-      </v-list-item>
-    </router-link>
+            <router-link to="/profile/ratings" style="text-decoration: none">
+              <v-list-item class="selected mb-2">
+                <div class="d-flex align-center pl-2">
+                  <v-icon class="mr-2">mdi-star</v-icon>
+                  <span class="font-weight-bold text-body-1">Ratings</span>
+                </div>
+              </v-list-item>
+            </router-link>
 
-    <v-list-item>
-      <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2">mdi-information</v-icon>
-        <span>About app</span>
-      </div>
-    </v-list-item>
+            <v-list-item>
+              <div class="d-flex align-center pl-2">
+                <v-icon class="mr-2">mdi-information</v-icon>
+                <span>About app</span>
+              </div>
+            </v-list-item>
 
-    <v-list-item>
-      <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2">mdi-logout</v-icon>
-        <span>Log out</span>
-      </div>
-    </v-list-item>
-  </v-list>
-</v-col>
-
+            <v-list-item>
+              <div class="d-flex align-center pl-2">
+                <v-icon class="mr-2">mdi-logout</v-icon>
+                <span>Log out</span>
+              </div>
+            </v-list-item>
+          </v-list>
+        </v-col>
 
         <!-- Ratings Section -->
         <v-col cols="12" md="9">
