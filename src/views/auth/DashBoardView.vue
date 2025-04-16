@@ -129,7 +129,6 @@ const filteringDorms = computed(() => {
     <v-main>
       <div class="gradient-bg">
         <v-container>
-          <!-- Search & Buttons -->
           <div class="d-flex align-center search-wrapper mb-4">
             <v-text-field
               v-model="search"
@@ -200,7 +199,6 @@ const filteringDorms = computed(() => {
             </v-col>
           </div>
 
-          <!-- Dorm Cards -->
           <v-row>
             <v-col v-for="(dorm, index) in filteringDorms" :key="index" cols="12" sm="6" md="4">
               <component

@@ -77,13 +77,11 @@ const images = ['/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png', '/TGBG/
           </v-col>
         </v-row>
 
-        <!-- Center the button -->
         <div class="d-flex justify-center mb-4">
           <v-btn class="price-btn" prepend-icon="mdi-tag">Prices included all fees</v-btn>
         </div>
 
         <v-row class="details-card" no-gutters>
-          <!-- Full-width price inside the card -->
           <v-col cols="12">
             <div class="price mb-3">₱7,000 <span class="text-caption">For 10 nights</span></div>
           </v-col>

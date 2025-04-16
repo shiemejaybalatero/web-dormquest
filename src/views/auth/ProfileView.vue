@@ -2,9 +2,9 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
 
-const profileImage = ref(null) // Ref for the profile image URL
+const profileImage = ref(null)
 
-const fileInput = ref(null) // Ref for the hidden file input
+const fileInput = ref(null)
 
 // Trigger the file input click when the button is clicked
 const triggerFileInput = () => {
@@ -17,9 +17,9 @@ const handleFileUpload = (event) => {
   if (file) {
     const reader = new FileReader()
     reader.onload = (e) => {
-      profileImage.value = e.target.result // Set the uploaded image URL
+      profileImage.value = e.target.result
     }
-    reader.readAsDataURL(file) // Convert the file to a data URL
+    reader.readAsDataURL(file)
   }
 }
 
@@ -33,7 +33,6 @@ const status = ref('Single')
   <AppLayout>
     <template #content>
       <v-row>
-        <!-- Sidebar (no card) -->
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
             <v-list-item class="mt-3 mb-5 selected">
@@ -68,7 +67,6 @@ const status = ref('Single')
           </v-list>
         </v-col>
 
-        <!-- Profile Info (no card) -->
         <v-col cols="12" md="9">
           <div class="profile-section pa-6">
             <div class="text-right">
@@ -88,7 +86,6 @@ const status = ref('Single')
 
             <v-row>
               <v-col cols="12" md="4" class="d-flex justify-center flex-column align-center">
-                <!-- Avatar display -->
                 <v-avatar size="150">
                   <v-img
                     :src="profileImage || 'https://via.placeholder.com/150'"
@@ -97,16 +94,13 @@ const status = ref('Single')
                     <template v-slot:placeholder>
                       <v-row align="center" justify="center" class="fill-height">
                         <v-icon>mdi-account</v-icon>
-                        <!-- Default profile icon -->
                       </v-row>
                     </template>
                   </v-img>
                 </v-avatar>
 
-                <!-- Upload Button placed below the picture -->
                 <v-btn class="mt-3" @click="triggerFileInput">Upload Profile Picture</v-btn>
 
-                <!-- Hidden File Input -->
                 <input
                   ref="fileInput"
                   type="file"

@@ -4,7 +4,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const buttons = ref([])
 
 function handleActiveState(event) {
-  const element = event.currentTarget // Get the button itself
+  const element = event.currentTarget
   element.classList.add('active-tap')
   setTimeout(() => {
     element.classList.remove('active-tap')
