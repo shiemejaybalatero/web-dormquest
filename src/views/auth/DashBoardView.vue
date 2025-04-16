@@ -44,6 +44,7 @@ const dorms = ref([
     address: '0.5 km away from CSU',
     availability: '1,500 php/month',
     image: '/dorm1.jpg',
+    route: { name: 'amplayoboardinghousedetails' },
   },
   {
     name: 'Blue Heavens Dorm',
@@ -52,7 +53,19 @@ const dorms = ref([
     image: '/dorm2.jpg',
   },
   {
+    name: 'Blissful Dormitory',
+    address: '5.5 km away from CSU',
+    availability: '1,000 php/month',
+    image: '/dorm3.jpg',
+  },
+  {
     name: 'Licayan Boarding House',
+    address: '3.2 km away from CSU',
+    availability: '1,000 php/month',
+    image: '/dorm3.jpg',
+  },
+  {
+    name: 'Chelsea Boarding House',
     address: '3.2 km away from CSU',
     availability: '1,000 php/month',
     image: '/dorm3.jpg',
@@ -65,13 +78,7 @@ const dorms = ref([
     route: { name: 'tgbgboardinghousedetails' },
   },
   {
-    name: 'Blissful Dormitory',
-    address: '5.5 km away from CSU',
-    availability: '1,000 php/month',
-    image: '/dorm3.jpg',
-  },
-  {
-    name: 'Solotas Boarding House',
+    name: 'Magdura Boarding House',
     address: '0.9 km away from CSU',
     availability: '1,500 php/month',
     image: '/dorm3.jpg',
