@@ -1,50 +1,182 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { ref } from 'vue'
+
+const profileImage = ref(null) // Ref for the profile image URL
+
+const fileInput = ref(null) // Ref for the hidden file input
+
+// Trigger the file input click when the button is clicked
+const triggerFileInput = () => {
+  fileInput.value.click()
+}
+
+// Handle the file upload and update the profile image
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      profileImage.value = e.target.result // Set the uploaded image URL
+    }
+    reader.readAsDataURL(file) // Convert the file to a data URL
+  }
+}
+
+const name = ref('SHIEME JAY G. BALATERO')
+const age = ref('30')
+const email = ref('Shiemejay@gmail.com')
+const status = ref('Single')
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-card class="pa-6" elevation="2" style="border-radius: 20px">
-        <h4 class="text-subtitle-1 font-weight-bold mb-4">Account Settings</h4>
+      <v-row>
+        <!-- Sidebar (no card) -->
+        <v-col cols="12" md="3">
+          <v-list dense nav class="sidebar pa-4">
+            <v-list-item class="mt-3 mb-5 selected">
+              <div class="d-flex align-center">
+                <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
+                <span class="font-weight-bold text-body-1">Personal Information</span>
+              </div>
+            </v-list-item>
 
-        <div class="d-flex flex-column align-center mb-6">
-          <v-avatar size="120">
-            <img src="/23.png" alt="Profile" />
-          </v-avatar>
-          <h3 class="mt-4 font-weight-bold">SHIEME JAY G. BALATERO</h3>
-          <v-btn class="mt-2" color="#0c3b2e" size="small" variant="tonal">Change</v-btn>
-        </div>
+            <v-list-item>
+              <div class="">
+                <v-icon class="mr-2">mdi-star</v-icon>
+                <span>Ratings</span>
+              </div>
+            </v-list-item>
 
-        <v-list density="comfortable">
-          <v-list-item>
-            <v-list-item-title class="text-primary font-weight-medium"
-              >&gt; Personal Information</v-list-item-title
-            >
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title class="text-primary font-weight-medium"
-              >&gt; Ratings</v-list-item-title
-            >
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title class="text-primary font-weight-medium"
-              >&gt; About app</v-list-item-title
-            >
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title class="text-primary font-weight-medium"
-              >&gt; Log out</v-list-item-title
-            >
-          </v-list-item>
-        </v-list>
-      </v-card>
+            <v-list-item>
+              <div class="">
+                <v-icon class="mr-2">mdi-information</v-icon>
+                <span>About app</span>
+              </div>
+            </v-list-item>
+
+            <v-list-item>
+              <div class="">
+                <v-icon class="mr-2">mdi-logout</v-icon>
+                <span>Log out</span>
+              </div>
+            </v-list-item>
+          </v-list>
+        </v-col>
+
+        <!-- Profile Info (no card) -->
+        <v-col cols="12" md="9">
+          <div class="profile-section pa-6">
+            <div class="text-right">
+              <v-btn class="text-black font-weight-bold account-setting"> Account Setting </v-btn>
+            </div>
+
+            <v-divider class="my-6" />
+
+            <div class="d-flex justify-space-between align-center mb-4">
+              <div>
+                <h3 class="font-weight-bold mb-1">{{ name }}</h3>
+                <span class="text-grey-darken-1">Information</span>
+              </div>
+
+              <v-btn small color="#0c3b2e" class="white--text">CHANGE</v-btn>
+            </div>
+
+            <v-row>
+              <v-col cols="12" md="4" class="d-flex justify-center flex-column align-center">
+                <!-- Avatar display -->
+                <v-avatar size="150">
+                  <v-img
+                    :src="profileImage || 'https://via.placeholder.com/150'"
+                    alt="Profile Picture"
+                  >
+                    <template v-slot:placeholder>
+                      <v-row align="center" justify="center" class="fill-height">
+                        <v-icon>mdi-account</v-icon>
+                        <!-- Default profile icon -->
+                      </v-row>
+                    </template>
+                  </v-img>
+                </v-avatar>
+
+                <!-- Upload Button placed below the picture -->
+                <v-btn class="mt-3" @click="triggerFileInput">Upload Profile Picture</v-btn>
+
+                <!-- Hidden File Input -->
+                <input
+                  ref="fileInput"
+                  type="file"
+                  style="display: none"
+                  accept="image/*"
+                  @change="handleFileUpload"
+                />
+              </v-col>
+
+              <v-col cols="12" md="8">
+                <v-row>
+                  <v-col cols="6">
+                    <div class="label">Name:</div>
+                    <v-chip class="mt-1 font-weight-bold" color="black" label>{{ name }}</v-chip>
+                  </v-col>
+
+                  <v-col cols="6">
+                    <div class="label">Age:</div>
+                    <v-chip class="mt-1" color="black" label>{{ age }}</v-chip>
+                  </v-col>
+
+                  <v-col cols="6">
+                    <div class="label">Gmail:</div>
+                    <v-chip class="mt-1 font-weight-bold" color="black" label>{{ email }}</v-chip>
+                  </v-col>
+
+                  <v-col cols="6">
+                    <div class="label">Status:</div>
+                    <v-chip class="mt-1 font-weight-bold" color="black" label>{{ status }}</v-chip>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </div>
+        </v-col>
+      </v-row>
     </template>
   </AppLayout>
 </template>
 
 <style scoped>
-.text-primary {
+.profile-layout {
+  min-height: 50vh;
+  align-items: stretch;
+}
+
+.sidebar {
+  min-height: 40vh;
+  background: linear-gradient(180deg, #dbead3, #6d9773);
+  border-radius: 16px;
+}
+
+.label {
+  font-weight: bold;
   color: #0c3b2e;
+}
+
+.selected {
+  background-color: #ffba00 !important;
+  border-radius: 20px;
+}
+
+.account-setting {
+  border-radius: 20px;
+  background-color: #ffba00 !important;
+}
+
+.profile-section {
+  border-radius: 16px;
+  background: linear-gradient(180deg, #dbead3, #6d9773);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-height: 65vh;
+  align-items: stretch;
 }
 </style>
