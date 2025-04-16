@@ -45,6 +45,12 @@ const router = createRouter({
     },
 
     {
+      path: '/profile/ratings',
+      name: 'ratings',
+      component: () => import('@/views/auth/RatingsView.vue'),
+    },
+
+    {
       path: '/tgbgboardinghousedetails',
       name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
