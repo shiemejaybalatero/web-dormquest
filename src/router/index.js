@@ -49,9 +49,10 @@ const router = createRouter({
     },
     {
       path: '/profile/ratings',
-      name: 'ratings',
-      component: () => import('@/views/auth/RatingsView.vue'),
+      name: 'Ratings',
+      component: () => import('@/views/RatingsView.vue'),
     },
+
     {
       path: '/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',
