@@ -4,6 +4,6 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 
 <template>
   <AppLayout>
-    <template #content></template>
+    <template #content> </template>
   </AppLayout>
 </template>
