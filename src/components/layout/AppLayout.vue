@@ -46,11 +46,11 @@ onBeforeUnmount(() => {
         />
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar app flat class="gradient-app-bar">
       <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
       </router-link>
-
       <v-spacer />
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
     </v-app-bar>
@@ -99,7 +99,8 @@ onBeforeUnmount(() => {
 
           <hr class="search-divider" />
 
-          <v-row> <slot name="content"></slot> </v-row>
+          <!-- ✅ This is the fixed named slot -->
+          <slot name="content" />
         </v-container>
       </div>
     </v-main>
@@ -122,6 +123,7 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   padding: 1rem;
 }
+
 .green-btn {
   background-color: #0c3b2e;
   color: white;
