@@ -99,8 +99,10 @@ onBeforeUnmount(() => {
 
           <hr class="search-divider" />
 
-          <!-- ✅ This is the fixed named slot -->
-          <slot name="content" />
+          <!-- ✅ Fixed slot with fallback to router-view -->
+          <slot name="content">
+            <router-view />
+          </slot>
         </v-container>
       </div>
     </v-main>
