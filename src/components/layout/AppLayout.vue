@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
             </router-link>
 
             <router-link to="/profile">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/profile' }">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path.startsWith('/profile') }">
                 <v-icon>mdi-account-circle-outline</v-icon>
               </v-btn>
             </router-link>
