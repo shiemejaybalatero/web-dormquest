@@ -50,7 +50,7 @@ const router = createRouter({
     {
       path: '/profile/ratings',
       name: 'Ratings',
-      component: () => import('@/views/RatingsView.vue'),
+      component: () => import('@/views/auth/RatingsView.vue'),
     },
 
     {
