@@ -13,6 +13,7 @@ import ChelseaBoardingHouseView from '@/views/auth/ChelseaBoardingHouseView.vue'
 import KarmoBoardingHouseView from '@/views/auth/KarmoBoardingHouseView.vue'
 import LicayanBoardingHouseView from '@/views/auth/LicayanBoardingHouseView.vue'
 import MagduraBoardingHouseView from '@/views/auth/MagduraBoardingHouseView.vue'
+import RatingsView from '@/views/auth/RatingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,7 +51,7 @@ const router = createRouter({
     {
       path: '/profile/ratings',
       name: 'Ratings',
-      component: () => import('@/views/auth/RatingsView.vue'),
+      component: RatingsView,
     },
 
     {
