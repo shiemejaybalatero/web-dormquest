@@ -2,9 +2,13 @@
   <v-app>
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
+        <!-- Dashboard -->
         <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
+
+        <!-- Settings -->
         <v-list-item title="Settings" prepend-icon="mdi-cog" />
 
+        <!-- Ratings -->
         <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
           <v-list-item
             title="Ratings"
@@ -13,6 +17,16 @@
           />
         </router-link>
 
+        <!-- About App -->
+        <router-link to="/about" style="text-decoration: none; color: inherit">
+          <v-list-item
+            title="About App"
+            prepend-icon="mdi-information-outline"
+            :class="{ 'green-btn': route.path === '/about' }"
+          />
+        </router-link>
+
+        <!-- Logout -->
         <v-list-item
           @click="toggleLogin"
           :title="isLoggedIn ? 'Logout' : 'Login'"
@@ -49,6 +63,7 @@
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
 
+            <!-- Top bar nav icons -->
             <router-link to="/dashboard">
               <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
                 <v-icon>mdi-home-outline</v-icon>
@@ -99,6 +114,11 @@ const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
 const search = ref('')
+const isLoggedIn = ref(true)
+
+const toggleLogin = () => {
+  isLoggedIn.value = !isLoggedIn.value
+}
 
 const handleScroll = () => {
   if (!mainContent.value) return
@@ -130,45 +150,37 @@ onBeforeUnmount(() => {
   color: #ffba00;
   font-size: larger;
 }
-
 .stext {
   color: #0c3b2e;
   font-size: larger;
 }
-
 .gradient-bg {
   background: linear-gradient(290deg, #6d9773, #fffae6);
   min-height: 100vh;
   padding: 1rem;
 }
-
 .green-btn {
   background-color: #0c3b2e;
   color: white;
 }
-
 .gradient-app-bar {
   background: linear-gradient(290deg, #fffae6, #6d9773);
   color: #000;
 }
-
 .search-wrapper {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-
 .search-field {
   flex: 2;
   max-width: 500px;
 }
-
 .search-divider {
   border: none;
   border-top: 1px solid #727070;
   margin: 10px 0 30px;
 }
-
 .scroll-top-btn {
   position: fixed;
   bottom: 30px;
@@ -178,22 +190,18 @@ onBeforeUnmount(() => {
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-
 .icon-color {
   color: #0c3b2e;
 }
-
 .filter-row {
   display: flex;
   gap: 16px;
   flex-wrap: nowrap;
 }
-
 @media (max-width: 600px) {
   .filter-row {
     flex-direction: row;
   }
-
   .filter-row > .v-col {
     flex: 1 1 0;
   }
