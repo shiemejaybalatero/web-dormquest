@@ -9,10 +9,9 @@ const route = useRoute()
   <AppLayout>
     <template #content>
       <v-row class="pa-6">
-        <!-- Sidebar wrapped correctly -->
+        <!-- Sidebar -->
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar">
-            <!-- Personal Information -->
             <v-list-item class="mt-3 mb-2">
               <div class="d-flex align-center pl-2">
                 <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
@@ -20,7 +19,6 @@ const route = useRoute()
               </div>
             </v-list-item>
 
-            <!-- Ratings -->
             <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
               <v-list-item :class="{ selected: route.path === '/profile/ratings' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
@@ -30,7 +28,6 @@ const route = useRoute()
               </v-list-item>
             </router-link>
 
-            <!-- About App -->
             <router-link to="/about" style="text-decoration: none; color: inherit">
               <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
@@ -40,7 +37,6 @@ const route = useRoute()
               </v-list-item>
             </router-link>
 
-            <!-- Logout -->
             <v-list-item>
               <div class="d-flex align-center pl-2">
                 <v-icon class="mr-2" color="#0c3b2e">mdi-logout</v-icon>
@@ -50,7 +46,7 @@ const route = useRoute()
           </v-list>
         </v-col>
 
-        <!-- Main Content Section -->
+        <!-- Main Content -->
         <v-col cols="12" md="9">
           <div class="about-section pa-6">
             <div class="d-flex justify-space-between align-center mb-6">
