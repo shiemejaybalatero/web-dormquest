@@ -81,9 +81,7 @@ const dormRatings = ref([
                     alt="Profile Picture"
                   />
                 </v-avatar>
-                <v-btn small class="mt-2" @click="triggerFileInput">
-                  Upload
-                </v-btn>
+                <v-btn small class="mt-2" @click="triggerFileInput"> Upload </v-btn>
                 <input
                   ref="fileInput"
                   type="file"
