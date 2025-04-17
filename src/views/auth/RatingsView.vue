@@ -38,7 +38,7 @@ const dormRatings = ref([
         <!-- Sidebar -->
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" style="text-decoration: none">
+            <router-link to="/profile" style="text-decoration: none; color: inherit">
               <v-list-item class="mt-3 mb-2">
                 <div class="d-flex align-center pl-2">
                   <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
@@ -47,7 +47,7 @@ const dormRatings = ref([
               </v-list-item>
             </router-link>
 
-            <router-link to="/profile/ratings" style="text-decoration: none">
+            <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
               <v-list-item class="selected mb-2">
                 <div class="d-flex align-center pl-2">
                   <v-icon class="mr-2">mdi-star</v-icon>
@@ -56,12 +56,14 @@ const dormRatings = ref([
               </v-list-item>
             </router-link>
 
-            <v-list-item>
-              <div class="d-flex align-center pl-2">
-                <v-icon class="mr-2">mdi-information</v-icon>
-                <span>About app</span>
-              </div>
-            </v-list-item>
+            <router-link to="/about" style="text-decoration: none; color: inherit">
+              <v-list-item>
+                <div class="d-flex align-center pl-2">
+                  <v-icon class="mr-2">mdi-information</v-icon>
+                  <span>About app</span>
+                </div></v-list-item
+              >
+            </router-link>
 
             <v-list-item>
               <div class="d-flex align-center pl-2">
