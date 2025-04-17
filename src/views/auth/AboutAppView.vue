@@ -1,113 +1,179 @@
-<script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
-</script>
-
 <template>
-  <AppLayout>
-    <template #content>
-      <v-row class="pa-6">
-        <!-- Sidebar (with matching column width) -->
-        <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar">
-            <!-- Personal Information -->
-            <v-list-item class="mt-3 mb-2">
-              <div class="d-flex align-center pl-2">
-                <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
-                <span>Personal Information</span>
-              </div>
-            </v-list-item>
+  <v-app>
+    <v-navigation-drawer v-model="drawer" app temporary>
+      <v-list>
+        <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
+        <v-list-item title="Settings" prepend-icon="mdi-cog" />
 
-            <!-- Ratings -->
-            <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
-              <v-list-item class="mb-2" :class="{ selected: $route.path === '/profile/ratings' }">
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2" color="#0c3b2e">mdi-star</v-icon>
-                  <span class="font-weight-bold text-body-1">Ratings</span>
-                </div>
-              </v-list-item>
+        <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
+          <v-list-item
+            title="Ratings"
+            prepend-icon="mdi-star-outline"
+            :class="{ 'green-btn': route.path === '/profile/ratings' }"
+          />
+        </router-link>
+
+        <router-link to="/about" style="text-decoration: none; color: inherit">
+          <v-list-item
+            title="About App"
+            prepend-icon="mdi-information-outline"
+            :class="{ 'green-btn': route.path === '/about' }"
+          />
+        </router-link>
+
+        <v-list-item
+          @click="toggleLogin"
+          :title="isLoggedIn ? 'Logout' : 'Login'"
+          prepend-icon="mdi-logout"
+        />
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar app flat class="gradient-app-bar">
+      <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
+        <span class="ftext">DORM</span><span class="stext">QUEST</span>
+      </router-link>
+      <v-spacer />
+      <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
+    </v-app-bar>
+
+    <v-main ref="mainContent" style="overflow-y: auto; height: 100vh">
+      <div class="gradient-bg">
+        <v-container>
+          <div class="d-flex align-center search-wrapper mb-4 pl-2">
+            <v-text-field
+              v-model="search"
+              placeholder="Search for dormitories or boarding house..."
+              prepend-inner-icon="mdi-magnify"
+              class="search-field"
+              variant="outlined"
+              rounded
+              hide-details
+              clearable
+              density="comfortable"
+            />
+
+            <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
+              <v-icon>mdi-arrow-up</v-icon>
+            </v-btn>
+
+            <router-link to="/dashboard">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
+                <v-icon>mdi-home-outline</v-icon>
+              </v-btn>
             </router-link>
 
-            <!-- About App -->
-            <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item class="mb-2" :class="{ selected: $route.path === '/about' }">
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2" color="#0c3b2e">mdi-information</v-icon>
-                  <span class="font-weight-bold text-body-1">About app</span>
-                </div>
-              </v-list-item>
+            <router-link to="/map">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
+                <v-icon>mdi-map-marker-outline</v-icon>
+              </v-btn>
             </router-link>
 
-            <!-- Logout -->
-            <v-list-item>
-              <div class="d-flex align-center pl-2">
-                <v-icon class="mr-2" color="#0c3b2e">mdi-logout</v-icon>
-                <span>Log out</span>
-              </div>
-            </v-list-item>
-          </v-list>
-        </v-col>
+            <router-link to="/profile">
+              <v-btn
+                icon
+                class="mx-1"
+                :class="{
+                  'green-btn': route.path.startsWith('/profile') || route.path === '/about',
+                }"
+              >
+                <v-icon>mdi-account-circle-outline</v-icon>
+              </v-btn>
+            </router-link>
 
-        <!-- About App Content Section -->
-        <v-col cols="12" md="9">
-          <div class="about-section pl-6 pr-6 pt-6 pb-6">
-            <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="font-weight-bold">
-                <span style="color: #ffba00">DORM</span>
-                <span style="color: #0c3b2e"> QUEST</span>
-              </h2>
-              <v-btn color="#ffba00" class="font-weight-bold" rounded>ALL ABOUT</v-btn>
-            </div>
-
-            <v-card flat class="pa-6 about-box">
-              <p class="mb-4 text-body-1">
-                <strong>Dorm Quest</strong> is a web-based platform that helps students and tenants
-                around Ampayon easily find and track available dormitories. With real-time updates
-                on room availability, users can explore listings that include key details like
-                pricing, room capacity, amenities, and exact location.
-              </p>
-              <p class="mb-4 text-body-1">
-                The platform also features a rating and review system, giving users insights from
-                previous tenants to help them make informed decisions. Dorm owners can list and
-                manage their properties through the site, making it easier to connect with potential
-                renters.
-              </p>
-              <p class="text-body-1">
-                Whether you're a student looking for a convenient place to stay or a property owner
-                aiming to reach more people, Dorm Quest makes the entire dorm-searching and listing
-                process easier, smarter, and more reliable.
-              </p>
-            </v-card>
+            <v-app-bar-nav-icon @click="drawer = !drawer" />
           </div>
-        </v-col>
-      </v-row>
-    </template>
-  </AppLayout>
+
+          <router-view />
+        </v-container>
+      </div>
+    </v-main>
+  </v-app>
 </template>
 
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const showScrollTop = ref(false)
+const mainContent = ref(null)
+const drawer = ref(false)
+const search = ref('')
+const isLoggedIn = ref(true)
+
+const toggleLogin = () => {
+  isLoggedIn.value = !isLoggedIn.value
+}
+
+const handleScroll = () => {
+  if (!mainContent.value) return
+  const scrollTop = mainContent.value.$el.scrollTop
+  showScrollTop.value = scrollTop > 300
+}
+
+const scrollToTop = () => {
+  if (mainContent.value) {
+    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+onMounted(() => {
+  if (mainContent.value) {
+    mainContent.value.$el.addEventListener('scroll', handleScroll)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (mainContent.value) {
+    mainContent.value.$el.removeEventListener('scroll', handleScroll)
+  }
+})
+</script>
+
 <style scoped>
-.sidebar {
-  min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  border-radius: 16px;
-  padding: 24px;
+.ftext {
+  color: #ffba00;
+  font-size: larger;
 }
-
-.selected {
-  background-color: #ffba00 !important;
-  border-radius: 20px;
+.stext {
   color: #0c3b2e;
+  font-size: larger;
 }
-
-.about-section {
-  border-radius: 16px;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.gradient-bg {
+  background: linear-gradient(290deg, #6d9773, #fffae6);
+  min-height: 100vh;
+  padding: 1rem;
 }
-
-.about-box {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  line-height: 1.6;
+.green-btn {
+  background-color: #0c3b2e;
+  color: white;
+}
+.gradient-app-bar {
+  background: linear-gradient(290deg, #fffae6, #6d9773);
+  color: #000;
+}
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.search-field {
+  flex: 2;
+  max-width: 500px;
+}
+.search-divider {
+  border: none;
+  border-top: 1px solid #727070;
+  margin: 10px 0 30px;
+}
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  background-color: #0c3b2e;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 </style>
