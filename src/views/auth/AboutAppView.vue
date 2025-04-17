@@ -29,7 +29,7 @@ const route = useRoute()
             </router-link>
 
             <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
+              <v-list-item :class="{ selected: $route.path === '/about' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
                   <v-icon class="mr-2" color="#0c3b2e">mdi-information</v-icon>
                   <span class="font-weight-bold text-body-1">About app</span>
