@@ -25,9 +25,14 @@ const email = ref('Shiemejay@gmail.com')
 const averageRating = ref(4.2)
 
 const dormRatings = ref([
+  { name: 'Ampalayo Boarding House', rating: 4.0 },
   { name: 'Blue Heavens Dorm', rating: 4.5 },
-  { name: 'Justine Boarding House', rating: 4.0 },
+  { name: 'Blissful Dormitory', rating: 4.2 },
   { name: 'Licayan Boarding House', rating: 3.5 },
+  { name: 'Chelsea Boarding House', rating: 4.1 },
+  { name: 'TGBG Boarding House', rating: 4.6 },
+  { name: 'Magdura Boarding House', rating: 3.9 },
+  { name: 'Karmo Boarding House', rating: 4.3 },
 ])
 </script>
 
@@ -61,8 +66,8 @@ const dormRatings = ref([
                 <div class="d-flex align-center pl-2">
                   <v-icon class="mr-2">mdi-information</v-icon>
                   <span>About app</span>
-                </div></v-list-item
-              >
+                </div>
+              </v-list-item>
             </router-link>
 
             <v-list-item>
@@ -115,26 +120,28 @@ const dormRatings = ref([
             <v-divider class="my-5" />
 
             <h4 class="font-weight-medium mb-4">Personal Ratings</h4>
-            <v-row>
-              <v-col
-                cols="12"
-                v-for="(dorm, index) in dormRatings"
-                :key="index"
-                class="rating-card px-4 py-3 mb-3"
-              >
-                <div class="d-flex justify-space-between align-center">
-                  <span class="font-weight-medium text-subtitle-1">{{ dorm.name }}</span>
-                  <v-rating
-                    :model-value="dorm.rating"
-                    half-increments
-                    color="#FFD700"
-                    background-color="#d0d0d0"
-                    size="22"
-                    readonly
-                  />
-                </div>
-              </v-col>
-            </v-row>
+            <div class="ratings-scroll">
+              <v-row>
+                <v-col
+                  cols="12"
+                  v-for="(dorm, index) in dormRatings"
+                  :key="index"
+                  class="rating-card px-4 py-3 mb-3"
+                >
+                  <div class="d-flex justify-space-between align-center">
+                    <span class="font-weight-medium text-subtitle-1">{{ dorm.name }}</span>
+                    <v-rating
+                      :model-value="dorm.rating"
+                      half-increments
+                      color="#FFD700"
+                      background-color="#d0d0d0"
+                      size="22"
+                      readonly
+                    />
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -151,7 +158,7 @@ const dormRatings = ref([
 
 .selected {
   background-color: #ffba00 !important;
-  border-radius: 20px;
+  border-radius: 50px;
   color: #0c3b2e;
 }
 
@@ -161,10 +168,28 @@ const dormRatings = ref([
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.ratings-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
 .rating-card {
   background: rgba(255, 255, 255, 0.85);
-  border-radius: 12px;
+  border-radius: 50px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  min-height: 70px;
+  min-height: 60px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 24px;
+  margin-bottom: 16px;
+
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ratings-scroll {
+  max-width: 100%;
 }
 </style>

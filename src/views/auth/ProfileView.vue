@@ -51,12 +51,14 @@ const status = ref('Single')
               </v-list-item>
             </RouterLink>
 
-            <v-list-item>
-              <div>
-                <v-icon class="mr-2">mdi-information</v-icon>
-                <span>About app</span>
-              </div>
-            </v-list-item>
+            <router-link to="/about" style="text-decoration: none; color: inherit">
+              <v-list-item>
+                <div>
+                  <v-icon class="mr-2">mdi-information</v-icon>
+                  <span>About app</span>
+                </div>
+              </v-list-item>
+            </router-link>
 
             <v-list-item>
               <div>
