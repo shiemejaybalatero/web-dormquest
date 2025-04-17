@@ -20,7 +20,7 @@ import AppLayout from '@/components/layout/AppLayout.vue'
             </router-link>
 
             <!-- Ratings -->
-            <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
+            <router-link to="/ratings" style="text-decoration: none; color: inherit">
               <v-list-item class="mb-2">
                 <div class="d-flex align-center pl-2">
                   <v-icon class="mr-2" color="#0c3b2e">mdi-star</v-icon>

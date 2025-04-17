@@ -68,7 +68,7 @@
                 :class="{
                   'green-btn':
                     route.path === '/profile' ||
-                    route.path === '/profile/ratings' ||
+                    route.path === '/ratings' ||
                     route.path === '/about',
                 }"
               >
