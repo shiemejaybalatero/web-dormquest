@@ -1,18 +1,44 @@
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const showScrollTop = ref(false)
+const mainContent = ref(null)
+const drawer = ref(false)
+const search = ref('')
+
+const handleScroll = () => {
+  if (!mainContent.value) return
+  const scrollTop = mainContent.value.$el.scrollTop
+  showScrollTop.value = scrollTop > 300
+}
+
+const scrollToTop = () => {
+  if (mainContent.value) {
+    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+onMounted(() => {
+  if (mainContent.value) {
+    mainContent.value.$el.addEventListener('scroll', handleScroll)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (mainContent.value) {
+    mainContent.value.$el.removeEventListener('scroll', handleScroll)
+  }
+})
+</script>
+
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
         <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
         <v-list-item title="Settings" prepend-icon="mdi-cog" />
-
-        <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
-          <v-list-item
-            title="Ratings"
-            prepend-icon="mdi-star-outline"
-            :class="{ 'green-btn': route.path === '/profile/ratings' }"
-          />
-        </router-link>
-
         <v-list-item
           @click="toggleLogin"
           :title="isLoggedIn ? 'Logout' : 'Login'"
@@ -20,11 +46,11 @@
         />
       </v-list>
     </v-navigation-drawer>
-
     <v-app-bar app flat class="gradient-app-bar">
       <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
       </router-link>
+
       <v-spacer />
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
     </v-app-bar>
@@ -32,6 +58,7 @@
     <v-main ref="mainContent" style="overflow-y: auto; height: 100vh">
       <div class="gradient-bg">
         <v-container>
+          <!-- Search & Buttons -->
           <div class="d-flex align-center search-wrapper mb-4 pl-2">
             <v-text-field
               v-model="search"
@@ -81,49 +108,12 @@
 
           <hr class="search-divider" />
 
-          <slot name="content">
-            <router-view />
-          </slot>
+          <v-row> <slot name="content"></slot> </v-row>
         </v-container>
       </div>
     </v-main>
   </v-app>
 </template>
-
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-const showScrollTop = ref(false)
-const mainContent = ref(null)
-const drawer = ref(false)
-const search = ref('')
-
-const handleScroll = () => {
-  if (!mainContent.value) return
-  const scrollTop = mainContent.value.$el.scrollTop
-  showScrollTop.value = scrollTop > 300
-}
-
-const scrollToTop = () => {
-  if (mainContent.value) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-onMounted(() => {
-  if (mainContent.value) {
-    mainContent.value.$el.addEventListener('scroll', handleScroll)
-  }
-})
-
-onBeforeUnmount(() => {
-  if (mainContent.value) {
-    mainContent.value.$el.removeEventListener('scroll', handleScroll)
-  }
-})
-</script>
 
 <style scoped>
 .ftext {
@@ -141,7 +131,6 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   padding: 1rem;
 }
-
 .green-btn {
   background-color: #0c3b2e;
   color: white;
