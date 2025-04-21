@@ -51,6 +51,7 @@
   margin-bottom: 0;
 }
 
+/* Button styles */
 .custom-btn {
   width: 15em;
   font-size: 16px;
@@ -70,7 +71,6 @@
   background-color: #0c3b2e !important;
   border-radius: 0 2rem;
   width: 15em;
-  color: white !important;
   text-transform: none;
 }
 
