@@ -145,7 +145,7 @@ const filteringDorms = computed(() => {
           <div class="d-flex align-center search-wrapper mb-4">
             <v-text-field
               v-model="search"
-              placeholder="Search for dormitories or boarding house..."
+              placeholder="Search for dormitories or boarding house"
               prepend-inner-icon="mdi-magnify"
               class="search-field"
               variant="outlined"
@@ -219,11 +219,22 @@ const filteringDorms = computed(() => {
                 :to="dorm.route"
                 style="text-decoration: none"
               >
-                <v-card hover>
+                <v-card class="hover-card dorm-card" elevation="2">
                   <v-img :src="dorm.image" height="160px" cover />
-                  <v-card-title>{{ dorm.name }}</v-card-title>
-                  <v-card-subtitle>{{ dorm.availability }}</v-card-subtitle>
-                  <v-card-text class="text-grey">{{ dorm.address }}</v-card-text>
+
+                  <v-card-text>
+                    <div class="d-flex justify-space-between align-center mb-2">
+                      <span class="text-body-1 font-weight-medium dorm-title">{{ dorm.name }}</span>
+                      <div class="d-flex align-center">
+                        <v-icon color="amber" size="18">mdi-star</v-icon>
+                        <span class="ml-1 text-body-2">{{ dorm.rating }}</span>
+                      </div>
+                    </div>
+                    <div class="text-subtitle-2 text-grey dorm-subtitle">
+                      {{ dorm.availability }}
+                    </div>
+                    <div class="text-body-2 text-grey dorm-text">{{ dorm.address }}</div>
+                  </v-card-text>
                 </v-card>
               </component>
             </v-col>
@@ -294,6 +305,47 @@ const filteringDorms = computed(() => {
 .filter-row {
   display: flex;
   flex-wrap: nowrap;
+}
+
+.hover-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.05);
+}
+
+.dorm-card {
+  background-color: #f5fdf8; /* soft green background */
+  color: #0c3b2e; /* dark green for text */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+.dorm-title {
+  font-weight: 600;
+  color: #1b4332;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 20px !important;
+}
+
+.dorm-subtitle {
+  color: #4d5106;
+  font-size: 18px !important;
+  font-weight: 500;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.dorm-text {
+  color: #4e4a50 !important;
+  font-size: 13px;
 }
 
 @media (max-width: 600px) {
