@@ -1,29 +1,54 @@
 <script setup>
 import { ref, computed } from 'vue'
+import {
+  requiredValidator,
+  emailValidator,
+  passwordValidator,
+  confirmedValidator,
+} from '@/utils/validators'
+import { useRouter } from 'vue-router'
+import dayjs from 'dayjs'
 
-const firstName = ref('')
-const lastName = ref('')
-const email = ref('')
-const gender = ref('')
-const password = ref('')
-const confirmPassword = ref('')
+const router = useRouter()
+
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const refVForm = ref()
 
-const birthMonth = ref('')
-const birthDay = ref('')
-const birthYear = ref('')
+const formDataDefault = {
+  firstname: '',
+  lastname: '',
+  email: '',
+  birthday: '',
+  gender: '',
+  password: '',
+  password_confirmation: '',
+}
+const formData = ref({ ...formDataDefault })
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const days = Array.from({ length: 31 }, (_, i) => i + 1)
-const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)
-
+// Format birthday for display
 const formattedBirthday = computed(() => {
-  if (birthMonth.value && birthDay.value && birthYear.value) {
-    return `${birthMonth.value} ${birthDay.value}, ${birthYear.value}`
+  if (formData.value.birthday) {
+    return dayjs(formData.value.birthday).format('MMMM D, YYYY')
   }
   return ''
 })
+
+const onRegister = () => {
+  alert('Registration successful for: ' + formData.value.email)
+  router.push('/login')
+}
+
+const onFormSubmit = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      formData.value.birthday = dayjs(formData.value.birthday).format('YYYY-MM-DD')
+      onRegister()
+    } else {
+      alert('Please fill in all required fields correctly.')
+    }
+  })
+}
 
 function handleActiveState(event) {
   const button = event.currentTarget
@@ -49,32 +74,34 @@ function handleActiveState(event) {
     <v-card class="form-card" flat>
       <v-card-text>
         <h1 class="signup-title text-center">Create your account</h1>
-        <v-form>
+        <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-row class="ma-0 pb-2">
-            <v-col cols="12" sm="6" class="pa-0">
+            <v-col cols="12" sm="6" class="pa-0 pr-1">
               <v-text-field
-                v-model="firstName"
+                v-model="formData.firstname"
                 label="First Name"
                 variant="outlined"
                 color="green"
                 hide-details
                 density="comfortable"
+                :rules="[requiredValidator]"
               />
             </v-col>
-            <v-col cols="12" sm="6" class="pa-0">
+            <v-col cols="12" sm="6" class="pa-0 pl-1">
               <v-text-field
-                v-model="lastName"
+                v-model="formData.lastname"
                 label="Last Name"
                 variant="outlined"
                 color="green"
                 hide-details
                 density="comfortable"
+                :rules="[requiredValidator]"
               />
             </v-col>
           </v-row>
 
           <v-text-field
-            v-model="email"
+            v-model="formData.email"
             label="Email Address"
             type="email"
             variant="outlined"
@@ -82,59 +109,42 @@ function handleActiveState(event) {
             class="pb-2"
             hide-details
             density="comfortable"
+            :rules="[requiredValidator, emailValidator]"
           />
+          <v-col cols="12" class="pa-0">
+            <v-subheader class="text-caption mt-1 mb-1 subheader"><i>Birthdate</i></v-subheader>
+            <v-text-field
+              v-model="formData.birthday"
+              type="date"
+              color="green"
+              variant="outlined"
+              density="comfortable"
+              :rules="[requiredValidator]"
+              class="w-100"
+            />
+          </v-col>
 
-          <!-- Birthday -->
-          <v-row class="ma-0 pa-0">
-            <v-col cols="12" sm="4" class="pa-0">
-              <v-select
-                v-model="birthMonth"
-                label="Month"
-                :items="months"
-                variant="outlined"
-                hide-details
-                density="comfortable"
-                color="green"
-              />
-            </v-col>
-            <v-col cols="12" sm="4" class="pa-0">
-              <v-select
-                v-model="birthDay"
-                label="Day"
-                :items="days"
-                variant="outlined"
-                hide-details
-                density="comfortable"
-                color="green"
-              />
-            </v-col>
-            <v-col cols="12" sm="4" class="pa-0">
-              <v-select
-                v-model="birthYear"
-                label="Year"
-                :items="years"
-                variant="outlined"
-                hide-details
-                density="comfortable"
-                color="green"
-              />
-            </v-col>
-          </v-row>
-
-          <div v-if="formattedBirthday" class="text-white text-caption mt-1 mb-3">
+          <div v-if="formattedBirthday" class="text-white text-caption mt-n5 mb-3">
             📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
           </div>
 
-          <!-- Gender -->
-          <v-radio-group v-model="gender" class="mb-n4" inline>
-            <v-radio label="Male" value="male" />
-            <v-radio label="Female" value="female" />
-            <v-radio label="Rather not to say" value="custom" />
-          </v-radio-group>
+          <v-col cols="12" class="pa-0 mt-n2">
+            <v-subheader class="text-caption subheader"><i>Gender</i></v-subheader>
+            <v-radio-group
+              v-model="formData.gender"
+              class="mb-n4"
+              inline
+              :rules="[requiredValidator]"
+            >
+              <v-radio label="Male" value="male" />
+              <v-radio label="Female" value="female" />
+              <v-radio label="Rather not to say" value="custom" />
+            </v-radio-group>
+          </v-col>
 
           <!-- Password -->
           <v-text-field
-            v-model="password"
+            v-model="formData.password"
             :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
             :type="showPassword ? 'text' : 'password'"
             density="compact"
@@ -144,12 +154,14 @@ function handleActiveState(event) {
             label="Password"
             color="green"
             counter
+            class="mb-n3"
             @click:append-inner="showPassword = !showPassword"
+            :rules="[requiredValidator, passwordValidator]"
           />
 
           <!-- Confirm Password -->
           <v-text-field
-            v-model="confirmPassword"
+            v-model="formData.password_confirmation"
             :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
             :type="showConfirmPassword ? 'text' : 'password'"
             density="compact"
@@ -159,19 +171,23 @@ function handleActiveState(event) {
             label="Confirm Password"
             color="green"
             counter
+            class="mb-n2"
             @click:append-inner="showConfirmPassword = !showConfirmPassword"
+            :rules="[
+              requiredValidator,
+              confirmedValidator(formData.password_confirmation, formData.password),
+            ]"
           />
 
           <!-- Register Button -->
-          <RouterLink to="/dashboard"
-            ><v-btn
-              class="register-button w-100 py-2"
-              color="transparent"
-              @click="handleActiveState"
-            >
-              SIGN UP
-            </v-btn></RouterLink
+          <v-btn
+            class="register-button w-100 py-2"
+            color="transparent"
+            @click="handleActiveState"
+            :loading="false"
           >
+            SIGN UP
+          </v-btn>
         </v-form>
 
         <!-- Already have an account -->
@@ -203,18 +219,17 @@ function handleActiveState(event) {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-h1 b {
-  color: #0c3b2e;
-}
-
 h1 {
   font-size: 33px;
   color: #ffba00;
 }
 
-.login {
-  text-decoration: none;
+.ftext {
   color: #ffba00;
+}
+
+.stext {
+  color: #0c3b2e;
 }
 
 .signup-title {
@@ -225,8 +240,9 @@ h1 {
   text-align: center;
 }
 
-.login:hover {
+.login {
   text-decoration: none;
+  color: #ffba00;
 }
 
 .register-button {
@@ -241,23 +257,13 @@ h1 {
 .active-tap {
   background-color: #ffba00 !important;
   color: #0c3b2e !important;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
 }
 
-h1,
-h2,
-h5,
-p {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.ftext {
-  color: #ffba00;
-}
-
-.stext {
+.register-button:hover {
+  background-color: #ffba00;
   color: #0c3b2e;
+}
+
+.subheader {
 }
 </style>

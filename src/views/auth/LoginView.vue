@@ -16,8 +16,8 @@ const onLogin = () => {
   alert(formData.value.email)
 }
 const onFormSubmit = () => {
-  refVForm.value?.validate().then(({ Valid }) => {
-    if (Valid) onLogin()
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) onLogin()
   })
 }
 
@@ -55,7 +55,7 @@ onUnmounted(() => {
     <v-card class="card text-center">
       <v-card-text>
         <h1 class="login-title">Log in to your account</h1>
-        <v-form ref="refVForm">
+        <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-text-field
             v-model="formData.email"
             label="Email"

@@ -1,5 +1,3 @@
-// import './assets/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
@@ -9,6 +7,11 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+
+// Day.js & Date Adapter
+import DayJsAdapter from '@date-io/dayjs'
+import dayjs from 'dayjs'
+
 import App from './App.vue'
 import router from './router'
 
@@ -16,10 +19,13 @@ const app = createApp(App)
 
 const vuetify = createVuetify({
   icons: {
-    defaultSet: 'mdi', // This is already the default value - only for display purposes
+    defaultSet: 'mdi',
   },
   components,
   directives,
+  adapters: {
+    date: new DayJsAdapter({ dayjs }),
+  },
 })
 
 app.use(createPinia())
