@@ -7,11 +7,6 @@
     <v-row justify="center" class="text-center mb-5">
       <v-col cols="12">
         <h1 class="firsttext fw-bold mb-0">
-          <p>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus cumque earum
-            quibusdam, exercitationem voluptates rerum culpa esse aspernatur velit, repellendus
-            tenetur! Iste fugit voluptatem amet, quisquam praesentium aut quo rerum.
-          </p>
           <b> Are you a CSU Student <br />looking for a place to stay? </b>
         </h1>
         <h1 class="secondtext fw-light pb-5">
@@ -93,5 +88,9 @@
 .secondtext {
   font-size: 17px;
   color: #0c3b2e;
+}
+
+.text-white {
+  color: white !important;
 }
 </style>
