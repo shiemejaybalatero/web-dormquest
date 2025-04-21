@@ -73,7 +73,7 @@ const images = ['/Blissful/blissful1.jpg', '/Blissful/blissful.jpg', '/Blissful/
       <v-col cols="12" md="6">
         <v-row dense class="mb-4">
           <v-col v-for="(img, index) in images" :key="index" cols="6" md="6">
-            <v-img :src="img" height="130" class="rounded" cover />
+            <v-img :src="img" height="170" class="rounded" cover />
           </v-col>
         </v-row>
 
