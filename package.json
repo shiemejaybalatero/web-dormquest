@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@date-io/dayjs": "^3.2.0",
+    "@supabase/supabase-js": "^2.49.4",
     "bootstrap-icons": "^1.11.3",
     "dayjs": "^1.11.13",
     "pinia": "^3.0.1",
