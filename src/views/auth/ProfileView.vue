@@ -1,17 +1,17 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const profileImage = ref(null)
-
 const fileInput = ref(null)
 
-// Trigger the file input click when the button is clicked
 const triggerFileInput = () => {
   fileInput.value.click()
 }
 
-// Handle the file upload and update the profile image
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
@@ -35,33 +35,41 @@ const status = ref('Single')
       <v-row>
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
-            <v-list-item class="mt-3 mb-5 selected">
-              <div class="d-flex align-center">
-                <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
-                <span class="font-weight-bold text-body-1">Personal Information</span>
-              </div>
-            </v-list-item>
-
-            <RouterLink to="/ratings" class="text-decoration-none text-black">
-              <v-list-item>
-                <div>
-                  <v-icon class="mr-2">mdi-star</v-icon>
-                  <span>Ratings</span>
+            <router-link to="/profile" style="text-decoration: none; color: inherit">
+              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
+                <div class="d-flex align-center pl-2">
+                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-account</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">Personal Information</span>
                 </div>
               </v-list-item>
-            </RouterLink>
+            </router-link>
+
+            <router-link to="/ratings" style="text-decoration: none; color: inherit">
+              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
+                <div class="d-flex align-center pl-2">
+                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-star</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">Ratings</span>
+                </div>
+              </v-list-item>
+            </router-link>
 
             <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item>
-                <div>
-                  <v-icon class="mr-2">mdi-information</v-icon>
-                  <span>About app</span>
+              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
+                <div class="d-flex align-center pl-2">
+                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-information</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">About app</span>
                 </div>
               </v-list-item>
             </router-link>
 
             <v-list-item>
-              <div>
+              <div class="d-flex align-center pl-2">
                 <v-icon class="mr-2">mdi-logout</v-icon>
                 <span>Log out</span>
               </div>
@@ -163,6 +171,7 @@ const status = ref('Single')
 .selected {
   background-color: #ffba00 !important;
   border-radius: 20px;
+  color: #0c3b2e;
 }
 
 .account-setting {

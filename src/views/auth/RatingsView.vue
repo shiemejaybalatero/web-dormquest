@@ -1,6 +1,9 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const profileImage = ref(null)
 const fileInput = ref(null)
@@ -44,28 +47,34 @@ const dormRatings = ref([
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
             <router-link to="/profile" style="text-decoration: none; color: inherit">
-              <v-list-item class="mt-3 mb-2">
+              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
-                  <span>Personal Information</span>
+                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-account</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">Personal Information</span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <router-link to="/profile/ratings" style="text-decoration: none; color: inherit">
-              <v-list-item class="selected mb-2">
+            <router-link to="/ratings" style="text-decoration: none; color: inherit">
+              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2">mdi-star</v-icon>
+                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-star</v-icon
+                  >
                   <span class="font-weight-bold text-body-1">Ratings</span>
                 </div>
               </v-list-item>
             </router-link>
 
             <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item>
+              <v-list-item :class="{ selected: route.path === '/about' }">
                 <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2">mdi-information</v-icon>
-                  <span>About app</span>
+                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-information</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">About app</span>
                 </div>
               </v-list-item>
             </router-link>
