@@ -111,6 +111,7 @@ function handleActiveState(event) {
             density="comfortable"
             :rules="[requiredValidator, emailValidator]"
           />
+
           <v-col cols="12" class="pa-0">
             <v-subheader class="text-caption mt-1 mb-1 subheader"><i>Birthdate</i></v-subheader>
             <v-text-field
@@ -154,7 +155,6 @@ function handleActiveState(event) {
             label="Password"
             color="green"
             counter
-            class="mb-n3"
             @click:append-inner="showPassword = !showPassword"
             :rules="[requiredValidator, passwordValidator]"
           />
@@ -171,7 +171,6 @@ function handleActiveState(event) {
             label="Confirm Password"
             color="green"
             counter
-            class="mb-n2"
             @click:append-inner="showConfirmPassword = !showConfirmPassword"
             :rules="[
               requiredValidator,
@@ -262,8 +261,5 @@ h1 {
 .register-button:hover {
   background-color: #ffba00;
   color: #0c3b2e;
-}
-
-.subheader {
 }
 </style>
