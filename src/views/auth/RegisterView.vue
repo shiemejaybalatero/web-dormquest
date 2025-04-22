@@ -9,7 +9,9 @@ import {
 } from '@/utils/validators'
 import dayjs from 'dayjs'
 import AlertNotification from '@/components/common/AlertNotification.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const refVForm = ref()
@@ -53,6 +55,7 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account'
     refVForm.value?.reset()
+    router.replace('/dashboard')
   }
 
   formAction.value.formProcess = false
