@@ -106,7 +106,7 @@ function handleActiveState(event) {
             type="email"
             variant="outlined"
             color="green"
-            class="pb-2"
+            class="pb-2 pt-2"
             hide-details
             density="comfortable"
             :rules="[requiredValidator, emailValidator]"
