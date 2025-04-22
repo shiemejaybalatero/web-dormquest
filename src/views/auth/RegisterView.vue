@@ -6,10 +6,8 @@ import {
   passwordValidator,
   confirmedValidator,
 } from '@/utils/validators'
-import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
-
-const router = useRouter()
+import { supabase, formActionDefault } from '@/utils/supabase'
 
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -26,7 +24,8 @@ const formDataDefault = {
 }
 const formData = ref({ ...formDataDefault })
 
-// Format birthday for display
+const formAction = ref({ ...formActionDefault })
+
 const formattedBirthday = computed(() => {
   if (formData.value.birthday) {
     return dayjs(formData.value.birthday).format('MMMM D, YYYY')
@@ -34,20 +33,41 @@ const formattedBirthday = computed(() => {
   return ''
 })
 
-const onRegister = () => {
-  alert('Registration successful for: ' + formData.value.email)
-  router.push('/login')
-}
-
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-    if (valid) {
-      formData.value.birthday = dayjs(formData.value.birthday).format('YYYY-MM-DD')
-      onRegister()
-    } else {
-      alert('Please fill in all required fields correctly.')
-    }
+    if (valid) onSubmit()
   })
+}
+
+const onSubmit = async () => {
+  formAction.value = {
+    ...formActionDefault,
+  }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.value.email,
+    password: formData.value.password,
+    options: {
+      data: {
+        firstname: formData.value.firstname,
+        lastname: formData.value.lastname,
+        birthday: formData.value.birthday,
+        gender: formData.value.gender,
+      },
+    },
+  })
+
+  if (error) {
+    console.log(error)
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    console.log(data)
+    formAction.value.formSuccessMessage = 'Successfully Registered Account'
+  }
+
+  formAction.value.formProcess = false
 }
 
 function handleActiveState(event) {
@@ -74,6 +94,31 @@ function handleActiveState(event) {
     <v-card class="form-card" flat>
       <v-card-text>
         <h1 class="signup-title text-center">Create your account</h1>
+
+        <v-alert
+          v-if="formAction.formSuccessMessage"
+          :text="formAction.formSuccessMessage"
+          title="Success!"
+          type="success"
+          variant="tonal"
+          density="compact"
+          boarder="start"
+          closable
+        >
+        </v-alert>
+
+        <v-alert
+          v-if="formAction.formErrorMessage"
+          :text="formAction.formErrorMessage"
+          title="Ooops!"
+          type="error"
+          variant="tonal"
+          density="compact"
+          boarder="start"
+          closable
+        >
+        </v-alert>
+
         <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-row class="ma-0 pb-2">
             <v-col cols="12" sm="6" class="pa-0 pr-1">
@@ -178,12 +223,14 @@ function handleActiveState(event) {
             ]"
           />
 
-          <!-- Register Button -->
           <v-btn
             class="register-button w-100 py-2"
             color="transparent"
-            @click="handleActiveState"
-            :loading="false"
+            @click="handleActiveState($event)"
+            type="submit"
+            block
+            :disabled="formAction.formProcess"
+            :loading="formAction.formProcess"
           >
             SIGN UP
           </v-btn>
