@@ -6,8 +6,11 @@
 
     <v-row justify="center" class="text-center mb-5">
       <v-col cols="12">
-        <h1 class="firsttext fw-bold mb-0">
-          <b> Are you a CSU Student <br />looking for a place to stay? </b>
+        <h1 class="firsttext fw-bold mb-2">
+          <b>
+            Are you a CSU Student <br />
+            looking for a place to stay?</b
+          >
         </h1>
         <h1 class="secondtext fw-light pb-5">
           Start a <i>Quest</i> to find a place <br />to stay, anytime, anywhere.
@@ -81,8 +84,9 @@
 }
 
 .firsttext {
-  font-size: 18px;
+  font-size: 25px;
   color: #0c3b2e;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serifs;
 }
 
 .secondtext {
