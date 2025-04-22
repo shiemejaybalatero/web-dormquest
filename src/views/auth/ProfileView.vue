@@ -37,7 +37,7 @@ const status = ref('Single')
           <v-list dense nav class="sidebar pa-4">
             <v-list-item class="mt-3 mb-5 selected">
               <div class="d-flex align-center">
-                <v-icon color="#0c3b2e" class="mr-2">mdi-account</v-icon>
+                <v-icon color="black" class="mr-2">mdi-account</v-icon>
                 <span class="font-weight-bold text-body-1">Personal Information</span>
               </div>
             </v-list-item>
