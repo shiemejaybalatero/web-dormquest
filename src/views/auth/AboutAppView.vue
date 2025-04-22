@@ -45,12 +45,16 @@ const route = useRoute()
               </v-list-item>
             </router-link>
 
-            <v-list-item>
-              <div class="d-flex align-center pl-2">
-                <v-icon class="mr-2">mdi-logout</v-icon>
-                <span>Log out</span>
-              </div>
-            </v-list-item>
+            <router-link to="/" style="text-decoration: none; color: inherit">
+              <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
+                <div class="d-flex align-center pl-2">
+                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2"
+                    >mdi-logout</v-icon
+                  >
+                  <span class="font-weight-bold text-body-1">Log out</span>
+                </div>
+              </v-list-item>
+            </router-link>
           </v-list>
         </v-col>
 
