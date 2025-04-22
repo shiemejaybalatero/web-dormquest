@@ -33,17 +33,19 @@ const formattedBirthday = computed(() => {
   return ''
 })
 
-const onFormSubmit = () => {
-  refVForm.value?.validate().then(({ valid }) => {
-    if (valid) onSubmit()
-  })
+const onFormSubmit = async () => {
+  const result = await refVForm.value?.validate()
+
+  if (result?.valid) {
+    onSubmit()
+  }
 }
 
 const onSubmit = async () => {
   formAction.value = {
     ...formActionDefault,
+    formProcess: true,
   }
-  formAction.value.formProcess = true
 
   const { data, error } = await supabase.auth.signUp({
     email: formData.value.email,
@@ -59,10 +61,10 @@ const onSubmit = async () => {
   })
 
   if (error) {
-    console.log(error)
+    console.error(error)
     formAction.value.formErrorMessage = error.message
     formAction.value.formStatus = error.status
-  } else if (data) {
+  } else {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account'
   }
