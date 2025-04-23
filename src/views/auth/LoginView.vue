@@ -12,12 +12,12 @@ const formDataDefault = {
 
 const formData = ref({ ...formDataDefault })
 
-const onLogin = () => {
+const onSubmit = () => {
   alert(formData.value.email)
 }
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-    if (valid) onLogin()
+    if (valid) onSubmit()
   })
 }
 
