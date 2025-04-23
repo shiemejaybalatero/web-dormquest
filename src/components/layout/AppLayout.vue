@@ -47,7 +47,7 @@ onBeforeUnmount(() => {
       </v-list>
     </v-navigation-drawer>
     <v-app-bar app flat class="gradient-app-bar">
-      <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
+      <router-link to="/dashboard" class="fw-bolder ml-6 Logoname">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
       </router-link>
 
@@ -139,6 +139,10 @@ onBeforeUnmount(() => {
 .gradient-app-bar {
   background: linear-gradient(290deg, #fffae6, #6d9773);
   color: #000;
+}
+
+.Logoname {
+  text-decoration: none;
 }
 
 .search-wrapper {
