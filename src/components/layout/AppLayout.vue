@@ -47,7 +47,7 @@ onBeforeUnmount(() => {
       </v-list>
     </v-navigation-drawer>
     <v-app-bar app flat class="gradient-app-bar">
-      <router-link to="/dashboard" class="fw-bolder ml-6" style="text-decoration: none">
+      <router-link to="/dashboard" class="fw-bolder ml-6 Logoname">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
       </router-link>
 
@@ -55,67 +55,82 @@ onBeforeUnmount(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
     </v-app-bar>
 
-    <v-main ref="mainContent" style="overflow-y: auto; height: 100vh">
-      <div class="gradient-bg">
-        <v-container>
-          <!-- Search & Buttons -->
-          <div class="d-flex align-center search-wrapper mb-4 pl-2">
-            <v-text-field
-              v-model="search"
-              placeholder="Search for dormitories or boarding house..."
-              prepend-inner-icon="mdi-magnify"
-              class="search-field"
-              variant="outlined"
-              rounded
-              hide-details
-              clearable
-              density="comfortable"
-            />
-
-            <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
-              <v-icon>mdi-arrow-up</v-icon>
-            </v-btn>
-
-            <router-link to="/dashboard">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
-                <v-icon>mdi-home-outline</v-icon>
+    <v-main
+      ref="mainContent"
+      :style="
+        route.path === '/map'
+          ? 'overflow: hidden; height: 100vh; padding: 0;'
+          : 'overflow-y: auto; height: 100vh;'
+      "
+    >
+      <div :class="route.path === '/map' ? '' : 'gradient-bg'">
+        <template v-if="route.path !== '/map'">
+          <v-container>
+            <!-- Search & Buttons -->
+            <div class="d-flex align-center search-wrapper mb-4 pl-2">
+              <v-text-field
+                v-model="search"
+                placeholder="Search for dormitories or boarding house..."
+                prepend-inner-icon="mdi-magnify"
+                class="search-field"
+                variant="outlined"
+                rounded
+                hide-details
+                clearable
+                density="comfortable"
+              />
+              <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
+                <v-icon>mdi-arrow-up</v-icon>
               </v-btn>
-            </router-link>
+              <router-link to="/dashboard">
+                <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
+                  <v-icon>mdi-home-outline</v-icon>
+                </v-btn>
+              </router-link>
+              <router-link to="/map">
+                <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
+                  <v-icon>mdi-map-marker-outline</v-icon>
+                </v-btn>
+              </router-link>
+              <router-link to="/profile">
+                <v-btn
+                  icon
+                  class="mx-1"
+                  :class="{
+                    'green-btn':
+                      route.path === '/profile' ||
+                      route.path === '/ratings' ||
+                      route.path === '/about',
+                  }"
+                >
+                  <v-icon>mdi-account-circle-outline</v-icon>
+                </v-btn>
+              </router-link>
+              <v-app-bar-nav-icon @click="drawer = !drawer" />
+            </div>
+            <hr class="search-divider" />
+            <v-row>
+              <slot name="content"></slot>
+            </v-row>
+          </v-container>
+        </template>
 
-            <router-link to="/map">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
-                <v-icon>mdi-map-marker-outline</v-icon>
-              </v-btn>
-            </router-link>
-
-            <router-link to="/profile">
-              <v-btn
-                icon
-                class="mx-1"
-                :class="{
-                  'green-btn':
-                    route.path === '/profile' ||
-                    route.path === '/ratings' ||
-                    route.path === '/about',
-                }"
-              >
-                <v-icon>mdi-account-circle-outline</v-icon>
-              </v-btn>
-            </router-link>
-
-            <v-app-bar-nav-icon @click="drawer = !drawer" />
+        <template v-else>
+          <div class="full-map-wrapper">
+            <slot name="content"></slot>
           </div>
-
-          <hr class="search-divider" />
-
-          <v-row> <slot name="content"></slot> </v-row>
-        </v-container>
+        </template>
       </div>
     </v-main>
   </v-app>
 </template>
 
 <style scoped>
+.full-map-wrapper {
+  width: 100%;
+  height: 100vh;
+}
+
 .ftext {
   color: #ffba00;
   font-size: larger;
@@ -139,6 +154,10 @@ onBeforeUnmount(() => {
 .gradient-app-bar {
   background: linear-gradient(290deg, #fffae6, #6d9773);
   color: #000;
+}
+
+.Logoname {
+  text-decoration: none;
 }
 
 .search-wrapper {

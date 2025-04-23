@@ -1,7 +1,25 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { requiredValidator, emailValidator } from '@/utils/validators'
 
 const buttons = ref([])
+const refVForm = ref()
+
+const formDataDefault = {
+  email: '',
+  password: '',
+}
+
+const formData = ref({ ...formDataDefault })
+
+const onSubmit = () => {
+  alert(formData.value.email)
+}
+const onFormSubmit = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) onSubmit()
+  })
+}
 
 function handleActiveState(event) {
   const element = event.currentTarget
@@ -13,7 +31,6 @@ function handleActiveState(event) {
 
 onMounted(() => {
   buttons.value = document.querySelectorAll('.login-button, .signup-link')
-
   buttons.value.forEach((button) => {
     button.addEventListener('click', handleActiveState)
   })
@@ -38,8 +55,9 @@ onUnmounted(() => {
     <v-card class="card text-center">
       <v-card-text>
         <h1 class="login-title">Log in to your account</h1>
-        <v-form>
+        <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-text-field
+            v-model="formData.email"
             label="Email"
             type="email"
             color="green"
@@ -47,8 +65,10 @@ onUnmounted(() => {
             outlined
             hide-details
             class="mb-2"
+            :rules="[requiredValidator, emailValidator]"
           />
           <v-text-field
+            v-model="formData.password"
             label="Password"
             type="password"
             color="green"
@@ -56,9 +76,12 @@ onUnmounted(() => {
             outlined
             hide-details
             class="mb-4"
+            :rules="[requiredValidator]"
           />
           <!-- Button -->
-          <v-btn class="login-button w-100 py-2" color="transparent">Log in</v-btn>
+          <v-btn class="login-button w-100 py-2" color="transparent" @click="onFormSubmit"
+            >Log in</v-btn
+          >
         </v-form>
         <p class="mt-3 dont">
           Don't have an account?
