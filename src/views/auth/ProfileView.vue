@@ -42,78 +42,60 @@ const saveProfile = () => {
   <AppLayout>
     <template #content>
       <v-row>
+        <!-- Sidebar -->
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
-<<<<<<< HEAD
-            <router-link to="/profile" style="text-decoration: none; color: inherit">
+            <!-- Personal Information -->
+            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-account</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Personal Information</span>
-=======
-            <v-list-item class="mt-3 mb-5 selected">
-              <div class="d-flex align-center">
-                <v-icon color="black" class="mr-2">mdi-account</v-icon>
-                <span class="font-weight-bold text-body-1">Personal Information</span>
-              </div>
-            </v-list-item>
-
-            <RouterLink to="/ratings" class="text-decoration-none text-black">
-              <v-list-item>
-                <div>
-                  <v-icon class="mr-2">mdi-star</v-icon>
-                  <span>Ratings</span>
-                </div>
-              </v-list-item>
-            </RouterLink>
-
-            <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item>
-                <div>
-                  <v-icon class="mr-2">mdi-information</v-icon>
-                  <span>About app</span>
->>>>>>> anton
+                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2">
+                    mdi-account
+                  </v-icon>
+                  <span class="font-weight-bold text-body-1"> Personal Information </span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <router-link to="/ratings" style="text-decoration: none; color: inherit">
+            <!-- Ratings -->
+            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-star</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Ratings</span>
+                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2">
+                    mdi-star
+                  </v-icon>
+                  <span class="font-weight-bold text-body-1"> Ratings </span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <router-link to="/about" style="text-decoration: none; color: inherit">
+            <!-- About App -->
+            <router-link to="/about" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-information</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">About app</span>
+                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2">
+                    mdi-information
+                  </v-icon>
+                  <span class="font-weight-bold text-body-1"> About app </span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <router-link to="/" style="text-decoration: none; color: inherit">
+            <!-- Log Out -->
+            <router-link to="/" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-logout</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Log out</span>
+                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2">
+                    mdi-logout
+                  </v-icon>
+                  <span class="font-weight-bold text-body-1"> Log out </span>
                 </div>
               </v-list-item>
             </router-link>
           </v-list>
         </v-col>
 
+        <!-- Main Content -->
         <v-col cols="12" md="9">
           <div class="profile-section d-flex flex-column align-center justify-center pa-6">
             <div class="profile-wrapper">
@@ -127,7 +109,7 @@ const saveProfile = () => {
               <v-card class="pa-6 profile-card" flat>
                 <v-form @submit.prevent="saveProfile">
                   <v-row>
-                    <!-- Avatar -->
+                    <!-- Avatar Column -->
                     <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
                       <v-avatar size="120">
                         <v-img :src="profileImage || 'https://via.placeholder.com/150'" />
@@ -150,7 +132,7 @@ const saveProfile = () => {
                       />
                     </v-col>
 
-                    <!-- Editable Fields -->
+                    <!-- Form Fields Column -->
                     <v-col cols="12" md="8">
                       <v-row>
                         <v-col cols="12" sm="6">
