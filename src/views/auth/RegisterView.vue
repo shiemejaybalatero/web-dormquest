@@ -26,7 +26,7 @@ const formDataDefault = {
   password_confirmation: '',
 }
 const formData = ref({ ...formDataDefault })
-const formAction = ref({ formActionDefault })
+const formAction = ref({ ...formActionDefault })
 
 const onSubmit = async () => {
   formAction.value = {
@@ -103,6 +103,7 @@ function handleActiveState(event) {
           :form-success-message="formAction.formSuccessMessage"
           :form-error-message="formAction.formErrorMessage"
         ></AlertNotification>
+
         <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-row class="ma-0 pb-2">
             <v-col cols="12" sm="6" class="pa-0 pr-1">
