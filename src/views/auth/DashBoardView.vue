@@ -129,14 +129,22 @@ const filteringDorms = computed(() => {
         />
       </v-list>
     </v-navigation-drawer>
-
     <v-app-bar app flat class="gradient-app-bar">
-      <router-link to="/dashboard" class="fw-bolder ml-6 Logoname">
-        <span class="ftext">DORM</span><span class="stext">QUEST</span>
+      <!-- Logo for large screens -->
+      <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
+        <span class="ftext ms-10 font-weight-bold">DORM</span>
+        <span class="stext font-weight-bold">QUEST</span>
+      </router-link>
+
+      <!-- Logo for mobile/small screens -->
+      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
+        <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
+        <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
       </router-link>
 
       <v-spacer />
-      <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6" />
+      <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 me-15 d-none d-lg-block" />
+      <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
     </v-app-bar>
 
     <v-main>
@@ -220,7 +228,7 @@ const filteringDorms = computed(() => {
                 style="text-decoration: none"
               >
                 <v-card class="hover-card dorm-card" elevation="2">
-                  <v-img :src="dorm.image" height="160px" cover />
+                  <v-img :src="dorm.image" height="280px" cover />
 
                   <v-card-text>
                     <div class="d-flex justify-space-between align-center mb-2">
@@ -257,9 +265,10 @@ const filteringDorms = computed(() => {
 }
 
 .gradient-bg {
-  background: linear-gradient(290deg, #6d9773, #fffae6);
-  min-height: 100vh;
+  background-image: url('/public/bg-admin.jpg');
+  height: 100vh;
   padding: 1rem;
+  overflow-y: auto; /* allow scrolling */
 }
 
 .gradient-app-bar {
@@ -267,14 +276,35 @@ const filteringDorms = computed(() => {
   color: #000;
 }
 
+.gradient-app-bar .ftext,
+.stext {
+  font-size: 30px;
+}
+
 .Logoname {
   text-decoration: none;
+}
+
+.Logoname2 {
+  font-size: 12px;
 }
 
 .search-wrapper {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.search-wrapper .v-btn:hover {
+  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
+  transform: scale(1.1);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.search-wrapper .v-btn:hover .v-icon {
+  color: #2e7d32; /* Green icon on hover */
 }
 
 .search-field {
@@ -336,7 +366,7 @@ const filteringDorms = computed(() => {
 .dorm-title {
   font-weight: 600;
   color: #1b4332;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 20px !important;
 }
 
@@ -344,7 +374,7 @@ const filteringDorms = computed(() => {
   color: #4d5106;
   font-size: 18px !important;
   font-weight: 500;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
 }
 
 .dorm-text {
