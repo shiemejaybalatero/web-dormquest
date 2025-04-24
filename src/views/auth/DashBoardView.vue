@@ -221,14 +221,20 @@ const filteringDorms = computed(() => {
           </div>
 
           <v-row>
-            <v-col v-for="(dorm, index) in filteringDorms" :key="index" cols="12" sm="6" md="4">
+            <v-col
+              v-for="(dorm, index) in filteringDorms"
+              :key="index"
+              cols="12"
+              sm="6"
+              md="4 pa-4"
+            >
               <component
                 :is="dorm.route ? 'router-link' : 'div'"
                 :to="dorm.route"
                 style="text-decoration: none"
               >
                 <v-card class="hover-card dorm-card" elevation="2">
-                  <v-img :src="dorm.image" height="280px" cover />
+                  <v-img :src="dorm.image" height="200px" cover />
 
                   <v-card-text>
                     <div class="d-flex justify-space-between align-center mb-2">
