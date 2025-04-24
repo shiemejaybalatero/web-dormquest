@@ -70,6 +70,7 @@ const saveProfile = () => {
             </router-link>
 
             <!-- About App -->
+
             <router-link to="/about" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
@@ -82,6 +83,7 @@ const saveProfile = () => {
             </router-link>
 
             <!-- Log Out -->
+
             <router-link to="/" class="text-decoration-none" style="color: inherit">
               <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
                 <div class="d-flex align-center pl-2">
@@ -96,6 +98,9 @@ const saveProfile = () => {
         </v-col>
 
         <!-- Main Content -->
+
+        <!-- Profile Form -->
+
         <v-col cols="12" md="9">
           <div class="profile-section d-flex flex-column align-center justify-center pa-6">
             <div class="profile-wrapper">
