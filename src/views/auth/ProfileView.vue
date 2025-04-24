@@ -44,6 +44,7 @@ const saveProfile = () => {
       <v-row>
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
+<<<<<<< HEAD
             <router-link to="/profile" style="text-decoration: none; color: inherit">
               <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
                 <div class="d-flex align-center pl-2">
@@ -51,6 +52,29 @@ const saveProfile = () => {
                     >mdi-account</v-icon
                   >
                   <span class="font-weight-bold text-body-1">Personal Information</span>
+=======
+            <v-list-item class="mt-3 mb-5 selected">
+              <div class="d-flex align-center">
+                <v-icon color="black" class="mr-2">mdi-account</v-icon>
+                <span class="font-weight-bold text-body-1">Personal Information</span>
+              </div>
+            </v-list-item>
+
+            <RouterLink to="/ratings" class="text-decoration-none text-black">
+              <v-list-item>
+                <div>
+                  <v-icon class="mr-2">mdi-star</v-icon>
+                  <span>Ratings</span>
+                </div>
+              </v-list-item>
+            </RouterLink>
+
+            <router-link to="/about" style="text-decoration: none; color: inherit">
+              <v-list-item>
+                <div>
+                  <v-icon class="mr-2">mdi-information</v-icon>
+                  <span>About app</span>
+>>>>>>> anton
                 </div>
               </v-list-item>
             </router-link>
