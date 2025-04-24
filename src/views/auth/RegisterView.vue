@@ -55,7 +55,7 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account'
     refVForm.value?.reset()
-    router.replace('/dashboard')
+    router.replace('/system/dashboard')
   }
 
   formAction.value.formProcess = false

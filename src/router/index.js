@@ -1,18 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthUserStore } from '@/stores/authUser'
+// import { isAuthenticated } from '@/utils/supabase'
 
 // Views
 import LoginView from '@/views/auth/LoginView.vue'
 import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import DashBoardView from '@/views/auth/system/DashBoardView.vue'
-import GoogleMapView from '@/views/auth/system/GoogleMapView.vue'
+import MapView from '@/views/auth/system/MapView.vue'
 import ProfileView from '@/views/auth/system/ProfileView.vue'
 import RatingsView from '@/views/auth/system/RatingsView.vue'
 import AboutAppView from '@/views/auth/system/AboutAppView.vue'
 
 // Error Views
 import ForbiddenView from '@/views/error/ForbiddenView.vue'
+// import NotFoundView from '@/views/error/NotFoundView.vue'
 
 // Boarding House Details Views
 import AmplayoBoardingHouseView from '@/views/auth/system/AmplayoBoardingHouseView.vue'
@@ -46,34 +47,29 @@ const router = createRouter({
       path: '/system/dashboard',
       name: 'dashboard',
       component: DashBoardView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/map',
       name: 'map',
-      component: GoogleMapView,
-      meta: { requiresAuth: true },
+      component: MapView,
     },
     {
       path: '/system/profile',
       name: 'profile',
       component: ProfileView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/ratings',
       name: 'ratings',
       component: RatingsView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/about',
       name: 'about',
       component: AboutAppView,
-      meta: { requiresAuth: true },
     },
     {
-      path: '/forbidden',
+      path: '/system/forbidden',
       name: 'forbidden',
       component: ForbiddenView,
     },
@@ -81,99 +77,61 @@ const router = createRouter({
       path: '/system/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',
       component: AmplayoBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/blissfulboardinghousedetails',
       name: 'blissfulboardinghousedetails',
       component: BlissfulBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/blueboardinghousedetails',
       name: 'blueboardinghousedetails',
       component: BlueBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/chelseaboardinghousedetails',
       name: 'chelseaboardinghousedetails',
       component: ChelseaBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/karmoboardinghousedetails',
       name: 'karmoboardinghousedetails',
       component: KarmoBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/licayanboardinghousedetails',
       name: 'licayanboardinghousedetails',
       component: LicayanBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/magduraboardinghousedetails',
       name: 'magduraboardinghousedetails',
       component: MagduraBoardingHouseView,
-      meta: { requiresAuth: true },
     },
     {
       path: '/system/tgbgboardinghousedetails',
       name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    // Add a catch-all route for undefined routes
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      redirect: { name: 'forbidden' },
     },
   ],
 })
 
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthUserStore()
-  let isLoggedIn = false
+/*router.beforeEach(async (to) => {
+  const loggedIn = await isAuthenticated()
 
-  try {
-    isLoggedIn = await authStore.isAuthenticated()
-  } catch (error) {
-    console.error('Authentication check failed:', error)
-    isLoggedIn = false
+  if (to.name === 'home') {
+    return loggedIn ? { name: 'dashboard' } : true
   }
 
-  // Home page logic - redirect to dashboard if logged in
-  if (to.name === 'home' && isLoggedIn) {
-    next({ name: 'dashboard' })
-    return
+  if (loggedIn && (to.name === 'login' || to.name === 'register')) {
+    return { name: 'dashboard' }
   }
 
-  // Prevent accessing login or register if already logged in
-  if (isLoggedIn && (to.name === 'login' || to.name === 'register')) {
-    next({ name: 'dashboard' })
-    return
+  if (!loggedIn && to.path.startsWith('/system')) {
+    return { name: 'login' }
   }
 
-  // Check if user is trying to access a protected route
-  if (to.meta.requiresAuth) {
-    if (!isLoggedIn) {
-      console.log('Access to protected route denied - redirecting to forbidden')
-      next('/forbidden')
-      return
-    }
-  }
-
-  // If user is not logged in and tries to access any system path, redirect to login
-  if (!isLoggedIn && to.path.startsWith('/system')) {
-    next({ name: 'login' })
-    return
-  }
-
-  // Allow access to the requested route
-  next()
-})
+  return true
+}) */
 
 export default router

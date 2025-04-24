@@ -1,12 +1,38 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { supabase, formActionDefault } from '@/utils/supabase'
+import { getAvatarText } from '@/utils/helper'
 
 const route = useRoute()
+const router = useRouter()
+
 const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
 const search = ref('')
+
+const formAction = ref({ ...formActionDefault })
+
+const userData = ref({
+  initials: '',
+  email: '',
+  fullname: '',
+})
+
+const onLogout = async () => {
+  formAction.value = { ...formActionDefault, formProcess: true }
+
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    console.error('Error during logout:', error)
+    return
+  }
+
+  formAction.value.formProcess = false
+  router.replace('/')
+}
 
 const handleScroll = () => {
   if (!mainContent.value) return
@@ -20,7 +46,25 @@ const scrollToTop = () => {
   }
 }
 
+const getUser = async () => {
+  const { data, error } = await supabase.auth.getUser()
+
+  if (error) {
+    console.error('Error getting user:', error)
+    return
+  }
+
+  const metadata = data?.user?.user_metadata
+
+  if (metadata) {
+    userData.value.email = metadata.email || ''
+    userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
+    userData.value.initials = getAvatarText(userData.value.fullname)
+  }
+}
+
 onMounted(() => {
+  getUser()
   if (mainContent.value) {
     mainContent.value.$el.addEventListener('scroll', handleScroll)
   }
@@ -39,15 +83,11 @@ onBeforeUnmount(() => {
       <v-list>
         <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
         <v-list-item title="Settings" prepend-icon="mdi-cog" />
-        <v-list-item
-          @click="toggleLogin"
-          :title="isLoggedIn ? 'Logout' : 'Login'"
-          prepend-icon="mdi-logout"
-        />
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar app flat class="gradient-app-bar">
-      <router-link to="/dashboard" class="fw-bolder ml-6 Logoname">
+      <router-link to="/system/dashboard" class="fw-bolder ml-6 Logoname">
         <span class="ftext">DORM</span><span class="stext">QUEST</span>
       </router-link>
 
@@ -58,13 +98,13 @@ onBeforeUnmount(() => {
     <v-main
       ref="mainContent"
       :style="
-        route.path === '/map'
+        route.path === '/system/map'
           ? 'overflow: hidden; height: 100vh; padding: 0;'
           : 'overflow-y: auto; height: 100vh;'
       "
     >
-      <div :class="route.path === '/map' ? '' : 'gradient-bg'">
-        <template v-if="route.path !== '/map'">
+      <div :class="route.path === '/system/map' ? '' : 'gradient-bg'">
+        <template v-if="route.path !== '/system/map'">
           <v-container>
             <!-- Search & Buttons -->
             <div class="d-flex align-center search-wrapper mb-4 pl-2">
@@ -79,35 +119,83 @@ onBeforeUnmount(() => {
                 clearable
                 density="comfortable"
               />
+
               <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
                 <v-icon>mdi-arrow-up</v-icon>
               </v-btn>
-              <router-link to="/dashboard">
-                <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
-                  <v-icon>mdi-home-outline</v-icon>
-                </v-btn>
-              </router-link>
-              <router-link to="/map">
-                <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
-                  <v-icon>mdi-map-marker-outline</v-icon>
-                </v-btn>
-              </router-link>
-              <router-link to="/profile">
+
+              <router-link to="/system/dashboard">
                 <v-btn
                   icon
                   class="mx-1"
-                  :class="{
-                    'green-btn':
-                      route.path === '/profile' ||
-                      route.path === '/ratings' ||
-                      route.path === '/about',
-                  }"
+                  :class="{ 'green-btn': route.path === '/system/dashboard' }"
                 >
-                  <v-icon>mdi-account-circle-outline</v-icon>
+                  <v-icon>mdi-home-outline</v-icon>
                 </v-btn>
               </router-link>
+
+              <router-link to="/system/map">
+                <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/system/map' }">
+                  <v-icon>mdi-map-marker-outline</v-icon>
+                </v-btn>
+              </router-link>
+
+              <!-- Avatar Menu -->
+              <v-menu min-width="200px" location="bottom end">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon v-bind="props">
+                    <v-avatar class="avatar-btn" size="large">
+                      <span class="text-subtitle-2">{{ userData.initials }}</span>
+                    </v-avatar>
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-text>
+                    <div class="mx-auto text-center">
+                      <v-avatar color="brown">
+                        <span class="text-h5">{{ userData.initials }}</span>
+                      </v-avatar>
+                      <h3>{{ userData.fullName }}</h3>
+                      <p class="text-caption mt-1">
+                        {{ userData.email }}
+                      </p>
+                      <v-divider class="my-3"></v-divider>
+                      <router-link to="/system/profile">
+                        <v-btn
+                          variant="text"
+                          rounded
+                          class="mx-1"
+                          :class="{
+                            'green-btn':
+                              route.path === '/system/profile' ||
+                              route.path === '/system/ratings' ||
+                              route.path === '/system/about',
+                          }"
+                        >
+                          Personal Information
+                        </v-btn>
+                      </router-link>
+                      <v-divider class="my-3"></v-divider>
+                      <v-btn variant="text" rounded> Edit Account </v-btn>
+                      <v-divider class="my-3"></v-divider>
+
+                      <v-btn
+                        prepend-icon="mdi-logout"
+                        variant="plain"
+                        @click="onLogout"
+                        :loading="formAction.formProcess"
+                        :disabled="formAction.formProcess"
+                      >
+                        Logout
+                      </v-btn>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-menu>
+
               <v-app-bar-nav-icon @click="drawer = !drawer" />
             </div>
+
             <hr class="search-divider" />
             <v-row>
               <slot name="content"></slot>
@@ -154,6 +242,11 @@ onBeforeUnmount(() => {
 .gradient-app-bar {
   background: linear-gradient(290deg, #fffae6, #6d9773);
   color: #000;
+}
+
+.avatar-btn {
+  background-color: #0c3b2e;
+  color: #ffffff;
 }
 
 .Logoname {

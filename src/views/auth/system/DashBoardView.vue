@@ -43,35 +43,35 @@ const dorms = ref([
     name: 'Ampalayo Boarding House',
     address: '0.5 km away from CSU',
     availability: '1,500 php/month',
-    image: 'Amplayo/amplayomain.png',
+    image: '/Amplayo/amplayomain.png',
     route: { name: 'amplayoboardinghousedetails' },
   },
   {
     name: 'Blue Heavens Dorm',
     address: '2.5 km away from CSU',
     availability: '900 php/month',
-    image: 'BlueHeaven/bluemain.png',
+    image: '/BlueHeaven/bluemain.png',
     route: { name: 'blueboardinghousedetails' },
   },
   {
     name: 'Blissful Dormitory',
     address: '5.5 km away from CSU',
     availability: '1,000 php/month',
-    image: 'Blissful/blissfulmain.png',
+    image: '/Blissful/blissfulmain.png',
     route: { name: 'blissfulboardinghousedetails' },
   },
   {
     name: 'Licayan Boarding House',
     address: '3.2 km away from CSU',
     availability: '1,000 php/month',
-    image: 'Licayan/licayanmain.png',
+    image: '/Licayan/licayanmain.png',
     route: { name: 'licayanboardinghousedetails' },
   },
   {
     name: 'Chelsea Boarding House',
     address: '3.2 km away from CSU',
     availability: '1,000 php/month',
-    image: 'Chelsea/chelseamain.jpg',
+    image: '/Chelsea/chelseamain.jpg',
     route: { name: 'chelseaboardinghousedetails' },
   },
   {
@@ -85,14 +85,14 @@ const dorms = ref([
     name: 'Magdura Boarding House',
     address: '0.9 km away from CSU',
     availability: '1,500 php/month',
-    image: 'Magdura/magduramain.png',
+    image: '/Magdura/magduramain.png',
     route: { name: 'magduraboardinghousedetails' },
   },
   {
     name: 'Karmo Boarding House',
     address: '6.2 km away from CSU',
     availability: '1,500 php/month',
-    image: 'Karmo/karmomain.jpg',
+    image: '/Karmo/karmomain.jpg',
     route: { name: 'karmoboardinghousedetails' },
   },
 ])
@@ -131,13 +131,16 @@ const filteringDorms = computed(() => {
     </v-navigation-drawer>
     <v-app-bar app flat class="gradient-app-bar">
       <!-- Logo for large screens -->
-      <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
+      <router-link to="/system/dashboard" class="ml-6 Logoname d-none d-lg-block">
         <span class="ftext ms-10 font-weight-bold">DORM</span>
         <span class="stext font-weight-bold">QUEST</span>
       </router-link>
 
       <!-- Logo for mobile/small screens -->
-      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
+      <router-link
+        to="/system/dashboard"
+        class="ml-4 d-flex align-center d-lg-none text-decoration-none"
+      >
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
         <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
       </router-link>
@@ -167,20 +170,20 @@ const filteringDorms = computed(() => {
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
 
-            <router-link to="/dashboard">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
+            <router-link to="/system/dashboard">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/system/dashboard' }">
                 <v-icon>mdi-home-outline</v-icon>
               </v-btn>
             </router-link>
 
-            <router-link to="/map">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
+            <router-link to="/system/map">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/system/map' }">
                 <v-icon>mdi-map-marker-outline</v-icon>
               </v-btn>
             </router-link>
 
-            <router-link to="/profile">
-              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/profile' }">
+            <router-link to="/system/profile">
+              <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/system/profile' }">
                 <v-icon>mdi-account-circle-outline</v-icon>
               </v-btn>
             </router-link>
