@@ -154,7 +154,7 @@ function handleActiveState(event) {
             />
           </v-col>
 
-          <div v-if="formattedBirthday" class="text-white text-caption mt-n5 mb-3">
+          <div v-if="formattedBirthday" class="calendar text-white text-caption mt-n5 mb-3">
             📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
           </div>
 
@@ -233,7 +233,7 @@ function handleActiveState(event) {
 
 <style scoped>
 .bg-image {
-  background: linear-gradient(290deg, #6d9773, #fffae6);
+  background: url(/public/landing4.png);
   background-size: cover;
   background-position: center;
   height: 100%;
@@ -264,7 +264,7 @@ h1 {
 }
 
 .signup-title {
-  font-size: 16px;
+  font-size: 20px;
   padding-bottom: 1rem;
   color: #ffffff;
   font-family: Arial, Helvetica, sans-serif;
@@ -293,5 +293,9 @@ h1 {
 .register-button:hover {
   background-color: #ffba00;
   color: #0c3b2e;
+}
+
+.calendar {
+  color: white;
 }
 </style>
