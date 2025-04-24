@@ -1,98 +1,16 @@
-<script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-
-const profileImage = ref(null)
-const fileInput = ref(null)
-
-const triggerFileInput = () => {
-  fileInput.value.click()
-}
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      profileImage.value = e.target.result
-    }
-    reader.readAsDataURL(file)
-  }
-}
-
-const name = ref('SHIEME JAY G. BALATERO')
-const age = ref('30')
-const email = ref('shiemejay@gmail.com')
-const status = ref('Single')
-
-const saveProfile = () => {
-  console.log('Profile saved:', {
-    name: name.value,
-    age: age.value,
-    email: email.value,
-    status: status.value,
-  })
-}
-</script>
-
 <template>
   <AppLayout>
     <template #content>
       <v-row>
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-account</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/ratings" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-star</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-information</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">About app</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-logout</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Log out</span>
-                </div>
-              </v-list-item>
-            </router-link>
+            <!-- Sidebar content can go here -->
           </v-list>
         </v-col>
 
         <v-col cols="12" md="9">
           <div class="profile-section d-flex flex-column align-center justify-center pa-6">
-            <div class="profile-wrapper">
+            <div class="profile-wrapper" v-if="user">
               <div class="d-flex justify-space-between align-center mb-6 w-100">
                 <h3 class="font-weight-bold mb-0">Profile Information</h3>
                 <v-btn color="#ffba00" class="font-weight-bold text-black account-setting" rounded>
@@ -106,7 +24,7 @@ const saveProfile = () => {
                     <!-- Avatar -->
                     <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
                       <v-avatar size="120">
-                        <v-img :src="profileImage || 'https://via.placeholder.com/150'" />
+                        <v-img :src="profile.avatar_url || placeholderUrl" />
                       </v-avatar>
                       <v-btn
                         color="#0c3b2e"
@@ -130,54 +48,66 @@ const saveProfile = () => {
                     <v-col cols="12" md="8">
                       <v-row>
                         <v-col cols="12" sm="6">
-                          <div class="label">Name</div>
+                          <div class="label">First Name</div>
                           <v-text-field
-                            v-model="name"
-                            placeholder="Full Name"
+                            v-model="profile.firstname"
+                            placeholder="First Name"
                             density="compact"
                             variant="outlined"
                             hide-details
                           />
                         </v-col>
-
                         <v-col cols="12" sm="6">
-                          <div class="label">Age</div>
+                          <div class="label">Last Name</div>
                           <v-text-field
-                            v-model="age"
-                            placeholder="Age"
-                            type="number"
+                            v-model="profile.lastname"
+                            placeholder="Last Name"
                             density="compact"
                             variant="outlined"
                             hide-details
                           />
                         </v-col>
-
                         <v-col cols="12" sm="6">
-                          <div class="label">Gmail</div>
+                          <div class="label">Email</div>
                           <v-text-field
-                            v-model="email"
+                            :model-value="userEmail"
                             placeholder="Email"
                             type="email"
                             density="compact"
                             variant="outlined"
                             hide-details
+                            disabled
                           />
                         </v-col>
-
                         <v-col cols="12" sm="6">
-                          <div class="label">Status</div>
-                          <v-select
-                            v-model="status"
-                            :items="['Single', 'Married', 'In a relationship']"
-                            placeholder="Status"
+                          <div class="label">Birthdate</div>
+                          <v-text-field
+                            v-model="profile.birthdate"
+                            type="date"
                             density="compact"
                             variant="outlined"
                             hide-details
                           />
                         </v-col>
-
+                        <v-col cols="12" sm="6">
+                          <div class="label">Gender</div>
+                          <v-select
+                            v-model="profile.gender"
+                            :items="['male', 'female', 'custom']"
+                            placeholder="Gender"
+                            density="compact"
+                            variant="outlined"
+                            hide-details
+                          />
+                        </v-col>
                         <v-col cols="12" class="text-right mt-4">
-                          <v-btn type="submit" color="#0c3b2e" class="white--text" rounded>
+                          <v-btn
+                            type="submit"
+                            color="#0c3b2e"
+                            class="white--text"
+                            rounded
+                            :loading="loading"
+                          >
                             Save
                           </v-btn>
                         </v-col>
@@ -194,24 +124,101 @@ const saveProfile = () => {
   </AppLayout>
 </template>
 
+<script setup>
+import AppLayout from '@/components/layout/AppLayout.vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { supabase } from '@/utils/supabase'
+
+// State
+const user = ref(null)
+const profile = reactive({
+  firstname: '',
+  lastname: '',
+  birthdate: '',
+  gender: '',
+  avatar_url: '',
+})
+
+const placeholderUrl = 'https://via.placeholder.com/150'
+const fileInput = ref(null)
+const loading = ref(false)
+
+// Computed to safely access email
+const userEmail = computed(() => user.value?.email || '')
+
+// Trigger file upload
+const triggerFileInput = () => fileInput.value?.click()
+
+// Handle file upload to Supabase Storage
+const handleFileUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file || !user.value) return
+
+  const filePath = `${user.value.id}/${file.name}`
+  loading.value = true
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true })
+
+  if (!uploadError) {
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath)
+    profile.avatar_url = urlData.publicUrl
+  }
+
+  loading.value = false
+}
+
+// Fetch user and profile metadata
+const fetchProfile = async () => {
+  const { data: sessionData } = await supabase.auth.getUser()
+  if (!sessionData.user) return
+
+  user.value = sessionData.user
+
+  const md = sessionData.user.user_metadata || {}
+  profile.firstname = md.firstname || ''
+  profile.lastname = md.lastname || ''
+  profile.birthdate = md.birthday || ''
+  profile.gender = md.gender || ''
+}
+
+// Save updates to Supabase
+const saveProfile = async () => {
+  if (!user.value) return
+
+  loading.value = true
+  const updates = {
+    id: user.value.id,
+    ...profile,
+    updated_at: new Date(),
+  }
+
+  const { error } = await supabase.from('profiles').upsert(updates)
+  if (error) console.error('Profile update failed:', error)
+
+  loading.value = false
+}
+
+// Load profile on mount
+onMounted(fetchProfile)
+</script>
+
 <style scoped>
 .sidebar {
   min-height: 40vh;
   background: linear-gradient(180deg, #dbead3, #6d9773);
   border-radius: 16px;
 }
-
 .selected {
   background-color: #ffba00 !important;
   border-radius: 20px;
   color: #0c3b2e;
 }
-
 .account-setting {
   border-radius: 20px;
   background-color: #ffba00 !important;
 }
-
 .profile-section {
   background: linear-gradient(180deg, #dbead3, #6d9773);
   border-radius: 16px;
@@ -222,19 +229,16 @@ const saveProfile = () => {
   align-items: center;
   justify-content: center;
 }
-
 .profile-wrapper {
   width: 100%;
   max-width: 900px;
 }
-
 .profile-card {
   background-color: rgba(255, 255, 255, 0.97);
   border-radius: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   width: 100%;
 }
-
 .label {
   font-size: 0.85rem;
   color: #0c3b2e;
