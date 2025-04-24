@@ -98,7 +98,7 @@ onUnmounted(() => {
 }
 
 .bg-image {
-  background: linear-gradient(290deg, #6d9773, #fffae6);
+  background: url(/public/landing4.png);
   background-size: cover;
   background-position: center;
 }
