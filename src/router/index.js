@@ -101,6 +101,12 @@ const router = createRouter({
       name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
     },
+
+    {
+      path: '/',
+      name: 'home',
+      component: LandingPageView,
+    },
   ],
 })
 
