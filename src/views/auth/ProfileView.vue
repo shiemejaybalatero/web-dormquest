@@ -254,15 +254,23 @@ const setActiveItem = (item) => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.icon-container:hover {
-  background-color: rgba(255, 186, 0, 0.1);
-  border: 2px solid #ffba00;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+.icon-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
-.icon-container:not(:hover) {
-  background-color: transparent;
-  box-shadow: none;
-  border: none;
+.icon-container:hover {
+  background-color: rgba(255, 186, 0, 0.1);
+  border-color: #ffba00;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 </style>
