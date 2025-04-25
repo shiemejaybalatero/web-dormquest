@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import { isAuthenticated } from '@/utils/supabase'
+import { isAuthenticated } from '@/utils/supabase'
 
-// Views
 import LoginView from '@/views/auth/LoginView.vue'
 import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
@@ -13,7 +12,7 @@ import AboutAppView from '@/views/auth/system/AboutAppView.vue'
 
 // Error Views
 import ForbiddenView from '@/views/error/ForbiddenView.vue'
-// import NotFoundView from '@/views/error/NotFoundView.vue'
+import NotFoundView from '@/views/error/NotFoundView.vue'
 
 // Boarding House Details Views
 import AmplayoBoardingHouseView from '@/views/auth/system/AmplayoBoardingHouseView.vue'
@@ -32,106 +31,135 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: LandingPageView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/register',
       name: 'register',
       component: RegisterView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/system/dashboard',
       name: 'dashboard',
       component: DashBoardView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/map',
       name: 'map',
       component: MapView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/ratings',
       name: 'ratings',
       component: RatingsView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/about',
       name: 'about',
       component: AboutAppView,
+      meta: { requiresAuth: true },
     },
     {
-      path: '/system/forbidden',
+      path: '/error/forbidden',
       name: 'forbidden',
       component: ForbiddenView,
+    },
+    {
+      path: '/error/not-found',
+      name: 'not-found',
+      component: NotFoundView,
     },
     {
       path: '/system/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',
       component: AmplayoBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/blissfulboardinghousedetails',
       name: 'blissfulboardinghousedetails',
       component: BlissfulBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/blueboardinghousedetails',
       name: 'blueboardinghousedetails',
       component: BlueBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/chelseaboardinghousedetails',
       name: 'chelseaboardinghousedetails',
       component: ChelseaBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/karmoboardinghousedetails',
       name: 'karmoboardinghousedetails',
       component: KarmoBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/licayanboardinghousedetails',
       name: 'licayanboardinghousedetails',
       component: LicayanBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/magduraboardinghousedetails',
       name: 'magduraboardinghousedetails',
       component: MagduraBoardingHouseView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/system/tgbgboardinghousedetails',
       name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/:catchAll(.*)',
+      component: NotFoundView,
     },
   ],
 })
 
-/*router.beforeEach(async (to) => {
+router.beforeEach(async (to) => {
   const loggedIn = await isAuthenticated()
 
+  // Redirect to login or dashboard when accessing home
   if (to.name === 'home') {
-    return loggedIn ? { name: 'dashboard' } : true
+    return loggedIn ? { name: 'dashboard' } : { name: 'login' }
   }
 
-  if (loggedIn && (to.name === 'login' || to.name === 'register')) {
+  // Redirect logged-in users from public pages to dashboard
+  if (loggedIn && !to.meta.requiresAuth) {
     return { name: 'dashboard' }
   }
 
-  if (!loggedIn && to.path.startsWith('/system')) {
-    return { name: 'login' }
+  // Redirect guests from protected pages to home
+  if (!loggedIn && to.meta.requiresAuth) {
+    return { name: 'home' }
   }
 
+  // No redirection needed
   return true
-}) */
+})
 
 export default router
