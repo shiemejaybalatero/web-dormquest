@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useItemStore } from '@/stores/items'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -8,6 +9,13 @@ const drawer = ref(false)
 const search = ref('')
 const selectedPriceRange = ref(null)
 const selectedDistanceRange = ref(null)
+const itemStore = useItemStore()
+
+onMounted(async () => {
+  if (itemStore.items.length == 0) await itemStore.getItemsFromApi()
+
+  console.log(itemStore.items)
+})
 
 const handleScroll = () => {
   showScrollTop.value = window.scrollY > 300
@@ -19,10 +27,6 @@ const scrollToTop = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
 })
 
 const priceRanges = [
@@ -229,7 +233,8 @@ const filteringDorms = computed(() => {
               :key="index"
               cols="12"
               sm="6"
-              md="4 pa-4"
+              md="4"
+              class="pa-4"
             >
               <component
                 :is="dorm.route ? 'router-link' : 'div'"

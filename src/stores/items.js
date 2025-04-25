@@ -2,7 +2,7 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useCounterStore = defineStore('items', () => {
+export const useItemStore = defineStore('items', () => {
   // States
   const items = ref([])
 
@@ -11,7 +11,9 @@ export const useCounterStore = defineStore('items', () => {
 
   // Action
   async function getItemsFromApi() {
-    await axios.get('https://api.restful-api.dev/objects')
+    const response = await axios.get('https://api.restful-api.dev/objects')
+
+    items.value = response.data
   }
 
   return { items, getItemsFromApi }
