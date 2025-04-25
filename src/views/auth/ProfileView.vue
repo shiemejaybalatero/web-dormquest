@@ -228,7 +228,7 @@ const setActiveItem = (item) => {
   transition:
     opacity 0.3s ease,
     color 0.3s ease;
-  font-weight: normal;
+  font-weight: bolder;
 }
 
 .icon-container:hover .icon-name {
@@ -244,14 +244,14 @@ const setActiveItem = (item) => {
   padding: 20px;
   color: white;
   transition:
-    background-color 0.9ms ease,
-    box-shadow 0.9ms ease;
+    background-color 0.5s ease,
+    box-shadow 0.5s ease;
   cursor: pointer;
 }
 
 .icon-container:hover .icon {
   background-color: #ffba00;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 5px rgba(249, 241, 3, 0.3);
 }
 
 .icon-container {
