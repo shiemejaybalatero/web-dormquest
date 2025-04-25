@@ -202,6 +202,7 @@ const setActiveItem = (item) => {
 </template>
 
 <style scoped>
+/* Sidebar styles */
 .sidebar {
   min-height: 40vh;
   background: transparent;
@@ -212,6 +213,10 @@ const setActiveItem = (item) => {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  transition: all 0.4s ease;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
 }
 
 .icon-name {
@@ -219,15 +224,19 @@ const setActiveItem = (item) => {
   font-size: 14px;
   color: #fff;
   opacity: 0;
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
   transform: translateX(20px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    color 0.4s ease;
+  font-weight: normal;
 }
 
 .icon-container:hover .icon-name {
   opacity: 1;
   transform: translateX(0);
+  font-weight: 700;
+  color: #0c3b2e;
 }
 
 .icon {
@@ -237,13 +246,21 @@ const setActiveItem = (item) => {
   padding: 20px;
   color: white;
   transition:
-    transform 0.5s ease,
-    background-color 0.5s ease;
+    transform 0.4s ease,
+    background-color 0.4s ease,
+    box-shadow 0.4s ease;
   cursor: pointer;
 }
 
 .icon-container:hover .icon {
   background-color: #ffba00;
   transform: scale(1.2);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.icon-container:hover {
+  background-color: rgba(255, 186, 0, 0.2);
+  border: 2px solid #ffba00;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 </style>
