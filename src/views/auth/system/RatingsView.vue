@@ -2,10 +2,7 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { onMounted } from 'vue'
-import { useItemStore } from '@/stores/items'
 
-const itemStore = useItemStore()
 const route = useRoute()
 
 const profileImage = ref(null)
@@ -14,12 +11,6 @@ const fileInput = ref(null)
 const triggerFileInput = () => {
   fileInput.value.click()
 }
-
-onMounted(async () => {
-  if (itemStore.items.length == 0) await itemStore.getItemsFromApi()
-
-  console.log(itemStore.items)
-})
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
@@ -112,7 +103,7 @@ const dormRatings = ref([
               <v-col cols="12" md="3" class="text-center py-4">
                 <v-avatar size="100">
                   <v-img
-                    :src="profileImage || 'https://placehold.co/100x100'"
+                    :src="profileImage || 'https://via.placeholder.com/100'"
                     alt="Profile Picture"
                   />
                 </v-avatar>

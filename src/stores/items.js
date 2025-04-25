@@ -1,20 +1,20 @@
-import axios from 'axios'
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+/*const loading = ref(false)
+const error = ref(null)
 
-export const useItemStore = defineStore('items', () => {
-  // States
-  const items = ref([])
+async function getItemsFromApi() {
+  loading.value = true
+  error.value = null
 
-  // Getters
-  /*const sample = computed(() => count.value*2)*/
-
-  // Action
-  async function getItemsFromApi() {
+  try {
     const response = await axios.get('https://api.restful-api.dev/objects')
-
     items.value = response.data
+  } catch (err) {
+    error.value = err.message || 'Failed to fetch items'
+  } finally {
+    loading.value = false
   }
+}
 
-  return { items, getItemsFromApi }
-})
+return { items, loading, error, getItemsFromApi }
+
+*/
