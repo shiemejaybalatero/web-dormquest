@@ -46,50 +46,46 @@ const dormRatings = ref([
         <!-- Sidebar -->
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
-            <!-- Personal Information -->
-            <router-link to="/profile" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
+            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/profile')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/profile' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-account
                   </v-icon>
-                  <span class="font-weight-bold text-body-1">Personal Information</span>
+                  <span class="icon-name">Personal Information</span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <!-- Ratings -->
-            <router-link to="/ratings" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
+            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/ratings')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/ratings' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-star
                   </v-icon>
-                  <span class="font-weight-bold text-body-1">Ratings</span>
+                  <span class="icon-name">Ratings</span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <!-- About App -->
-            <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
+            <router-link to="/about" class="text-decoration-none" style="color: inherit">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/about')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/about' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-information
                   </v-icon>
-                  <span class="font-weight-bold text-body-1">About app</span>
+                  <span class="icon-name">About App</span>
                 </div>
               </v-list-item>
             </router-link>
 
-            <!-- Log out -->
-            <router-link to="/" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
+            <router-link to="/" class="text-decoration-none" style="color: inherit">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-logout
                   </v-icon>
-                  <span class="font-weight-bold text-body-1">Log out</span>
+                  <span class="icon-name">Log Out</span>
                 </div>
               </v-list-item>
             </router-link>
@@ -169,44 +165,73 @@ const dormRatings = ref([
 <style scoped>
 .sidebar {
   min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
+  background: transparent;
   border-radius: 16px;
 }
 
-.selected {
-  background-color: #ffba00 !important;
-  border-radius: 50px;
+.icon-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.icon-name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #fff;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    color 0.3s ease;
+  font-weight: bolder;
+}
+
+.icon-container:hover .icon-name {
+  opacity: 1;
+  font-weight: 700;
   color: #0c3b2e;
 }
 
-.ratings-section {
-  border-radius: 16px;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.icon {
+  font-size: 25px;
+  border-radius: 100%;
+  background-color: #0c3b2e;
+  padding: 20px;
+  color: white;
+  transition:
+    background-color 0.5s ease,
+    box-shadow 0.5s ease;
+  cursor: pointer;
 }
 
-.ratings-scroll {
-  max-height: 400px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 8px;
+.icon-container:hover .icon {
+  background-color: #ffba00;
+  box-shadow: 0 1px 5px rgba(249, 241, 3, 0.3);
 }
 
-.rating-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 50px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  min-height: 60px;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px 24px;
-  margin-bottom: 16px;
-
-  justify-content: space-between;
+.icon-container {
+  display: flex;
   align-items: center;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
-.ratings-scroll {
-  max-width: 100%;
+.icon-container:hover {
+  background-color: rgba(255, 186, 0, 0.1);
+  border-color: #ffba00;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 </style>
