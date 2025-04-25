@@ -1,12 +1,18 @@
 <script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-
-const route = useRoute()
+import AppLayout from '@/components/layout/AppLayout.vue'
 
 const profileImage = ref(null)
 const fileInput = ref(null)
+const name = ref('SHIEME JAY G. BALATERO')
+const age = ref('30')
+const email = ref('shiemejay@gmail.com')
+const status = ref('Single')
+
+const activeItem = ref(null)
+
+const route = useRoute()
 
 const triggerFileInput = () => {
   fileInput.value.click()
@@ -23,11 +29,6 @@ const handleFileUpload = (event) => {
   }
 }
 
-const name = ref('SHIEME JAY G. BALATERO')
-const age = ref('30')
-const email = ref('shiemejay@gmail.com')
-const status = ref('Single')
-
 const saveProfile = () => {
   console.log('Profile saved:', {
     name: name.value,
@@ -35,6 +36,10 @@ const saveProfile = () => {
     email: email.value,
     status: status.value,
   })
+}
+
+const setActiveItem = (item) => {
+  activeItem.value = activeItem.value === item ? null : item
 }
 </script>
 
@@ -46,45 +51,45 @@ const saveProfile = () => {
         <v-col cols="12" md="3">
           <v-list dense nav class="sidebar pa-4">
             <router-link to="/profile" class="text-decoration-none" style="color: inherit">
-              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/profile')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/profile' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-account
                   </v-icon>
-                  <span class="font-weight-bold text-body-1"> Personal Information </span>
+                  <span class="icon-name">Personal Information</span>
                 </div>
               </v-list-item>
             </router-link>
 
             <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
-              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/ratings')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/ratings' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-star
                   </v-icon>
-                  <span class="font-weight-bold text-body-1"> Ratings </span>
+                  <span class="icon-name">Ratings</span>
                 </div>
               </v-list-item>
             </router-link>
 
             <router-link to="/about" class="text-decoration-none" style="color: inherit">
-              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/about')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/about' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-information
                   </v-icon>
-                  <span class="font-weight-bold text-body-1"> About app </span>
+                  <span class="icon-name">About App</span>
                 </div>
               </v-list-item>
             </router-link>
 
             <router-link to="/" class="text-decoration-none" style="color: inherit">
-              <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
+              <v-list-item class="icon-container" @mouseover="setActiveItem('/')">
                 <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2">
+                  <v-icon :color="route.path === '/' ? '#fff' : '#fff'" class="mr-2 icon">
                     mdi-logout
                   </v-icon>
-                  <span class="font-weight-bold text-body-1"> Log out </span>
+                  <span class="icon-name">Log Out</span>
                 </div>
               </v-list-item>
             </router-link>
@@ -199,48 +204,46 @@ const saveProfile = () => {
 <style scoped>
 .sidebar {
   min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
+  background: transparent;
   border-radius: 16px;
 }
 
-.selected {
-  background-color: #ffba00 !important;
-  border-radius: 20px;
-  color: #0c3b2e;
-}
-
-.account-setting {
-  border-radius: 20px;
-  background-color: #ffba00 !important;
-}
-
-.profile-section {
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  border-radius: 16px;
-  min-height: 65vh;
-  padding-top: 24px;
-  padding-bottom: 40px;
+.icon-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 15px;
 }
 
-.profile-wrapper {
-  width: 100%;
-  max-width: 900px;
+.icon-name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #fff;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  transform: translateX(20px);
 }
 
-.profile-card {
-  background-color: rgba(255, 255, 255, 0.97);
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  width: 100%;
+.icon-container:hover .icon-name {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-.label {
-  font-size: 0.85rem;
-  color: #0c3b2e;
-  font-weight: 600;
-  margin-bottom: 4px;
+.icon {
+  font-size: 25px;
+  border-radius: 100%;
+  background-color: #0c3b2e;
+  padding: 20px;
+  color: white;
+  transition:
+    transform 0.5s ease,
+    background-color 0.5s ease;
+  cursor: pointer;
+}
+
+.icon-container:hover .icon {
+  background-color: #ffba00;
+  transform: scale(1.2);
 }
 </style>
