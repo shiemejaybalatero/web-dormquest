@@ -14,6 +14,7 @@ const setActiveItem = (item) => {
     <template #content>
       <v-container class="main-container" fluid>
         <v-row no-gutters>
+          <!-- Sidebar -->
           <v-col cols="12" md="3" class="sidebar-col">
             <v-list dense nav class="sidebar pa-4">
               <router-link to="/profile" class="text-decoration-none" style="color: inherit">
@@ -25,8 +26,6 @@ const setActiveItem = (item) => {
                   <div class="d-flex align-center pl-2">
                     <v-icon class="mr-2 icon">mdi-account</v-icon>
                     <span class="icon-name">Personal Information</span>
-                    <br />
-                    <br />
                   </div>
                 </v-list-item>
               </router-link>
@@ -85,7 +84,10 @@ const setActiveItem = (item) => {
             </v-list>
           </v-col>
 
-          <!--profile-->
+          <!-- Profile Content Placeholder -->
+          <v-col cols="12" md="9">
+            <slot />
+          </v-col>
         </v-row>
       </v-container>
     </template>
@@ -94,13 +96,10 @@ const setActiveItem = (item) => {
 
 <style scoped>
 html,
-body {
-  overflow-x: hidden;
-  width: 100%;
-}
-
+body,
 .v-application {
   overflow-x: hidden;
+  width: 100%;
 }
 
 .sidebar-col {
@@ -115,6 +114,7 @@ body {
   border-radius: 16px;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .sidebar::after {
@@ -187,92 +187,27 @@ body {
   border-color: #ffba00;
 }
 
-.profile-container {
-  overflow-x: hidden;
-  max-width: 100%;
-}
-
-.profile-top {
-  min-height: 70vh;
-  padding-top: 0;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #888;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.name {
-  font-size: 40px;
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 12px;
-  color: #1b1b1b;
-}
-
-.bio {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: #555;
-}
-
-.info-section {
-  font-size: 18px;
-  color: #333;
-}
-
-.info-section p {
-  margin: 6px 0;
-}
-
-.profile-img {
-  height: 560px;
-  width: auto;
-  object-fit: contain;
-  align-self: flex-start;
-  margin-top: 0;
-}
-
-.image-wrapper {
-  margin-top: -75px;
-  text-align: center;
-}
-
-@media (max-width: 1264px) {
-  .profile-img {
-    height: 400px;
-  }
-  .name {
-    font-size: 36px;
-  }
-  .bio,
-  .info-section {
-    font-size: 16px;
-  }
-}
-
 @media (max-width: 960px) {
   .sidebar-col {
     position: relative;
     top: 0;
   }
+
   .sidebar {
-    flex-direction: column;
     align-items: center;
     padding: 10px 0;
   }
+
   .sidebar::after {
     display: none;
   }
+
   .icon-container {
     width: 100%;
     justify-content: center;
     margin-bottom: 10px;
   }
+
   .icon-name {
     opacity: 1;
     color: #0c3b2e;
@@ -280,24 +215,10 @@ body {
     font-weight: 600;
     font-size: 14px;
   }
+
   .icon {
     font-size: 22px;
     padding: 16px;
-  }
-  .profile-top {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .name {
-    font-size: 32px;
-  }
-  .profile-img {
-    height: 300px;
-    margin-top: 20px;
-  }
-  .image-wrapper {
-    margin-top: 0;
   }
 }
 
@@ -306,21 +227,9 @@ body {
     font-size: 20px;
     padding: 12px;
   }
+
   .icon-name {
     font-size: 12px;
-  }
-  .profile-img {
-    height: 250px;
-  }
-  .name {
-    font-size: 28px;
-  }
-  .bio,
-  .info-section {
-    font-size: 14px;
-  }
-  .info-section p {
-    margin: 4px 0;
   }
 }
 </style>

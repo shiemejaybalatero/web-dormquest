@@ -1,105 +1,119 @@
 <script setup>
+import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import { useRoute } from 'vue-router'
 
-const route = useRoute()
+const activeItem = ref('')
+
+const setActiveItem = (item) => {
+  activeItem.value = item
+}
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-row>
-        <!-- Sidebar -->
-        <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/profile')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-account
-                  </v-icon>
-                  <span class="icon-name">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
+      <v-container class="main-container" fluid>
+        <v-row no-gutters>
+          <!-- Sidebar -->
+          <v-col cols="12" md="3" class="sidebar-col">
+            <v-list dense nav class="sidebar pa-4">
+              <router-link to="/profile" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/profile' }"
+                  @click="setActiveItem('/profile')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-account</v-icon>
+                    <span class="icon-name">Personal Information</span>
+                  </div>
+                </v-list-item>
+              </router-link>
 
-            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/ratings')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-star
-                  </v-icon>
-                  <span class="icon-name">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
+              <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/ratings' }"
+                  @click="setActiveItem('/ratings')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-star</v-icon>
+                    <span class="icon-name">Ratings</span>
+                  </div>
+                </v-list-item>
+              </router-link>
 
-            <router-link to="/about" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/about')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-information
-                  </v-icon>
-                  <span class="icon-name">About App</span>
-                </div>
-              </v-list-item>
-            </router-link>
+              <router-link to="/about" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/about' }"
+                  @click="setActiveItem('/about')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-information</v-icon>
+                    <span class="icon-name">About App</span>
+                  </div>
+                </v-list-item>
+              </router-link>
 
-            <router-link to="/" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-logout
-                  </v-icon>
-                  <span class="icon-name">Log Out</span>
-                </div>
-              </v-list-item>
-            </router-link>
-          </v-list>
-        </v-col>
+              <router-link to="/accountsetting" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/accountsetting' }"
+                  @click="setActiveItem('/accountsetting')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-cog</v-icon>
+                    <span class="icon-name">Account Settings</span>
+                  </div>
+                </v-list-item>
+              </router-link>
 
-        <!-- Content Section -->
-        <v-col cols="12" md="9">
-          <div class="about-section pa-6">
-            <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="font-weight-bold">
-                <span style="color: #ffba00">DORM</span>
-                <span style="color: #0c3b2e"> QUEST</span>
-              </h2>
-              <v-btn color="#ffba00" class="font-weight-bold" rounded>ALL ABOUT</v-btn>
-            </div>
+              <router-link to="/" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/' }"
+                  @click="setActiveItem('/')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-logout</v-icon>
+                    <span class="icon-name">Log Out</span>
+                  </div>
+                </v-list-item>
+              </router-link>
+            </v-list>
+          </v-col>
 
-            <v-card flat class="pa-6 about-box">
-              <p class="mb-4 text-body-1">
-                <strong>Dorm Quest</strong> is a web-based platform that helps students and tenants
-                around Ampayon easily find and track available dormitories. With real-time updates
-                on room availability, users can explore listings that include key details like
-                pricing, room capacity, amenities, and exact location.
-              </p>
-              <p class="mb-4 text-body-1">
-                The platform also features a rating and review system, giving users insights from
-                previous tenants to help them make informed decisions. Dorm owners can list and
-                manage their properties through the site, making it easier to connect with potential
-                renters.
-              </p>
-              <p class="text-body-1">
-                Whether you're a student looking for a convenient place to stay or a property owner
-                aiming to reach more people, Dorm Quest makes the entire dorm-searching and listing
-                process easier, smarter, and more reliable.
-              </p>
-            </v-card>
-          </div>
-        </v-col>
-      </v-row>
+          <!-- Profile Content Placeholder -->
+          <v-col cols="12" md="9">
+            <slot />
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 </template>
 
 <style scoped>
+html,
+body,
+.v-application {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.sidebar-col {
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+}
+
 .sidebar {
   min-height: 50vh;
   background: transparent;
   border-radius: 16px;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
@@ -119,11 +133,13 @@ const route = useRoute()
   align-items: center;
   margin-bottom: 15px;
   padding: 8px;
+  border: 2px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   transition:
     background-color 0.3s ease,
-    box-shadow 0.3s ease;
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .icon-name {
@@ -160,23 +176,60 @@ const route = useRoute()
   box-shadow: 0 1px 5px rgba(249, 241, 3, 0.3);
 }
 
-.icon-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 8px;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-}
-
 .icon-container:hover {
   background-color: rgba(255, 186, 0, 0.1);
   border-color: #ffba00;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.active-icon {
+  background-color: rgba(255, 186, 0, 0.2);
+  border-color: #ffba00;
+}
+
+@media (max-width: 960px) {
+  .sidebar-col {
+    position: relative;
+    top: 0;
+  }
+
+  .sidebar {
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  .sidebar::after {
+    display: none;
+  }
+
+  .icon-container {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .icon-name {
+    opacity: 1;
+    color: #0c3b2e;
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .icon {
+    font-size: 22px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .icon {
+    font-size: 20px;
+    padding: 12px;
+  }
+
+  .icon-name {
+    font-size: 12px;
+  }
 }
 </style>
