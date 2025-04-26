@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { ref } from 'vue'
+import { supabase, formActionDefault } from '@/utils/supabase'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()

@@ -147,21 +147,18 @@ onBeforeUnmount(() => {
                 </router-link>
 
                 <!-- Avatar Menu -->
-                <v-menu min-width="200px" location="bottom end">
+                <v-menu min-width="200px">
                   <template v-slot:activator="{ props }">
                     <v-btn
                       class="mx-1"
-                      :class="{ 'green-btn': route.path === '/map' }"
+                      :class="{ 'green-btn': route.path === '/personal' }"
                       icon
                       v-bind="props"
                     >
                       <v-avatar
                         class="avatar-btn"
                         :class="{
-                          'green-btn':
-                            route.path === '/system/profile' ||
-                            route.path === '/system/ratings' ||
-                            route.path === '/system/about',
+                          'green-btn': ['/profile', '/ratings', '/about'].includes(route.path),
                         }"
                         size="large"
                       >
