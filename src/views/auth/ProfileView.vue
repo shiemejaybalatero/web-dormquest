@@ -17,113 +17,129 @@ const setActiveItem = (item) => {
 <template>
   <AppLayout>
     <template #content>
-      <v-row>
-        <!-- Sidebar -->
-        <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
-              <v-list-item
-                class="icon-container"
-                :class="{ 'active-icon': activeItem === '/profile' }"
-                @click="setActiveItem('/profile')"
-              >
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2 icon">mdi-account</v-icon>
-                  <span class="icon-name">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
-              <v-list-item
-                class="icon-container"
-                :class="{ 'active-icon': activeItem === '/ratings' }"
-                @click="setActiveItem('/ratings')"
-              >
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2 icon">mdi-star</v-icon>
-                  <span class="icon-name">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/about" class="text-decoration-none" style="color: inherit">
-              <v-list-item
-                class="icon-container"
-                :class="{ 'active-icon': activeItem === '/about' }"
-                @click="setActiveItem('/about')"
-              >
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2 icon">mdi-information</v-icon>
-                  <span class="icon-name">About App</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/" class="text-decoration-none" style="color: inherit">
-              <v-list-item
-                class="icon-container"
-                :class="{ 'active-icon': activeItem === '/' }"
-                @click="setActiveItem('/')"
-              >
-                <div class="d-flex align-center pl-2">
-                  <v-icon class="mr-2 icon">mdi-logout</v-icon>
-                  <span class="icon-name">Log Out</span>
-                </div>
-              </v-list-item>
-            </router-link>
-          </v-list>
-        </v-col>
-
-        <!-- Profile Section -->
-        <v-col cols="12" md="9">
-          <v-container class="profile-container">
-            <v-row align="start" justify="space-between" class="profile-top" no-gutters>
-              <!-- Left Personal Info -->
-              <v-col cols="12" md="7" class="d-flex flex-column justify-start">
-                <div>
-                  <p class="section-title">Personal Information</p>
-                  <br />
-
-                  <h1 class="name">{{ name }}</h1>
-
-                  <!-- BIO -->
-                  <p class="bio">
-                    I am Shieme Jay, a student of Caraga State University. I'm currently looking for
-                    dormitories near the CSU Main Campus and Ampayon area to continue my academic
-                    journey comfortably.
-                  </p>
-
-                  <!-- INFO -->
-                  <div class="info-section">
-                    <p><strong>Age:</strong> {{ age }}</p>
-                    <p><strong>Email:</strong> {{ email }}</p>
-                    <p><strong>Status:</strong> {{ status }}</p>
+      <v-container class="main-container" fluid>
+        <v-row no-gutters>
+          <!-- Sidebar -->
+          <v-col cols="12" md="3" class="sidebar-col">
+            <v-list dense nav class="sidebar pa-4">
+              <router-link to="/profile" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/profile' }"
+                  @click="setActiveItem('/profile')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-account</v-icon>
+                    <span class="icon-name">Personal Information</span>
                   </div>
-                </div>
-              </v-col>
+                </v-list-item>
+              </router-link>
 
-              <!-- Right Profile Image -->
-              <v-col cols="12" md="5" class="d-flex align-start justify-center">
-                <div class="image-wrapper">
-                  <img src="/user1.png" alt="Profile Image" class="profile-img" />
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-col>
-      </v-row>
+              <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/ratings' }"
+                  @click="setActiveItem('/ratings')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-star</v-icon>
+                    <span class="icon-name">Ratings</span>
+                  </div>
+                </v-list-item>
+              </router-link>
+
+              <router-link to="/about" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/about' }"
+                  @click="setActiveItem('/about')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-information</v-icon>
+                    <span class="icon-name">About App</span>
+                  </div>
+                </v-list-item>
+              </router-link>
+
+              <router-link to="/" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/' }"
+                  @click="setActiveItem('/')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-logout</v-icon>
+                    <span class="icon-name">Log Out</span>
+                  </div>
+                </v-list-item>
+              </router-link>
+            </v-list>
+          </v-col>
+
+          <!-- Profile Section -->
+          <v-col cols="12" md="9">
+            <v-container class="profile-container" fluid>
+              <v-row align="start" justify="space-between" class="profile-top" no-gutters>
+                <!-- Left Personal Info -->
+                <v-col cols="12" md="7" class="d-flex flex-column justify-start">
+                  <div>
+                    <p class="section-title">Personal Information</p>
+                    <h1 class="name">{{ name }}</h1>
+
+                    <p class="bio">
+                      I am Shieme Jay, a student of Caraga State University. I'm currently looking
+                      for dormitories near the CSU Main Campus and Ampayon area to continue my
+                      academic journey comfortably.
+                    </p>
+
+                    <div class="info-section">
+                      <p><strong>Age:</strong> {{ age }}</p>
+                      <p><strong>Email:</strong> {{ email }}</p>
+                      <p><strong>Status:</strong> {{ status }}</p>
+                    </div>
+                  </div>
+                </v-col>
+
+                <!-- Right Profile Image -->
+                <v-col cols="12" md="5" class="d-flex align-start justify-center">
+                  <div class="image-wrapper">
+                    <img src="/user1.png" alt="Profile Image" class="profile-img" />
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 </template>
 
 <style scoped>
+/* Lock layout */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.v-application {
+  overflow-x: hidden;
+}
+
 /* Sidebar */
+.sidebar-col {
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+}
+
 .sidebar {
   min-height: 50vh;
   background: transparent;
   border-radius: 16px;
-  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar::after {
@@ -196,8 +212,10 @@ const setActiveItem = (item) => {
   border-color: #ffba00;
 }
 
+/* Profile Section */
 .profile-container {
   overflow-x: hidden;
+  max-width: 100%;
 }
 
 .profile-top {
@@ -247,5 +265,105 @@ const setActiveItem = (item) => {
 
 .image-wrapper {
   margin-top: -50px;
+  text-align: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1264px) {
+  .profile-img {
+    height: 400px;
+  }
+
+  .name {
+    font-size: 36px;
+  }
+
+  .bio,
+  .info-section {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 960px) {
+  .sidebar-col {
+    position: relative;
+    top: 0;
+  }
+
+  .sidebar {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  .sidebar::after {
+    display: none;
+  }
+
+  .icon-container {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .icon-name {
+    opacity: 1;
+    color: #0c3b2e;
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .icon {
+    font-size: 22px;
+    padding: 16px;
+  }
+
+  .profile-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .name {
+    font-size: 32px;
+  }
+
+  .profile-img {
+    height: 300px;
+    margin-top: 20px;
+  }
+
+  .image-wrapper {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .icon {
+    font-size: 20px;
+    padding: 12px;
+  }
+
+  .icon-name {
+    font-size: 12px;
+  }
+
+  .profile-img {
+    height: 250px;
+  }
+
+  .name {
+    font-size: 28px;
+  }
+
+  .bio,
+  .info-section {
+    font-size: 14px;
+  }
+
+  .info-section p {
+    margin: 4px 0;
+  }
 }
 </style>
