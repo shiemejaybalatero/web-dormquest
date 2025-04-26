@@ -1,37 +1,45 @@
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { supabase } from '@/utils/supabase'
+
+const formActionDefault = {
+  formProcess: false,
+}
 
 const props = defineProps({
   links: {
     type: Array,
     required: true,
-    // Example structure: [{ title: 'Profile', icon: 'mdi-account', path: '/profile' }]
   },
 })
 
 const route = useRoute()
 const router = useRouter()
+const formAction = ref({ ...formActionDefault })
 
 const onLogout = async () => {
-  try {
-    // You can remove the comment if you handle supabase or any auth system
-    // await supabase.auth.signOut()
-    router.replace('/')
-  } catch (error) {
+  formAction.value = { ...formActionDefault, formProcess: true }
+
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
     console.error('Error during logout:', error)
+    return
   }
+
+  formAction.value.formProcess = false
+  router.replace('/')
 }
 </script>
 
 <template>
-  <v-list dense nav class="sidebar pa-4">
+  <v-list dense nav class="sidebar pt-7">
     <router-link
       v-for="link in links"
       :key="link.path"
       :to="link.path"
-      class="text-decoration-none"
-      style="color: inherit"
+      class="text-decoration-none side-path"
     >
       <v-list-item :class="{ selected: route.path === link.path }" class="mb-2">
         <div class="d-flex align-center pl-2">
@@ -43,20 +51,29 @@ const onLogout = async () => {
       </v-list-item>
     </router-link>
 
-    <v-list-item @click="onLogout" class="mb-2 cursor-pointer">
-      <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2">mdi-logout</v-icon>
-        <span class="font-weight-bold text-body-1">Log Out</span>
-      </div>
-    </v-list-item>
+    <v-btn
+      prepend-icon="mdi-logout"
+      variant="plain"
+      class="ml-2 font-weight-bold text-body-1"
+      @click="onLogout"
+      :loading="formAction.formProcess"
+      :disabled="formAction.formProcess"
+    >
+      Logout
+    </v-btn>
   </v-list>
 </template>
 
 <style scoped>
 .sidebar {
   min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  border-radius: 16px;
+  background: linear-gradient(360deg, #dbead3, #6d9773);
+  border-radius: 10px;
+  border: 1px solid #0c3b2e;
+}
+
+.side-path {
+  color: inherit;
 }
 
 .selected {
