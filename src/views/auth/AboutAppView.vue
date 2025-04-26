@@ -97,9 +97,21 @@ const route = useRoute()
 
 <style scoped>
 .sidebar {
-  min-height: 40vh;
+  min-height: 50vh; /* <-- fix */
   background: transparent;
   border-radius: 16px;
+  position: relative;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, #cfd8dc, #90a4ae);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.3);
 }
 
 .icon-container {

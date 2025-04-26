@@ -206,7 +206,7 @@ const setActiveItem = (item) => {
   min-height: 50vh;
   background: transparent;
   border-radius: 16px;
-  position: relative; /* <-- ADD THIS to your existing .sidebar */
+  position: relative;
 }
 
 .sidebar::after {
