@@ -15,6 +15,7 @@ import LicayanBoardingHouseView from '@/views/auth/LicayanBoardingHouseView.vue'
 import MagduraBoardingHouseView from '@/views/auth/MagduraBoardingHouseView.vue'
 import RatingsView from '@/views/auth/RatingsView.vue'
 import AboutAppView from '@/views/auth/AboutAppView.vue'
+import AccountSettingView from '@/views/auth/AccountSettingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,13 +55,11 @@ const router = createRouter({
       name: 'ratings',
       component: RatingsView,
     },
-
     {
       path: '/about',
       name: 'about',
       component: AboutAppView,
     },
-
     {
       path: '/amplayoboardinghousedetails',
       name: 'amplayoboardinghousedetails',
@@ -101,11 +100,10 @@ const router = createRouter({
       name: 'tgbgboardinghousedetails',
       component: TgbgBoardingHouseView,
     },
-
     {
-      path: '/',
-      name: 'home',
-      component: LandingPageView,
+      path: '/accountsetting',
+      name: 'accountsetting',
+      component: AccountSettingView,
     },
   ],
 })

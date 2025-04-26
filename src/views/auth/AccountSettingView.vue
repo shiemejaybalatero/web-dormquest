@@ -2,11 +2,6 @@
 import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
-const name = ref('SHIEME JAY G. BALATERO')
-const age = ref('30')
-const email = ref('shiemejay@gmail.com')
-const status = ref('Student')
-
 const activeItem = ref('')
 
 const setActiveItem = (item) => {
@@ -90,39 +85,7 @@ const setActiveItem = (item) => {
             </v-list>
           </v-col>
 
-          <v-col cols="12" md="9">
-            <v-container class="profile-container" fluid>
-              <v-row align="start" justify="space-between" class="profile-top" no-gutters>
-                <v-col cols="12" md="7" class="d-flex flex-column justify-start">
-                  <div>
-                    <p class="section-title">Personal Information</p>
-                    <br />
-
-                    <h1 class="name">{{ name }}</h1>
-                    <br />
-
-                    <p class="bio">
-                      I am Shieme Jay, a student of Caraga State University. I'm currently looking
-                      for dormitories near the CSU Main Campus and Ampayon area to continue my
-                      academic journey comfortably.
-                    </p>
-
-                    <div class="info-section">
-                      <p><strong>Age:</strong> {{ age }}</p>
-                      <p><strong>Email:</strong> {{ email }}</p>
-                      <p><strong>Status:</strong> {{ status }}</p>
-                    </div>
-                  </div>
-                </v-col>
-
-                <v-col cols="12" md="5" class="d-flex align-start justify-center">
-                  <div class="image-wrapper">
-                    <img src="/user1.png" alt="Profile Image" class="profile-img" />
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-col>
+          <!--profile-->
         </v-row>
       </v-container>
     </template>
