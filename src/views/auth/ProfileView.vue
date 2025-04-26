@@ -19,7 +19,6 @@ const setActiveItem = (item) => {
     <template #content>
       <v-container class="main-container" fluid>
         <v-row no-gutters>
-          <!-- Sidebar -->
           <v-col cols="12" md="3" class="sidebar-col">
             <v-list dense nav class="sidebar pa-4">
               <router-link to="/profile" class="text-decoration-none" style="color: inherit">
@@ -31,6 +30,8 @@ const setActiveItem = (item) => {
                   <div class="d-flex align-center pl-2">
                     <v-icon class="mr-2 icon">mdi-account</v-icon>
                     <span class="icon-name">Personal Information</span>
+                    <br />
+                    <br />
                   </div>
                 </v-list-item>
               </router-link>
@@ -61,6 +62,19 @@ const setActiveItem = (item) => {
                 </v-list-item>
               </router-link>
 
+              <router-link to="/settings" class="text-decoration-none" style="color: inherit">
+                <v-list-item
+                  class="icon-container"
+                  :class="{ 'active-icon': activeItem === '/settings' }"
+                  @click="setActiveItem('/settings')"
+                >
+                  <div class="d-flex align-center pl-2">
+                    <v-icon class="mr-2 icon">mdi-cog</v-icon>
+                    <span class="icon-name">Account Settings</span>
+                  </div>
+                </v-list-item>
+              </router-link>
+
               <router-link to="/" class="text-decoration-none" style="color: inherit">
                 <v-list-item
                   class="icon-container"
@@ -76,15 +90,16 @@ const setActiveItem = (item) => {
             </v-list>
           </v-col>
 
-          <!-- Profile Section -->
           <v-col cols="12" md="9">
             <v-container class="profile-container" fluid>
               <v-row align="start" justify="space-between" class="profile-top" no-gutters>
-                <!-- Left Personal Info -->
                 <v-col cols="12" md="7" class="d-flex flex-column justify-start">
                   <div>
                     <p class="section-title">Personal Information</p>
+                    <br />
+
                     <h1 class="name">{{ name }}</h1>
+                    <br />
 
                     <p class="bio">
                       I am Shieme Jay, a student of Caraga State University. I'm currently looking
@@ -100,7 +115,6 @@ const setActiveItem = (item) => {
                   </div>
                 </v-col>
 
-                <!-- Right Profile Image -->
                 <v-col cols="12" md="5" class="d-flex align-start justify-center">
                   <div class="image-wrapper">
                     <img src="/user1.png" alt="Profile Image" class="profile-img" />
@@ -116,7 +130,6 @@ const setActiveItem = (item) => {
 </template>
 
 <style scoped>
-/* Lock layout */
 html,
 body {
   overflow-x: hidden;
@@ -127,7 +140,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Sidebar */
 .sidebar-col {
   position: sticky;
   top: 80px;
@@ -212,7 +224,6 @@ body {
   border-color: #ffba00;
 }
 
-/* Profile Section */
 .profile-container {
   overflow-x: hidden;
   max-width: 100%;
@@ -224,7 +235,7 @@ body {
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   color: #888;
   margin-bottom: 10px;
@@ -233,7 +244,7 @@ body {
 }
 
 .name {
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 12px;
@@ -264,20 +275,17 @@ body {
 }
 
 .image-wrapper {
-  margin-top: -50px;
+  margin-top: -75px;
   text-align: center;
 }
 
-/* RESPONSIVE */
 @media (max-width: 1264px) {
   .profile-img {
     height: 400px;
   }
-
   .name {
     font-size: 36px;
   }
-
   .bio,
   .info-section {
     font-size: 16px;
@@ -289,23 +297,19 @@ body {
     position: relative;
     top: 0;
   }
-
   .sidebar {
     flex-direction: column;
     align-items: center;
     padding: 10px 0;
   }
-
   .sidebar::after {
     display: none;
   }
-
   .icon-container {
     width: 100%;
     justify-content: center;
     margin-bottom: 10px;
   }
-
   .icon-name {
     opacity: 1;
     color: #0c3b2e;
@@ -313,27 +317,22 @@ body {
     font-weight: 600;
     font-size: 14px;
   }
-
   .icon {
     font-size: 22px;
     padding: 16px;
   }
-
   .profile-top {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-
   .name {
     font-size: 32px;
   }
-
   .profile-img {
     height: 300px;
     margin-top: 20px;
   }
-
   .image-wrapper {
     margin-top: 0;
   }
@@ -344,24 +343,19 @@ body {
     font-size: 20px;
     padding: 12px;
   }
-
   .icon-name {
     font-size: 12px;
   }
-
   .profile-img {
     height: 250px;
   }
-
   .name {
     font-size: 28px;
   }
-
   .bio,
   .info-section {
     font-size: 14px;
   }
-
   .info-section p {
     margin: 4px 0;
   }
