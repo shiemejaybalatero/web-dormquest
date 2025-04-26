@@ -5,29 +5,46 @@ import { supabase, formActionDefault } from '@/utils/supabase'
 import { useRoute, useRouter } from 'vue-router'
 import { calculateAge } from '@/utils/helper'
 
+// Router
 const route = useRoute()
 const router = useRouter()
-const formAction = ref({ ...formActionDefault })
-const profileImage = ref(null)
-const fileInput = ref(null)
-const isUploading = ref(false)
-const uploadError = ref('')
 
-// User data to display
+// Reactive States - User Data & Form
 const userData = ref({
   email: '',
-  fullname: '',
+  name: '',
   age: '',
   gender: '',
-  status: 'Active', // Default status
   birthday: '',
   avatar_url: '',
 })
 
+const formAction = ref({ ...formActionDefault })
+const isUploading = ref(false)
+const isSaving = ref(false)
+const isEditing = ref(false)
+
+const uploadError = ref('')
+const editError = ref('')
+
+// Reactive States - Files & Inputs
+const profileImage = ref(null)
+const fileInput = ref(null)
+const avatarFile = ref(null)
+
+// Reactive States - Edit Form
+const editForm = ref({
+  fullname: '',
+  birthday: '',
+  gender: '',
+})
+
+// Trigger file input click
 const triggerFileInput = () => {
   fileInput.value.click()
 }
 
+// Handle avatar file upload
 const handleFileUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
@@ -36,55 +53,41 @@ const handleFileUpload = async (event) => {
   uploadError.value = ''
 
   try {
-    // Create a unique file name
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
-    const filePath = `avatars/${fileName}`
+    const fileName = `avatar_${Date.now()}.${fileExt}`
+    const filePath = `public/${fileName}`
 
-    // Upload the file to Supabase Storage
-    const { data, error } = await supabase.storage.from('profiles').upload(filePath, file)
+    const { error: uploadError } = await supabase.storage.from('dormquest').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
 
-    if (error) throw error
+    if (uploadError) throw uploadError
 
-    // Get the public URL
-    const { data: urlData } = supabase.storage.from('profiles').getPublicUrl(filePath)
+    const { data: urlData } = supabase.storage.from('dormquest').getPublicUrl(filePath)
 
-    if (urlData) {
-      // Update user metadata with avatar URL
-      const { data: userData, error: updateError } = await supabase.auth.updateUser({
+    if (urlData?.publicUrl) {
+      const { error: updateError } = await supabase.auth.updateUser({
         data: { avatar_url: urlData.publicUrl },
       })
-
       if (updateError) throw updateError
 
-      // Update local state
       profileImage.value = urlData.publicUrl
-
-      // Refresh user data
       getUser()
     }
   } catch (error) {
-    console.error('Error uploading image:', error)
     uploadError.value = error.message || 'Failed to upload image'
   } finally {
     isUploading.value = false
   }
 }
 
-const onLogout = async () => {
-  formAction.value = { ...formActionDefault, formProcess: true }
-
-  const { error } = await supabase.auth.signOut()
-
-  if (error) {
-    console.error('Error during logout:', error)
-    return
-  }
-
-  formAction.value.formProcess = false
-  router.replace('/')
+// Handle file input for editing
+const handleEditFileUpload = (event) => {
+  avatarFile.value = event.target.files[0]
 }
 
+// Fetch current user data
 const getUser = async () => {
   formAction.value.formProcess = true
 
@@ -102,17 +105,11 @@ const getUser = async () => {
     userData.value.email = metadata.email || data?.user?.email || ''
     userData.value.birthday = metadata.birthday || ''
 
-    // Calculate age if birthday exists
-    if (metadata.birthday) {
-      userData.value.age = calculateAge(metadata.birthday)
-    } else {
-      userData.value.age = metadata.age || ''
-    }
+    userData.value.age = metadata.birthday ? calculateAge(metadata.birthday) : metadata.age || ''
 
     userData.value.gender = metadata.gender || ''
     userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
 
-    // Set avatar URL if exists
     if (metadata.avatar_url) {
       userData.value.avatar_url = metadata.avatar_url
       profileImage.value = metadata.avatar_url
@@ -122,7 +119,80 @@ const getUser = async () => {
   formAction.value.formProcess = false
 }
 
-// Call getUser when component is mounted
+// Start edit mode
+const startEditing = () => {
+  isEditing.value = true
+  editForm.value.fullname = userData.value.fullname
+  editForm.value.birthday = userData.value.birthday
+  editForm.value.gender = userData.value.gender
+}
+
+// Save profile changes
+const saveChanges = async () => {
+  isSaving.value = true
+  editError.value = ''
+
+  try {
+    let avatarUrl = profileImage.value
+
+    if (avatarFile.value) {
+      const fileExt = avatarFile.value.name.split('.').pop()
+      const fileName = `avatar_${Date.now()}.${fileExt}`
+      const filePath = `public/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('dormquest')
+        .upload(filePath, avatarFile.value, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from('dormquest').getPublicUrl(filePath)
+      if (urlData?.publicUrl) avatarUrl = urlData.publicUrl
+    }
+
+    const nameParts = editForm.value.fullname.split(' ')
+    const firstname = nameParts[0] || ''
+    const lastname = nameParts.slice(1).join(' ') || ''
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        firstname,
+        lastname,
+        birthday: editForm.value.birthday,
+        gender: editForm.value.gender,
+        avatar_url: avatarUrl,
+      },
+    })
+
+    if (updateError) throw updateError
+
+    profileImage.value = avatarUrl
+    isEditing.value = false
+    getUser()
+  } catch (error) {
+    editError.value = error.message || 'Failed to update profile'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// Logout user
+const onLogout = async () => {
+  formAction.value.formProcess = true
+
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    console.error('Error during logout:', error)
+  }
+
+  formAction.value.formProcess = false
+  router.replace('/')
+}
+
 onMounted(() => {
   getUser()
 })
@@ -183,28 +253,15 @@ onMounted(() => {
                 <v-row>
                   <!-- Avatar with Upload -->
                   <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
-                    <v-avatar size="120">
-                      <v-img :src="profileImage || 'https://via.placeholder.com/150'" />
+                    <v-avatar class="mt-5" size="200">
+                      <v-img
+                        :src="
+                          profileImage ||
+                          'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
+                        "
+                        cover
+                      />
                     </v-avatar>
-                    <v-btn
-                      color="#0c3b2e"
-                      class="mt-3 text-white"
-                      @click="triggerFileInput"
-                      rounded
-                      :loading="isUploading"
-                      :disabled="isUploading"
-                    >
-                      <v-icon left>mdi-camera</v-icon>
-                      Upload Photo
-                    </v-btn>
-                    <input
-                      ref="fileInput"
-                      type="file"
-                      style="display: none"
-                      accept="image/*"
-                      @change="handleFileUpload"
-                    />
-                    <div v-if="uploadError" class="error-text mt-2">{{ uploadError }}</div>
                   </v-col>
 
                   <!-- Display Fields -->
@@ -237,6 +294,36 @@ onMounted(() => {
                     </v-row>
                   </v-col>
                 </v-row>
+                <div class="d-flex justify-end mt-4">
+                  <v-btn color="#0c3b2e" variant="outlined" @click="startEditing">
+                    Edit Profile
+                  </v-btn>
+                </div>
+
+                <v-expand-transition>
+                  <div v-if="isEditing" class="mt-4 w-100 text-end">
+                    <v-card flat class="pa-4">
+                      <v-text-field v-model="editForm.fullname" label="Full Name" />
+                      <v-text-field v-model="editForm.birthday" label="Birthday" type="date" />
+                      <v-select
+                        v-model="editForm.gender"
+                        :items="['Male', 'Female', 'Rather not to say']"
+                        label="Gender"
+                      />
+                      <v-file-input
+                        label="Upload New Avatar"
+                        accept="image/*"
+                        @change="handleEditFileUpload"
+                      />
+
+                      <v-btn class="mt-3" color="success" :loading="isSaving" @click="saveChanges">
+                        Save Changes
+                      </v-btn>
+
+                      <div v-if="editError" class="error-text mt-2">{{ editError }}</div>
+                    </v-card>
+                  </div>
+                </v-expand-transition>
               </v-card>
             </div>
           </div>
