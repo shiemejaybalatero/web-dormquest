@@ -1,15 +1,20 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import L from 'leaflet'
 import AppLayout from '@/components/layout/AppLayout.vue'
+
+// Get the router instance
+const router = useRouter()
 
 // State variables
 const map = ref(null)
 const currentMarker = ref(null)
+const currentPath = ref(null)
 const currentZoom = ref(13)
-const defaultCoords = [8.9557, 125.5969] // Initial map center
-
-const referencePoint = [8.9555, 125.597] // Example: downtown or campus center
+const defaultCoords = [8.9557, 125.5969]
+const referencePoint = [8.9555, 125.597]
+const referenceMarker = ref(null)
 
 const boardingHouses = [
   {
@@ -17,19 +22,23 @@ const boardingHouses = [
     name: 'Blue Heaven Dormitory',
     coords: [8.9536896, 125.6003645],
     price: '₱3,500/month',
+    route: { name: 'blueboardinghousedetails' },
+  },
+  {
+    id: 2,
+    name: 'Green Oasis Boarding',
+    coords: [8.9525, 125.598],
+    price: '₱4,000/month',
+    route: { name: 'greenboardinghousedetails' },
   },
 ]
 
-// Function to calculate distance between two coordinates in meters
+// Calculate distance between two coordinates in meters
 const calculateDistance = (coords1, coords2) => {
-  // Create Leaflet latLng objects
   const point1 = L.latLng(coords1[0], coords1[1])
   const point2 = L.latLng(coords2[0], coords2[1])
-
-  // Calculate distance in meters
   const distanceInMeters = point1.distanceTo(point2)
 
-  // Convert to kilometers if over 1000m
   if (distanceInMeters >= 1000) {
     return `${(distanceInMeters / 1000).toFixed(2)} km`
   } else {
@@ -41,14 +50,18 @@ const calculateDistance = (coords1, coords2) => {
 onMounted(async () => {
   await nextTick()
 
-  map.value = L.map('map').setView(defaultCoords, currentZoom.value)
+  map.value = L.map('map', {
+    zoomAnimation: true,
+    fadeAnimation: true,
+    markerZoomAnimation: true,
+  }).setView(defaultCoords, currentZoom.value)
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
   }).addTo(map.value)
 
-  // Add marker for reference point (using a different icon to distinguish it)
-  L.marker(referencePoint, {
+  // Add marker for reference point
+  referenceMarker.value = L.marker(referencePoint, {
     icon: L.divIcon({
       html: `
         <div style="
@@ -73,9 +86,47 @@ onMounted(async () => {
   })
     .addTo(map.value)
     .bindPopup('Reference Point (Distance Measurement)')
-    .openPopup()
 
   addBoardingHouseMarkers()
+
+  // Enable clicking on the map to place a temporary marker
+  map.value.on('click', (e) => {
+    const clickedCoords = [e.latlng.lat, e.latlng.lng]
+
+    if (currentMarker.value) {
+      map.value.removeLayer(currentMarker.value)
+    }
+
+    map.value.closePopup()
+
+    const popupContent = `
+      <div>
+        <p><strong>Selected Location</strong></p>
+        <p><strong>Distance from reference point:</strong> ${calculateDistance(referencePoint, clickedCoords)}</p>
+        <button id="drawPathBtn" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">Draw Path to Reference</button>
+      </div>
+    `
+
+    currentMarker.value = L.marker(clickedCoords).addTo(map.value).bindPopup(popupContent)
+
+    setTimeout(() => {
+      if (currentMarker.value) {
+        currentMarker.value.openPopup()
+
+        const button = document.getElementById('drawPathBtn')
+        if (button) {
+          button.addEventListener('click', () => {
+            drawPath(clickedCoords, referencePoint)
+          })
+        }
+      }
+    }, 10)
+  })
+
+  // Handle zoom events carefully
+  map.value.on('zoomstart', () => {
+    map.value.closePopup()
+  })
 
   map.value.on('zoomend', () => {
     currentZoom.value = map.value.getZoom()
@@ -106,17 +157,86 @@ const addBoardingHouseMarkers = () => {
   })
 
   boardingHouses.forEach((house) => {
-    // Calculate distance from reference point to boarding house
     const distance = calculateDistance(referencePoint, house.coords)
 
-    L.marker(house.coords, { icon: boardingHouseIcon }).addTo(map.value).bindPopup(`
-        <div style="width: 200px">
-          <h3 style="margin: 4px 0; font-weight: bold">${house.name}</h3>
-          <p style="margin: 4px 0"><strong>Price:</strong> ${house.price}</p>
-          <p style="margin: 4px 0"><strong>Distance from reference point:</strong> ${distance}</p>
+    const popupContent = `
+      <div style="width: 200px">
+        <h3 style="margin: 4px 0; font-weight: bold">${house.name}</h3>
+        <p style="margin: 4px 0"><strong>Price:</strong> ${house.price}</p>
+        <p style="margin: 4px 0"><strong>Distance from reference point:</strong> ${distance}</p>
+        <div style="display: flex; gap: 5px; flex-direction: column; margin-top: 10px;">
+          <button id="drawPathBtn-${house.id}" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">Draw Path</button>
+          <button id="viewDetailsBtn-${house.id}" style="background-color: #2563eb; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">View Details</button>
         </div>
-      `)
+      </div>
+    `
+
+    const marker = L.marker(house.coords, { icon: boardingHouseIcon })
+      .addTo(map.value)
+      .bindPopup(popupContent, { autoPan: true })
+
+    // Add click handler to the marker itself
+    marker.on('click', () => {
+      // Close all other popups first
+      map.value.closePopup()
+
+      // Open this popup
+      marker.openPopup()
+
+      // Add event listeners with a delay to ensure DOM is ready
+      setTimeout(() => {
+        // Path button event listener
+        const pathButton = document.getElementById(`drawPathBtn-${house.id}`)
+        if (pathButton) {
+          // Remove existing event listeners to prevent duplicates
+          const newPathButton = pathButton.cloneNode(true)
+          pathButton.parentNode.replaceChild(newPathButton, pathButton)
+
+          newPathButton.addEventListener('click', () => {
+            drawPath(house.coords, referencePoint)
+          })
+        }
+
+        // Details button event listener
+        const detailsButton = document.getElementById(`viewDetailsBtn-${house.id}`)
+        if (detailsButton) {
+          // Remove existing event listeners to prevent duplicates
+          const newDetailsButton = detailsButton.cloneNode(true)
+          detailsButton.parentNode.replaceChild(newDetailsButton, detailsButton)
+
+          newDetailsButton.addEventListener('click', () => {
+            // Navigate to the boarding house details page
+            router.push(house.route)
+          })
+        }
+      }, 10)
+    })
   })
+}
+
+// Draw a path between two coordinates
+const drawPath = (fromCoords, toCoords) => {
+  // Remove existing path if there is one
+  if (currentPath.value) {
+    map.value.removeLayer(currentPath.value)
+  }
+
+  // Create a line between the two points
+  currentPath.value = L.polyline([fromCoords, toCoords], {
+    color: '#ff6b6b',
+    weight: 4,
+    opacity: 0.8,
+    dashArray: '10, 10',
+    lineJoin: 'round',
+  }).addTo(map.value)
+
+  // Fit the map bounds to show the entire path
+  map.value.fitBounds(currentPath.value.getBounds(), {
+    padding: [50, 50],
+    maxZoom: 16,
+  })
+
+  return currentPath.value
 }
 
 const getUserLocation = () => {
@@ -129,32 +249,51 @@ const getUserLocation = () => {
     (position) => {
       const userCoords = [position.coords.latitude, position.coords.longitude]
 
+      map.value.closePopup()
       map.value.setView(userCoords, currentZoom.value)
 
       if (currentMarker.value) {
         map.value.removeLayer(currentMarker.value)
       }
 
-      // Calculate user's distance from reference point
       const distanceFromReference = calculateDistance(referencePoint, userCoords)
 
-      currentMarker.value = L.marker(userCoords)
-        .addTo(map.value)
-        .bindPopup(
-          `
-          <div>
-            <p><strong>You are here!</strong></p>
-            <p><strong>Distance from reference point:</strong> ${distanceFromReference}</p>
-          </div>
-        `,
-        )
-        .openPopup()
+      const popupContent = `
+        <div>
+          <p><strong>You are here!</strong></p>
+          <p><strong>Distance from reference point:</strong> ${distanceFromReference}</p>
+          <button id="userLocationPathBtn" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px; margin-top: 5px;">Draw Path to Reference</button>
+        </div>
+      `
+
+      currentMarker.value = L.marker(userCoords).addTo(map.value).bindPopup(popupContent)
+
+      setTimeout(() => {
+        if (currentMarker.value) {
+          currentMarker.value.openPopup()
+
+          const pathButton = document.getElementById('userLocationPathBtn')
+          if (pathButton) {
+            pathButton.addEventListener('click', () => {
+              drawPath(userCoords, referencePoint)
+            })
+          }
+        }
+      }, 100)
     },
     (error) => {
       console.error('Geolocation error:', error)
       alert(`Error getting location: ${error.message}`)
     },
   )
+}
+
+// Clear the path
+const clearPath = () => {
+  if (currentPath.value) {
+    map.value.removeLayer(currentPath.value)
+    currentPath.value = null
+  }
 }
 </script>
 
@@ -163,7 +302,10 @@ const getUserLocation = () => {
     <template #content>
       <div class="full-map-container">
         <div id="map" class="full-map"></div>
-        <button @click="getUserLocation" class="location-button">Get Your Location</button>
+        <div class="button-container">
+          <button @click="getUserLocation" class="map-button">Get Your Location</button>
+          <button @click="clearPath" class="map-button clear-button">Clear Path</button>
+        </div>
       </div>
     </template>
   </AppLayout>
@@ -184,11 +326,17 @@ const getUserLocation = () => {
   height: 100%;
 }
 
-.location-button {
+.button-container {
   position: absolute;
   bottom: 40px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-button {
   background-color: #0c3b2e;
   color: white;
   padding: 12px 20px;
@@ -196,9 +344,19 @@ const getUserLocation = () => {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
+  border: none;
+  border-radius: 4px;
 }
 
-.location-button:hover {
+.map-button:hover {
   background-color: #ffba00;
+}
+
+.clear-button {
+  background-color: #d64545;
+}
+
+.clear-button:hover {
+  background-color: #f05252;
 }
 </style>
