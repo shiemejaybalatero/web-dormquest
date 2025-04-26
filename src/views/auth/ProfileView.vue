@@ -2,16 +2,13 @@
 import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
-// Profile Data
 const name = ref('SHIEME JAY G. BALATERO')
 const age = ref('30')
 const email = ref('shiemejay@gmail.com')
 const status = ref('Student')
 
-// Sidebar active item
 const activeItem = ref('')
 
-// Methods
 const setActiveItem = (item) => {
   activeItem.value = item
 }
@@ -194,13 +191,11 @@ const setActiveItem = (item) => {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Active sidebar highlight */
 .active-icon {
   background-color: rgba(255, 186, 0, 0.2);
   border-color: #ffba00;
 }
 
-/* Profile Layout */
 .profile-container {
   overflow-x: hidden;
 }
@@ -227,14 +222,12 @@ const setActiveItem = (item) => {
   color: #1b1b1b;
 }
 
-/* BIO Text */
 .bio {
   font-size: 18px;
   margin-bottom: 20px;
   color: #555;
 }
 
-/* Info Section */
 .info-section {
   font-size: 18px;
   color: #333;
@@ -244,7 +237,6 @@ const setActiveItem = (item) => {
   margin: 6px 0;
 }
 
-/* Profile Image */
 .profile-img {
   height: 560px;
   width: auto;
