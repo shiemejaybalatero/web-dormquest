@@ -97,7 +97,7 @@ const route = useRoute()
 
 <style scoped>
 .sidebar {
-  min-height: 50vh; /* <-- fix */
+  min-height: 50vh;
   background: transparent;
   border-radius: 16px;
   position: relative;
