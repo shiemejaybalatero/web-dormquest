@@ -10,6 +10,7 @@ import {
 import dayjs from 'dayjs'
 import AlertNotification from '@/components/common/AlertNotification.vue'
 import { useRouter } from 'vue-router'
+import { calculateAge } from '@/utils/helper'
 
 const router = useRouter()
 const showPassword = ref(false)
@@ -34,6 +35,9 @@ const onSubmit = async () => {
   }
   formAction.value.formProcess = true
 
+  // Calculate age from birthday
+  const age = formData.value.birthday ? calculateAge(formData.value.birthday) : null
+
   const { data, error } = await supabase.auth.signUp({
     email: formData.value.email,
     password: formData.value.password,
@@ -43,6 +47,7 @@ const onSubmit = async () => {
         lastname: formData.value.lastname,
         birthday: formData.value.birthday,
         gender: formData.value.gender,
+        age: age, // Add the calculated age here
       },
     },
   })

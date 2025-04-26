@@ -1,3 +1,21 @@
+export function calculateAge(birthdate) {
+  const birthDate = new Date(birthdate)
+  const currentDate = new Date()
+
+  let age = currentDate.getFullYear() - birthDate.getFullYear()
+
+  const currentMonth = currentDate.getMonth()
+  const birthMonth = birthDate.getMonth()
+  const currentDay = currentDate.getDate()
+  const birthDay = birthDate.getDate()
+
+  if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+    age--
+  }
+
+  return age
+}
+
 // 👉 Avatar Text Initials
 export const getAvatarText = (name) => {
   const nameParts = name.trim().split(' ').filter(Boolean)
