@@ -139,7 +139,8 @@ onBeforeUnmount(() => {
                     icon
                     class="mx-1"
                     :class="{
-                      'green-btn': route.path === '/dashboard' || route.path === '/dorm-details',
+                      'green-btn':
+                        route.path === '/dashboard' || route.path.startsWith('/dorm-details'),
                     }"
                   >
                     <v-icon>mdi-home-outline</v-icon>
@@ -238,7 +239,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-bg {
-  background-image: url('/public/bg-admin.jpg');
+  background-image: url('/bg-admin.jpg');
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;

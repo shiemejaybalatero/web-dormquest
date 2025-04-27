@@ -12,8 +12,6 @@ import MapView from '@/views/system/MapView.vue'
 import ProfileView from '@/views/system/ProfileView.vue'
 import RatingsView from '@/views/system/RatingsView.vue'
 import AboutAppView from '@/views/system/AboutAppView.vue'
-// Boarding House Details Views
-import AmplayoBoardingHouseView from '@/views/system/AmplayoBoardingHouseView.vue'
 import DormDetailsViews from '@/views/system/DormDetailsViews.vue'
 
 // Error Views
