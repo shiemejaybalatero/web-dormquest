@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
 const route = useRoute()
+const router = useRouter()
 const dormId = route.params.id
 const parsedDormId = parseInt(dormId)
 
@@ -12,10 +13,10 @@ const dormDetails = ref(null)
 const loading = ref(true)
 const errorMessage = ref('')
 
-const showMessenger = ref(false)
+const showFacebook = ref(false)
 const showContact = ref(false)
 
-// Image map - Fixed path casing from 'Ampalayo' to match actual folder name 'Amplayo'
+// Image map for gallery images
 const dormImageMap = {
   1: {
     main: '/Amplayo/amplayomain.png',
@@ -35,6 +36,15 @@ const dormImageMap = {
     gallery: ['/Blissful/blissful.jpg', '/Blissful/blissful1.jpg', '/Blissful/blissful2.jpg'],
   },
   4: {
+    main: '/Licayan/licayanmain.png',
+    gallery: [
+      '/Licayan/licayan.png',
+      '/Licayan/licayan1.png',
+      '/Licayan/licayan2.jpg',
+      '/Licayan/licayan3.jpg',
+    ],
+  },
+  5: {
     main: '/Chelsea/chelseamain.jpg',
     gallery: [
       '/Chelsea/chelsea.jpg',
@@ -43,18 +53,9 @@ const dormImageMap = {
       '/Chelsea/chelsea3.jpg',
     ],
   },
-  5: {
-    main: '/Karmo/karmomain.jpg',
-    gallery: ['/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
-  },
   6: {
-    main: '/Licayan/licayanmain.png',
-    gallery: [
-      '/Licayan/licayan.png',
-      '/Licayan/licayan1.png',
-      '/Licayan/licayan2.jpg',
-      '/Licayan/licayan3.jpg',
-    ],
+    main: '/TGBG/tgbgmain.png',
+    gallery: ['/TGBG/tgbg.png', '/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png'],
   },
   7: {
     main: '/Magdura/magduramain.png',
@@ -66,10 +67,9 @@ const dormImageMap = {
     ],
   },
   8: {
-    main: '/TGBG/tgbgmain.png',
-    gallery: ['/TGBG/tgbg.png', '/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png'],
+    main: '/Karmo/karmomain.jpg',
+    gallery: ['/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
   },
-  // Add more dorm image mappings here...
 }
 
 const defaultMainImage = '/Default/default.jpg'
@@ -77,6 +77,7 @@ const defaultGallery = ['/Default/default.jpg']
 
 const mainImage = computed(() => {
   if (!dormDetails.value) return defaultMainImage
+  // Fallback to image map if Supabase image is not available
   return dormImageMap[dormDetails.value.id]?.main || defaultMainImage
 })
 
@@ -86,14 +87,14 @@ const galleryImages = computed(() => {
 })
 
 const toggleMessenger = () => {
-  showMessenger.value = !showMessenger.value
+  showFacebook.value = !showFacebook.value
 }
 
 const toggleContact = () => {
   showContact.value = !showContact.value
 }
 
-// Fetch details
+// Fetch dormitory details from Supabase
 const fetchDormDetails = async () => {
   loading.value = true
   errorMessage.value = ''
@@ -103,6 +104,8 @@ const fetchDormDetails = async () => {
       errorMessage.value = 'Invalid dormitory ID'
       return
     }
+
+    console.log('Fetching dormitory with ID:', parsedDormId)
 
     const { data, error } = await supabase
       .from('dormitories')
@@ -121,14 +124,44 @@ const fetchDormDetails = async () => {
       return
     }
 
-    dormDetails.value = data
-    console.log('Fetched dorm details:', data)
+    // Set dormitory details using your exact database schema
+    dormDetails.value = {
+      id: data.id,
+      created_at: data.created_at,
+      name: data.name || 'No name',
+      address: data.address || 'Address not available',
+      contact_number: data.contact_number || 'Not available',
+      price: data.price,
+      number_of_room: data.number_of_room,
+      room_capacity: data.room_capacity,
+      room_type: data.room_type || '',
+      messenger_name: data.messenger_name || 'Not available',
+      amenity: data.amenity || 'Undefinded',
+      availability_status: data.availability_status !== undefined ? data.availability_status : true,
+      distance_to_campus: data.distance_to_campus || 'Undefined',
+      image: data.image,
+      owner: data.owner || 'Not available',
+
+      // Add default rating for UI (not in your schema but used in the UI)
+      rating: '4.5',
+    }
+
+    console.log('Fetched dorm details:', dormDetails.value)
   } catch (err) {
     console.error('Unexpected error:', err)
     errorMessage.value = 'An unexpected error occurred'
   } finally {
     loading.value = false
   }
+}
+
+// Go back to dormitory listing
+const goBack = () => {
+  router.push({ name: 'dashboard' })
+}
+
+const refetchData = () => {
+  fetchDormDetails()
 }
 
 onMounted(() => {
@@ -140,12 +173,37 @@ onMounted(() => {
   <AppLayout>
     <template #content>
       <v-container fluid>
-        <v-row>
+        <!-- Back button -->
+        <v-btn class="mb-4" variant="text" prepend-icon="mdi-arrow-left" @click="goBack">
+          Back to Dashboard
+        </v-btn>
+
+        <!-- Loading state -->
+        <v-row v-if="loading">
+          <v-col class="text-center">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <div class="mt-2">Loading dormitory details...</div>
+          </v-col>
+        </v-row>
+
+        <!-- Error state -->
+        <v-alert v-if="errorMessage" type="error" class="mb-4">
+          {{ errorMessage }}
+          <div class="mt-2">
+            <v-btn @click="refetchData" variant="outlined" size="small">Try Again</v-btn>
+          </div>
+        </v-alert>
+
+        <!-- Dormitory details when loaded -->
+        <v-row v-if="dormDetails && !loading">
           <v-col cols="12" md="6">
             <v-img :src="mainImage" height="350" class="rounded-xl mb-4" cover />
 
-            <h2 class="top font-weight-bold">{{ dormDetails?.name || 'TGBG Boarding House' }}</h2>
-            <p class="down mb-5">5 rooms | 4 beds/room | 3 private baths | Female dorm</p>
+            <h2 class="top font-weight-bold">{{ dormDetails.name }}</h2>
+            <p class="down mb-5">
+              {{ dormDetails.number_of_room }} rooms | {{ dormDetails.room_capacity }} beds/room | 3
+              private baths | Female dorm
+            </p>
             <br />
             <v-row
               class="details-card d-flex align-center justify-space-between pa-3"
@@ -162,20 +220,20 @@ onMounted(() => {
                   style="border-radius: 50%"
                 />
                 <div class="owner-detail ps-4">
-                  <p class="mb-0 font-weight-bold">Antonio Granza</p>
+                  <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
                   <p class="mb-0">Owner</p>
                 </div>
               </div>
 
               <!-- Right: Rating -->
-              <div class="owner-detail d-flex align-center pe-3">
+              <div class="d-flex align-center pe-3">
                 <v-icon color="amber" size="18">mdi-star</v-icon>
-                <span class="ml-1 font-weight-medium">4.93</span>
+                <span class="ml-1 text-body-2">{{ dormDetails.rating }}</span>
               </div>
             </v-row>
 
             <br />
-            <!-- Contact Informations -->
+            <!-- Contact Information -->
             <h4 class="mb-3">Contact Details</h4>
 
             <v-row class="text-center">
@@ -186,12 +244,12 @@ onMounted(() => {
                   @click="toggleMessenger"
                   style="text-transform: none"
                 >
-                  <v-icon class="mr-2">mdi-facebook-messenger</v-icon>
-                  Messenger
+                  <v-icon class="mr-2">mdi-facebook</v-icon>
+                  Facebook
                 </v-btn>
 
                 <v-expand-transition>
-                  <div v-show="showMessenger" class="mt-1">
+                  <div v-show="showFacebook" class="mt-1">
                     <v-btn
                       href="https://m.me/antongranza"
                       target="_blank"
@@ -199,7 +257,7 @@ onMounted(() => {
                       variant="text"
                       class="text-capitalize"
                     >
-                      Anton Granza
+                      {{ dormDetails.messenger_name }}
                     </v-btn>
                   </div>
                 </v-expand-transition>
@@ -218,8 +276,12 @@ onMounted(() => {
 
                 <v-expand-transition>
                   <div v-show="showContact" class="mt-1">
-                    <v-btn href="tel:09514564348" variant="text" class="text-capitalize">
-                      0951 456 4348
+                    <v-btn
+                      :href="`tel:${dormDetails.contact_number}`"
+                      variant="text"
+                      class="text-capitalize"
+                    >
+                      {{ dormDetails.contact_number }}
                     </v-btn>
                   </div>
                 </v-expand-transition>
@@ -230,12 +292,9 @@ onMounted(() => {
             <br />
             <p class="text-body-2 d-flex align-center font-weight-bold">
               <v-icon class="mr-2" color="black">mdi-map-marker-outline</v-icon>
-              {{
-                dormDetails?.address ||
-                'XH6W+5W3, Infront of CSU Main Campus, Butuan City, Agusan Del Norte'
-              }}
+              {{ dormDetails.address }}
             </p>
-            <p class="font-weight-bold mb-4 ps-7">{{ dormDetails?.distance || '120 km' }} away</p>
+            <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
             <hr />
           </v-col>
 
@@ -253,7 +312,7 @@ onMounted(() => {
             <v-row class="details-card ms-5 px-10" no-gutters>
               <v-col cols="12">
                 <div class="price mb-3">
-                  ₱{{ dormDetails?.price || '2,000' }} <span class="text-caption">Monthly</span>
+                  ₱{{ dormDetails.price }} <span class="text-caption">Monthly</span>
                 </div>
                 <br />
                 <hr />
@@ -262,17 +321,13 @@ onMounted(() => {
 
               <!-- Left column -->
               <v-col cols="12" md="5">
-                <p class="my-4">
-                  <strong>Distance:</strong> {{ dormDetails?.distance || '500 meter' }}
-                </p>
+                <p class="my-4"><strong>Distance:</strong> {{ dormDetails.distance_to_campus }}</p>
                 <hr />
-                <p class="my-4">
-                  <strong>Room number:</strong> {{ dormDetails?.room_number || '5' }}
-                </p>
+                <p class="my-4"><strong>Room number:</strong> {{ dormDetails.number_of_room }}</p>
                 <hr />
                 <p class="my-4">
                   <strong>Amenities:</strong>
-                  {{ dormDetails?.amenities || 'Wifi, Laundry, Kitchen' }}
+                  {{ dormDetails.amenity }}
                 </p>
               </v-col>
 
@@ -281,16 +336,13 @@ onMounted(() => {
 
               <!-- Right column -->
               <v-col cols="12" md="5">
-                <p class="my-4">
-                  <strong>Room Capacity:</strong> {{ dormDetails?.capacity || '4' }}
-                </p>
+                <p class="my-4"><strong>Room Capacity:</strong> {{ dormDetails.room_capacity }}</p>
+                <hr />
+                <p class="my-4"><strong>Room Type:</strong> {{ dormDetails.room_type }}</p>
                 <hr />
                 <p class="my-4">
-                  <strong>Room Type:</strong> {{ dormDetails?.room_type || 'Bed Spacer' }}
-                </p>
-                <hr />
-                <p class="my-4">
-                  <strong>Availability:</strong> {{ dormDetails?.availability ? 'Yes' : 'No' }}
+                  <strong>Availability:</strong>
+                  {{ dormDetails.availability_status ? 'Yes' : 'No' }}
                 </p>
               </v-col>
             </v-row>

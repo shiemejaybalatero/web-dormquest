@@ -135,7 +135,13 @@ onBeforeUnmount(() => {
                 </v-btn>
 
                 <router-link to="/dashboard">
-                  <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/dashboard' }">
+                  <v-btn
+                    icon
+                    class="mx-1"
+                    :class="{
+                      'green-btn': route.path === '/dashboard' || route.path === '/dorm-details',
+                    }"
+                  >
                     <v-icon>mdi-home-outline</v-icon>
                   </v-btn>
                 </router-link>

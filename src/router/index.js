@@ -82,12 +82,6 @@ const router = createRouter({
       component: NotFoundView,
     },
     {
-      path: '/amplayoboardinghousedetails',
-      name: 'amplayoboardinghousedetails',
-      component: AmplayoBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
       path: '/dorm-details/:id',
       name: 'DormDetails',
       component: DormDetailsViews,
