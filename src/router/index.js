@@ -93,21 +93,15 @@ const router = createRouter({
     },
   ],
 })
-
 router.beforeEach(async (to) => {
   const loggedIn = await isAuthenticated()
-
-  // Redirect to login or dashboard when accessing home
-  if (to.name === 'home') {
-    return loggedIn ? { name: 'dashboard' } : { name: 'login' }
-  }
 
   // Redirect logged-in users from public pages to dashboard
   if (loggedIn && !to.meta.requiresAuth) {
     return { name: 'dashboard' }
   }
 
-  // Redirect guests from protected pages to home
+  // Redirect guests from protected pages to home (not login)
   if (!loggedIn && to.meta.requiresAuth) {
     return { name: 'home' }
   }
