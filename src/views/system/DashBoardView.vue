@@ -1,161 +1,86 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import { supabase } from '@/utils/supabase'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
-const search = ref('')
-const selectedPriceRange = ref(null)
-const selectedDistanceRange = ref(null)
+const dorms = ref([])
+const errorMessage = ref('')
+const loading = ref(true)
+const router = useRouter()
 
-const priceRanges = [
-  { label: '₱500 - ₱1,000', min: 500, max: 1000 },
-  { label: '₱1,001 - ₱2,000', min: 1001, max: 2000 },
-  { label: '₱3,000 - ₱4,000', min: 3000, max: 4000 },
-  { label: '₱5,000 and up', min: 5000, max: Infinity },
-]
+const fetchDorms = async () => {
+  console.log('Fetching dormitories...')
+  loading.value = true
 
-const distanceRanges = [
-  { label: '0 - 1 km', min: 0, max: 1 },
-  { label: '2 - 5 km', min: 2, max: 5 },
-  { label: '5 km and up', min: 6, max: Infinity },
-]
+  try {
+    const { data, error } = await supabase
+      .from('dormitories')
+      .select('id, name, address, price, image')
+      .order('id', { ascending: true })
 
-const dorms = ref([
-  {
-    name: 'Ampalayo Boarding House',
-    address: '0.5 km away from CSU',
-    availability: '1,500 php/month',
-    image: 'Amplayo/amplayomain.png',
-    route: { name: 'amplayoboardinghousedetails' },
-    rating: 4.3,
-  },
-  {
-    name: 'Blue Heavens Dorm',
-    address: '2.5 km away from CSU',
-    availability: '900 php/month',
-    image: 'BlueHeaven/bluemain.png',
-    route: { name: 'blueboardinghousedetails' },
-    rating: 4.1,
-  },
-  {
-    name: 'Blissful Dormitory',
-    address: '5.5 km away from CSU',
-    availability: '1,000 php/month',
-    image: 'Blissful/blissfulmain.png',
-    route: { name: 'blissfulboardinghousedetails' },
-    rating: 3.9,
-  },
-  {
-    name: 'Licayan Boarding House',
-    address: '3.2 km away from CSU',
-    availability: '1,000 php/month',
-    image: 'Licayan/licayanmain.png',
-    route: { name: 'licayanboardinghousedetails' },
-    rating: 4.0,
-  },
-  {
-    name: 'Chelsea Boarding House',
-    address: '3.2 km away from CSU',
-    availability: '1,000 php/month',
-    image: 'Chelsea/chelseamain.jpg',
-    route: { name: 'chelseaboardinghousedetails' },
-    rating: 4.5,
-  },
-  {
-    name: 'TGBG Boarding House',
-    address: '7 km away from CSU',
-    availability: '7,000 php/month',
-    image: '/TGBG/tgbgmain.png',
-    route: { name: 'tgbgboardinghousedetails' },
-    rating: 3.5,
-  },
-  {
-    name: 'Magdura Boarding House',
-    address: '0.9 km away from CSU',
-    availability: '1,500 php/month',
-    image: 'Magdura/magduramain.png',
-    route: { name: 'magduraboardinghousedetails' },
-    rating: 4.6,
-  },
-  {
-    name: 'Karmo Boarding House',
-    address: '6.2 km away from CSU',
-    availability: '1,500 php/month',
-    image: 'Karmo/karmomain.jpg',
-    route: { name: 'karmoboardinghousedetails' },
-    rating: 3.8,
-  },
-])
+    if (error) {
+      console.error('Failed to fetch dormitories:', error)
+      errorMessage.value = `Failed to load dormitories: ${error.message}`
+      return
+    }
 
-const filteringDorms = computed(() => {
-  return dorms.value.filter((d) => {
-    const nameMatch = d.name.toLowerCase().includes(search.value.toLowerCase())
+    dorms.value = data.map((dorm) => ({
+      ...dorm,
+      rating: '4.5',
+      availability: `₱${dorm.price || 'N/A'} per month`,
+    }))
 
-    const cleanAvailability = d.availability.replace(/[^\d]/g, '')
-    const price = parseInt(cleanAvailability)
-    const priceMatch =
-      !selectedPriceRange.value ||
-      (price >= selectedPriceRange.value.min && price <= selectedPriceRange.value.max)
+    console.log('Dormitories set:', dorms.value)
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    errorMessage.value = 'An unexpected error occurred.'
+  } finally {
+    loading.value = false
+  }
+}
 
-    const distance = parseFloat(d.address.match(/[\d.]+/g)?.[0])
-    const distanceMatch =
-      !selectedDistanceRange.value ||
-      (distance >= selectedDistanceRange.value.min && distance <= selectedDistanceRange.value.max)
+// Navigate to dormitory details
+const navigateToDorm = (dorm) => {
+  router.push({ name: 'DormDetails', params: { id: dorm.id } })
+}
 
-    return nameMatch && priceMatch && distanceMatch
-  })
+onMounted(() => {
+  fetchDorms()
 })
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <!-- Filters -->
-      <v-row class="filter-row mt-n2 mb-n5">
-        <v-col cols="6">
-          <v-select
-            v-model="selectedPriceRange"
-            :items="priceRanges"
-            item-title="label"
-            item-value="value"
-            label="Select Price Range"
-            return-object
-            prepend-inner-icon="mdi-currency-php"
-            class="icon-color"
-            clearable
-          />
-        </v-col>
-        <v-col cols="6">
-          <v-select
-            v-model="selectedDistanceRange"
-            :items="distanceRanges"
-            item-title="label"
-            item-value="value"
-            label="Select Distance Range"
-            return-object
-            prepend-inner-icon="mdi-map-marker-distance"
-            class="icon-color"
-            clearable
-          />
-        </v-col>
-      </v-row>
+      <v-container fluid>
+        <!-- Loading -->
+        <v-row v-if="loading">
+          <v-col class="text-center">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <div class="mt-2">Loading dormitories...</div>
+          </v-col>
+        </v-row>
 
-      <v-row>
-        <v-col
-          v-for="(dorm, index) in filteringDorms"
-          :key="index"
-          cols="12"
-          sm="6"
-          md="4"
-          class="pa-4"
-        >
-          <component
-            :is="dorm.route ? 'router-link' : 'div'"
-            :to="dorm.route"
-            style="text-decoration: none"
-          >
-            <v-card class="hover-card dorm-card" elevation="2">
-              <v-img :src="dorm.image" height="200px" cover />
+        <!-- Error -->
+        <v-alert v-if="errorMessage" type="error" class="mt-4">
+          {{ errorMessage }}
+        </v-alert>
 
+        <!-- Dormitories listing -->
+        <v-row v-if="!loading">
+          <v-col v-for="(dorm, index) in dorms" :key="index" cols="12" sm="6" md="4" class="pa-4">
+            <v-card
+              class="hover-card dorm-card"
+              elevation="2"
+              @click="navigateToDorm(dorm)"
+              style="cursor: pointer"
+            >
+              <v-img
+                :src="dorm.image || 'https://via.placeholder.com/400x200?text=No+Image'"
+                height="200px"
+                cover
+              />
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-2">
                   <span class="text-body-1 font-weight-medium dorm-title">{{ dorm.name }}</span>
@@ -170,19 +95,22 @@ const filteringDorms = computed(() => {
                 <div class="text-body-2 text-grey dorm-text">{{ dorm.address }}</div>
               </v-card-text>
             </v-card>
-          </component>
-        </v-col>
-      </v-row>
+          </v-col>
+        </v-row>
+
+        <!-- No data -->
+        <v-row v-if="!loading && dorms.length === 0 && !errorMessage">
+          <v-col class="text-center">
+            <v-alert type="info">No dormitories found.</v-alert>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 </template>
 
 <style scoped>
-.filter-row {
-  display: flex;
-  flex-wrap: nowrap;
-}
-
+/* your hover, card, title, etc. styles stay the same */
 .hover-card {
   transition:
     transform 0.3s ease,
@@ -203,21 +131,16 @@ const filteringDorms = computed(() => {
 }
 
 .dorm-title {
-  font-weight: 600;
   color: #1b4332;
   font-family: 'Nunito', sans-serif;
-  font-size: 20px !important;
 }
 
 .dorm-subtitle {
   color: #4d5106;
-  font-size: 18px !important;
-  font-weight: 500;
   font-family: 'Nunito', sans-serif;
 }
 
 .dorm-text {
   color: #4e4a50 !important;
-  font-size: 13px;
 }
 </style>

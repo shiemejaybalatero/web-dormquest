@@ -1,28 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { isAuthenticated } from '@/utils/supabase'
 
+// Auth Views
 import LoginView from '@/views/auth/LoginView.vue'
 import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
-import DashBoardView from '@/views/auth/system/DashBoardView.vue'
-import MapView from '@/views/auth/system/MapView.vue'
-import ProfileView from '@/views/auth/system/ProfileView.vue'
-import RatingsView from '@/views/auth/system/RatingsView.vue'
-import AboutAppView from '@/views/auth/system/AboutAppView.vue'
+
+// System Views
+import DashBoardView from '@/views/system/DashBoardView.vue'
+import MapView from '@/views/system/MapView.vue'
+import ProfileView from '@/views/system/ProfileView.vue'
+import RatingsView from '@/views/system/RatingsView.vue'
+import AboutAppView from '@/views/system/AboutAppView.vue'
+// Boarding House Details Views
+import AmplayoBoardingHouseView from '@/views/system/AmplayoBoardingHouseView.vue'
+import DormDetailsViews from '@/views/system/DormDetailsViews.vue'
 
 // Error Views
 import ForbiddenView from '@/views/error/ForbiddenView.vue'
 import NotFoundView from '@/views/error/NotFoundView.vue'
-
-// Boarding House Details Views
-import AmplayoBoardingHouseView from '@/views/auth/system/AmplayoBoardingHouseView.vue'
-import BlissfulBoardingHouseView from '@/views/auth/system/BlissfulBoardingHouseView.vue'
-import BlueBoardingHouseView from '@/views/auth/system/BlueBoardingHouseView.vue'
-import ChelseaBoardingHouseView from '@/views/auth/system/ChelseaBoardingHouseView.vue'
-import KarmoBoardingHouseView from '@/views/auth/system/KarmoBoardingHouseView.vue'
-import LicayanBoardingHouseView from '@/views/auth/system/LicayanBoardingHouseView.vue'
-import MagduraBoardingHouseView from '@/views/auth/system/MagduraBoardingHouseView.vue'
-import TgbgBoardingHouseView from '@/views/auth/system/TgbgBoardingHouseView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -92,47 +88,13 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/blissfulboardinghousedetails',
-      name: 'blissfulboardinghousedetails',
-      component: BlissfulBoardingHouseView,
+      path: '/dorm-details/:id',
+      name: 'DormDetails',
+      component: DormDetailsViews,
       meta: { requiresAuth: true },
+      props: true,
     },
-    {
-      path: '/blueboardinghousedetails',
-      name: 'blueboardinghousedetails',
-      component: BlueBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/chelseaboardinghousedetails',
-      name: 'chelseaboardinghousedetails',
-      component: ChelseaBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/karmoboardinghousedetails',
-      name: 'karmoboardinghousedetails',
-      component: KarmoBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/licayanboardinghousedetails',
-      name: 'licayanboardinghousedetails',
-      component: LicayanBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/magduraboardinghousedetails',
-      name: 'magduraboardinghousedetails',
-      component: MagduraBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/tgbgboardinghousedetails',
-      name: 'tgbgboardinghousedetails',
-      component: TgbgBoardingHouseView,
-      meta: { requiresAuth: true },
-    },
+
     {
       path: '/:catchAll(.*)',
       component: NotFoundView,
