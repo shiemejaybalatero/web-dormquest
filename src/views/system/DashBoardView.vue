@@ -11,6 +11,19 @@ const navigateToDorm = (dorm) => {
   router.push({ name: 'dorm-details', params: { id: dorm.id } })
 }
 
+const priceRanges = [
+  { label: '₱500 - ₱1,000', min: 500, max: 1000 },
+  { label: '₱1,001 - ₱2,000', min: 1001, max: 2000 },
+  { label: '₱3,000 - ₱4,000', min: 3000, max: 4000 },
+  { label: '₱5,000 and up', min: 5000, max: Infinity },
+]
+
+const distanceRanges = [
+  { label: '0 - 1 km', min: 0, max: 1 },
+  { label: '2 - 5 km', min: 2, max: 5 },
+  { label: '5 km and up', min: 6, max: Infinity },
+]
+
 onMounted(() => {
   boardingHouseStore.fetchBoardingHouses()
 })
@@ -32,6 +45,37 @@ onMounted(() => {
         <v-alert v-if="boardingHouseStore.errorMessage" type="error" class="mt-4">
           {{ boardingHouseStore.errorMessage }}
         </v-alert>
+
+        <div class="filter-row mt-n2 mb-n5">
+          <v-row>
+            <v-col cols="6">
+              <v-select
+                v-model="selectedPriceRange"
+                :items="priceRanges"
+                item-title="label"
+                item-value="value"
+                label="Select Price Range"
+                return-object
+                prepend-inner-icon="mdi-currency-php"
+                class="icon-color"
+                clearable
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                v-model="selectedDistanceRange"
+                :items="distanceRanges"
+                item-title="label"
+                item-value="value"
+                label="Select Distance Range"
+                return-object
+                prepend-inner-icon="mdi-map-marker-distance"
+                class="icon-color"
+                clearable
+              />
+            </v-col>
+          </v-row>
+        </div>
 
         <!-- Dormitories listing -->
         <v-row v-if="!boardingHouseStore.loading">
