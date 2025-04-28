@@ -239,7 +239,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-bg {
-  background-image: url('/bg-admin.jpg');
+  background-image: #fdfaf6;
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;
