@@ -81,7 +81,7 @@ const router = createRouter({
     },
     {
       path: '/dorm-details/:id',
-      name: 'DormDetails',
+      name: 'dorm-details',
       component: DormDetailsViews,
       meta: { requiresAuth: true },
       props: true,

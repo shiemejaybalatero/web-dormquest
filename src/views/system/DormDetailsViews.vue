@@ -1,22 +1,26 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { supabase } from '@/utils/supabase'
+import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
 const route = useRoute()
 const router = useRouter()
-const dormId = route.params.id
-const parsedDormId = parseInt(dormId)
-
-const dormDetails = ref(null)
-const loading = ref(true)
-const errorMessage = ref('')
-
+const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
 
-// Image map for gallery images
+// Get the store
+const boardingHouseStore = useBoardingHouseStore()
+
+// Use a defensive approach to access store properties
+const selectedBoardingHouse = computed(() => boardingHouseStore.selectedBoardingHouse)
+const loading = computed(() => boardingHouseStore.loading)
+const errorMessage = computed(() => boardingHouseStore.errorMessage)
+
+// Safe computed property for dorm details
+const dormDetails = computed(() => selectedBoardingHouse.value)
+
 const dormImageMap = {
   1: {
     main: '/Amplayo/amplayomain.png',
@@ -75,9 +79,9 @@ const dormImageMap = {
 const defaultMainImage = '/Default/default.jpg'
 const defaultGallery = ['/Default/default.jpg']
 
+// More defensive computed properties with null checks
 const mainImage = computed(() => {
   if (!dormDetails.value) return defaultMainImage
-  // Fallback to image map if Supabase image is not available
   return dormImageMap[dormDetails.value.id]?.main || defaultMainImage
 })
 
@@ -94,79 +98,45 @@ const toggleContact = () => {
   showContact.value = !showContact.value
 }
 
-// Fetch dormitory details from Supabase
-const fetchDormDetails = async () => {
-  loading.value = true
-  errorMessage.value = ''
-
-  try {
-    if (!parsedDormId || isNaN(parsedDormId)) {
-      errorMessage.value = 'Invalid dormitory ID'
-      return
-    }
-
-    console.log('Fetching dormitory with ID:', parsedDormId)
-
-    const { data, error } = await supabase
-      .from('dormitories')
-      .select('*')
-      .eq('id', parsedDormId)
-      .single()
-
-    if (error) {
-      console.error('Error fetching dormitory details:', error)
-      errorMessage.value = `Failed to load dormitory details: ${error.message}`
-      return
-    }
-
-    if (!data) {
-      errorMessage.value = 'Dormitory not found'
-      return
-    }
-
-    // Set dormitory details using your exact database schema
-    dormDetails.value = {
-      id: data.id,
-      created_at: data.created_at,
-      name: data.name || 'No name',
-      address: data.address || 'Address not available',
-      contact_number: data.contact_number || 'Not available',
-      price: data.price,
-      number_of_room: data.number_of_room,
-      room_capacity: data.room_capacity,
-      room_type: data.room_type || '',
-      messenger_name: data.messenger_name || 'Not available',
-      amenity: data.amenity || 'Undefinded',
-      availability_status: data.availability_status !== undefined ? data.availability_status : true,
-      distance_to_campus: data.distance_to_campus || 'Undefined',
-      image: data.image,
-      owner: data.owner || 'Not available',
-
-      // Add default rating for UI (not in your schema but used in the UI)
-      rating: '4.5',
-    }
-
-    console.log('Fetched dorm details:', dormDetails.value)
-  } catch (err) {
-    console.error('Unexpected error:', err)
-    errorMessage.value = 'An unexpected error occurred'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Go back to dormitory listing
 const goBack = () => {
   router.push({ name: 'dashboard' })
 }
 
 const refetchData = () => {
-  fetchDormDetails()
+  if (!isNaN(dormId)) {
+    boardingHouseStore.fetchBoardingHouseById(dormId)
+  }
+}
+
+const viewOnMap = () => {
+  // Navigate to the map page with query parameters to highlight this dorm
+  router.push({
+    name: 'map', // The name of your map route in your router configuration
+    query: {
+      highlight: dormId.value, // Pass the dormitory ID as a query parameter
+      fromDetails: true, // Flag to indicate we're coming from details page
+    },
+  })
 }
 
 onMounted(() => {
-  fetchDormDetails()
+  if (!isNaN(dormId)) {
+    console.log(`Mounting DormDetails with ID: ${dormId}`)
+    refetchData()
+  }
 })
+
+// Watch for route changes
+watch(
+  () => route.params.id,
+  (newId) => {
+    const newDormId = parseInt(newId)
+    if (!isNaN(newDormId)) {
+      console.log(`Route changed to dorm ID: ${newDormId}`)
+      boardingHouseStore.fetchBoardingHouseById(newDormId)
+    }
+  },
+)
 </script>
 
 <template>
@@ -311,8 +281,18 @@ onMounted(() => {
 
             <v-row class="details-card ms-5 px-10" no-gutters>
               <v-col cols="12">
-                <div class="price mb-3">
-                  ₱{{ dormDetails.price }} <span class="text-caption">Monthly</span>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price"
+                    >₱{{ dormDetails.price }} <span class="text-caption">Monthly</span></span
+                  >
+                  <v-btn
+                    variant="outlined"
+                    prepend-icon="mdi-map-marker"
+                    @click="viewOnMap"
+                    class="view-map-btn ms-auto"
+                  >
+                    View in Map
+                  </v-btn>
                 </div>
                 <br />
                 <hr />

@@ -1,347 +1,136 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import L from 'leaflet'
-import { supabase } from '@/utils/supabase'
+import { onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { useMapStore } from '@/stores/mapStore'
 
 const router = useRouter()
+const route = useRoute()
+const mapStore = useMapStore()
 
-const map = ref(null)
-const currentMarker = ref(null)
-const currentPath = ref(null)
-const currentZoom = ref(10)
-const referencePoint = [8.9555, 125.597]
-const referenceMarker = ref(null)
-const boardingHouses = ref([])
-const isLoading = ref(true)
-const error = ref(null)
-const markers = ref([])
-
-// Utility Functions
-const calculateDistance = (coords1, coords2) => {
-  const point1 = L.latLng(coords1[0], coords1[1])
-  const point2 = L.latLng(coords2[0], coords2[1])
-  const distanceInMeters = point1.distanceTo(point2)
-  return distanceInMeters >= 1000
-    ? `${(distanceInMeters / 1000).toFixed(2)} km`
-    : `${Math.round(distanceInMeters)} m`
-}
-
-const isValidCoordinates = (lat, lng) => {
-  return !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
-}
-
-// View Boarding House Details
 const viewBoardingHouseDetails = (houseId) => {
-  const house = boardingHouses.value.find((h) => h.id === houseId)
-  if (!house) return
+  // Convert to number if your IDs are numeric
+  const numericId = parseInt(houseId, 10)
 
-  if (router.hasRoute(house.route.name)) {
-    router.push(house.route)
-  } else {
-    alert(`Detail page for ${house.name} is not available yet.`)
-  }
-}
+  // Log for debugging
+  console.log('Looking for house with ID:', houseId)
+  console.log(
+    'Available house IDs:',
+    mapStore.boardingHouses.map((h) => h.id),
+  )
 
-// Fetch Boarding Houses
-const fetchBoardingHouses = async () => {
-  isLoading.value = true
-  error.value = null
-  clearBoardingHouseMarkers()
+  // First check if the house exists in our store
+  const house = mapStore.boardingHouses.find((h) => h.id === numericId)
 
-  try {
-    const { data, error: supabaseError } = await supabase
-      .from('dormitories')
-      .select(
-        'id, name, latitude, longitude, price, address, contact_number, number_of_room, room_capacity, room_type, amenity, availability_status, distance_to_campus, image, owner',
-      )
-
-    if (supabaseError) throw supabaseError
-
-    boardingHouses.value = (data || []).map((house) => {
-      const lat = parseFloat(house.latitude)
-      const lng = parseFloat(house.longitude)
-      const isValid = isValidCoordinates(lat, lng)
-      const coords = isValid ? [lat, lng] : [...referencePoint]
-
-      return {
-        id: house.id,
-        name: house.name,
-        coords,
-        hasValidCoords: isValid,
-        price: house.price || 'Price not specified',
-        address: house.address || 'Address not specified',
-        contact: house.contact_number,
-        amenities: house.amenity,
-        roomType: house.room_type,
-        roomCapacity: house.room_capacity,
-        availability: house.availability_status,
-        image: house.image,
-        route: { name: 'boarding-house-details', params: { id: house.id } },
-        distance: calculateDistance(referencePoint, coords),
-      }
-    })
-
-    if (map.value) {
-      addBoardingHouseMarkers()
-    }
-  } catch (err) {
-    error.value = `Failed to load boarding houses: ${err.message || 'Unknown error'}`
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Clear Boarding House Markers
-const clearBoardingHouseMarkers = () => {
-  if (markers.value.length && map.value) {
-    markers.value.forEach((marker) => {
-      if (map.value.hasLayer(marker)) map.value.removeLayer(marker)
-    })
-    markers.value = []
-  }
-}
-
-// Get User Location
-const getUserLocation = () => {
-  if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser')
+  if (!house) {
+    console.log('House not found with ID:', houseId)
     return
   }
 
-  isLoading.value = true
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const userCoords = [position.coords.latitude, position.coords.longitude]
+  console.log('Found house:', house.name, 'navigating to details page')
 
-      if (map.value) {
-        if (currentMarker.value) map.value.removeLayer(currentMarker.value)
-
-        const userIcon = L.divIcon({
-          html: `<div style="background-color: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;"><i class="mdi mdi-account-location"></i></div>`,
-          className: '',
-          iconSize: [32, 32],
-          iconAnchor: [16, 32],
-          popupAnchor: [0, -32],
-        })
-
-        currentMarker.value = L.marker(userCoords, { icon: userIcon }).addTo(map.value).bindPopup(`
-          <div>
-            <p><strong>Your Location</strong></p>
-            <p><strong>Coordinates:</strong> ${userCoords[0].toFixed(6)}, ${userCoords[1].toFixed(6)}</p>
-            <p><strong>Distance from reference point:</strong> ${calculateDistance(referencePoint, userCoords)}</p>
-            <button id="drawPathToReferenceBtn" class="path-button" data-from="${userCoords[0]},${userCoords[1]}" data-to="${referencePoint[0]},${referencePoint[1]}" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">Draw Path to Reference</button>
-          </div>
-        `)
-
-        map.value.setView(userCoords, 15)
-        currentMarker.value.openPopup()
-      }
-
-      isLoading.value = false
-    },
-    (error) => {
-      isLoading.value = false
-      alert(`Unable to retrieve your location: ${error.message}`)
-    },
-    { enableHighAccuracy: true },
-  )
-}
-
-// Clear Path
-const clearPath = () => {
-  if (currentPath.value && map.value) {
-    map.value.removeLayer(currentPath.value)
-    currentPath.value = null
-  }
+  // Navigate to the dorm-details route with the house ID
+  router.push({
+    name: 'dorm-details',
+    params: { id: numericId.toString() },
+  })
 }
 
 // Setup Global Event Listeners
 const setupGlobalEventListeners = () => {
-  // Global listener for path buttons
-  document.addEventListener('click', (event) => {
-    if (event.target && event.target.matches('.path-button')) {
-      const fromCoords = event.target.getAttribute('data-from').split(',').map(Number)
-      const toCoords = event.target.getAttribute('data-to').split(',').map(Number)
-
-      if (fromCoords.length === 2 && toCoords.length === 2) {
-        drawPath(fromCoords, toCoords)
-      }
-    }
-
-    // Global listener for view details buttons
-    if (event.target && event.target.matches('.view-details-btn')) {
-      const houseId = event.target.getAttribute('data-house-id')
-      if (houseId) {
-        viewBoardingHouseDetails(houseId)
-      }
-    }
-  })
+  // Global listener for all map-related buttons
+  document.addEventListener('click', handleDocumentClick)
 }
 
-// OnMounted: Initialize Map
+// Handle document clicks
+const handleDocumentClick = (event) => {
+  // Handle path buttons
+  mapStore.handleGlobalClick(event)
+
+  // Handle view details buttons
+  if (event.target && event.target.matches('.view-details-btn')) {
+    const houseId = event.target.getAttribute('data-house-id')
+    if (houseId) {
+      // Close any open popups before navigation
+      if (mapStore.map) mapStore.map.closePopup()
+      console.log('View details clicked for house ID:', houseId)
+      // Use setTimeout to ensure popup closure completes before navigation
+      setTimeout(() => {
+        viewBoardingHouseDetails(houseId)
+      }, 50)
+    }
+  }
+}
+
+// In your map component
 onMounted(async () => {
   await nextTick()
 
-  try {
-    map.value = L.map('map', {
-      zoomAnimation: true,
-      fadeAnimation: true,
-      markerZoomAnimation: true,
-      zoomControl: false,
-    }).setView(referencePoint, currentZoom.value)
+  // Initialize the map
+  const mapInitialized = mapStore.initializeMap('map')
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(map.value)
+  if (mapInitialized) {
+    // Fetch boarding houses first
+    await mapStore.fetchBoardingHouses()
 
-    referenceMarker.value = L.marker(referencePoint, {
-      icon: L.divIcon({
-        html: `<div style="background-color: #ffba00; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;"><i class="mdi mdi-map-marker"></i></div>`,
-        className: '',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
-      }),
-    })
-      .addTo(map.value)
-      .bindPopup('Reference Point (Distance Measurement)')
-
-    // Set up global event listeners
+    // Then set up global event listeners after data is loaded
     setupGlobalEventListeners()
 
-    fetchBoardingHouses()
-
-    map.value.on('click', (e) => {
-      const clickedCoords = [e.latlng.lat, e.latlng.lng]
-
-      if (currentMarker.value && map.value) {
-        map.value.removeLayer(currentMarker.value)
-      }
-      if (map.value) map.value.closePopup()
-
-      const popupContent = `
-        <div>
-          <p><strong>Selected Location</strong></p>
-          <p><strong>Coordinates:</strong> ${clickedCoords[0].toFixed(6)}, ${clickedCoords[1].toFixed(6)}</p>
-          <p><strong>Distance from reference point:</strong> ${calculateDistance(referencePoint, clickedCoords)}</p>
-          <button class="path-button" data-from="${clickedCoords[0]},${clickedCoords[1]}" data-to="${referencePoint[0]},${referencePoint[1]}" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">Draw Path to Reference</button>
-        </div>
-      `
-
-      currentMarker.value = L.marker(clickedCoords).addTo(map.value).bindPopup(popupContent)
-      currentMarker.value.openPopup()
-    })
-
-    map.value.on('zoomend', () => {
-      currentZoom.value = map.value.getZoom()
-    })
-  } catch (err) {
-    error.value = `Failed to initialize map: ${err.message || 'Unknown error'}`
-    isLoading.value = false
+    // Check if we need to highlight a specific dorm
+    if (route.query.highlight && route.query.fromDetails) {
+      const dormId = route.query.highlight
+      console.log('Focusing on dorm with ID:', dormId)
+      // Find the dorm and focus the map on it
+      const success = mapStore.focusOnDorm(dormId)
+      console.log('Focus successful:', success)
+    }
   }
 })
 
-// Add Boarding House Markers
-const addBoardingHouseMarkers = () => {
-  if (!map.value) return
+onBeforeUnmount(() => {
+  // Remove event listeners
+  document.removeEventListener('click', handleDocumentClick)
 
-  const boardingHouseIcon = L.divIcon({
-    html: `<div style="background-color: #0c3b2e; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;"><i class="mdi mdi-home-city"></i></div>`,
-    className: '',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-  })
-
-  boardingHouses.value.forEach((house) => {
-    if (!house.hasValidCoords) return
-
-    const popupContent = `
-      <div style="width: 220px">
-        <h3 style="margin: 4px 0; font-weight: bold">${house.name}</h3>
-        <p><strong>Price:</strong> ₱${house.price}</p>
-        <p><strong>Address:</strong> ${house.address}</p>
-        <p><strong>Distance to Campus:</strong> ${house.distance}</p>
-        <div style="display: flex; gap: 5px; flex-direction: column; margin-top: 10px;">
-          <button class="path-button" data-from="${house.coords[0]},${house.coords[1]}" data-to="${referencePoint[0]},${referencePoint[1]}" style="background-color: #0c3b2e; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">Draw Path</button>
-          <button class="view-details-btn" data-house-id="${house.id}" style="background-color: #2563eb; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px;">View Details</button>
-        </div>
-      </div>
-    `
-
-    const marker = L.marker(house.coords, { icon: boardingHouseIcon })
-      .addTo(map.value)
-      .bindPopup(popupContent)
-
-    markers.value.push(marker)
-  })
-}
-
-// Draw Path
-const drawPath = (fromCoords, toCoords) => {
-  if (currentPath.value && map.value) {
-    map.value.removeLayer(currentPath.value)
-  }
-
-  // First, close any open popups before starting zoom/animation operations
-  if (map.value) {
-    map.value.closePopup()
-  }
-
-  currentPath.value = L.polyline([fromCoords, toCoords], {
-    color: '#ff6b6b',
-    weight: 4,
-    opacity: 0.8,
-    dashArray: '10,10',
-    lineJoin: 'round',
-  }).addTo(map.value)
-
-  // Use animate: false to prevent the conflict during animation
-  map.value.fitBounds(currentPath.value.getBounds(), {
-    padding: [50, 50],
-    maxZoom: 16,
-    animate: false, // This is key to preventing the error
-  })
-}
+  // Clean up map resources
+  mapStore.cleanup()
+})
 </script>
 
 <template>
   <AppLayout>
     <template #content>
       <div class="full-map-container">
-        <div v-if="isLoading" class="loading-overlay">
+        <div v-if="mapStore.isLoading" class="loading-overlay">
           <div class="loading-spinner"></div>
           <div class="loading-text">Getting your location...</div>
         </div>
-        <div v-if="error" class="error-message">
-          {{ error }}
-          <button @click="fetchBoardingHouses" class="retry-button">Retry</button>
+        <div v-if="mapStore.error" class="error-message">
+          {{ mapStore.error }}
+          <button @click="mapStore.fetchBoardingHouses" class="retry-button">Retry</button>
         </div>
         <div id="map" class="full-map"></div>
         <div class="button-container">
-          <button @click="getUserLocation" class="map-button location-button">
+          <button @click="mapStore.getUserLocation" class="map-button location-button">
             <i class="mdi mdi-crosshairs-gps"></i> Get Your Location
           </button>
-          <button @click="clearPath" class="map-button clear-button" :disabled="!currentPath">
+          <button
+            @click="mapStore.clearPath"
+            class="map-button clear-button"
+            :disabled="!mapStore.hasPath"
+          >
             <i class="mdi mdi-map-marker-path"></i> Clear Path
           </button>
         </div>
 
         <!-- Added accessibility options and controls -->
         <div class="map-controls">
-          <button @click="map?.zoomIn()" class="control-button" title="Zoom In">
+          <button @click="mapStore.zoomIn()" class="control-button" title="Zoom In">
             <i class="mdi mdi-plus"></i>
           </button>
-          <button @click="map?.zoomOut()" class="control-button" title="Zoom Out">
+          <button @click="mapStore.zoomOut()" class="control-button" title="Zoom Out">
             <i class="mdi mdi-minus"></i>
           </button>
-          <button
-            @click="map?.setView(referencePoint, 15)"
-            class="control-button"
-            title="Reset View"
-          >
+          <button @click="mapStore.resetView()" class="control-button" title="Reset View">
             <i class="mdi mdi-home"></i>
           </button>
         </div>
@@ -552,7 +341,6 @@ const drawPath = (fromCoords, toCoords) => {
   transform: translateY(-1px);
 }
 
-/* Added map legend */
 .map-legend {
   position: absolute;
   bottom: 40px;
