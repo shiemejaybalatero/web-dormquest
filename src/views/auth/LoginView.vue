@@ -1,7 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { requiredValidator, emailValidator } from '@/utils/validators'
+import { supabase, formActionDefault } from '@/utils/supabase'
+import { useRouter } from 'vue-router'
+import AlertNotification from '@/components/common/AlertNotification.vue'
 
+const router = useRouter()
 const buttons = ref([])
 const refVForm = ref()
 
@@ -11,10 +15,33 @@ const formDataDefault = {
 }
 
 const formData = ref({ ...formDataDefault })
+const formAction = ref({ ...formActionDefault })
 
-const onSubmit = () => {
-  alert(formData.value.email)
+const onSubmit = async () => {
+  formAction.value = {
+    ...formActionDefault,
+  }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: formData.value.email,
+    password: formData.value.password,
+  })
+
+  if (error) {
+    console.log(error)
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    console.log(data)
+    formAction.value.formSuccessMessage = 'Successfully Login Account'
+    refVForm.value?.reset()
+    router.replace('/system/dashboard')
+  }
+
+  formAction.value.formProcess = false
 }
+
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) onSubmit()
@@ -52,9 +79,15 @@ onUnmounted(() => {
     </div>
 
     <!-- Card -->
+
     <v-card class="card text-center">
       <v-card-text>
         <h1 class="login-title">Log in to your account</h1>
+        <AlertNotification
+          :form-success-message="formAction.formSuccessMessage"
+          :form-error-message="formAction.formErrorMessage"
+        ></AlertNotification>
+
         <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-text-field
             v-model="formData.email"

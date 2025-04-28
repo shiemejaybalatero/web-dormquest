@@ -1,20 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isAuthenticated } from '@/utils/supabase'
+
+// Auth Views
 import LoginView from '@/views/auth/LoginView.vue'
 import LandingPageView from '@/views/auth/LandingPageView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
-import DashBoardView from '@/views/auth/DashBoardView.vue'
-import GoogleMapView from '@/views/auth/GoogleMapView.vue'
-import ProfileView from '@/views/auth/ProfileView.vue'
-import TgbgBoardingHouseView from '@/views/auth/TgbgBoardingHouseView.vue'
-import AmplayoBoardingHouseView from '@/views/auth/AmplayoBoardingHouseView.vue'
-import BlissfulBoardingHouseView from '@/views/auth/BlissfulBoardingHouseView.vue'
-import BlueBoardingHouseView from '@/views/auth/BlueBoardingHouseView.vue'
-import ChelseaBoardingHouseView from '@/views/auth/ChelseaBoardingHouseView.vue'
-import KarmoBoardingHouseView from '@/views/auth/KarmoBoardingHouseView.vue'
-import LicayanBoardingHouseView from '@/views/auth/LicayanBoardingHouseView.vue'
-import MagduraBoardingHouseView from '@/views/auth/MagduraBoardingHouseView.vue'
-import RatingsView from '@/views/auth/RatingsView.vue'
-import AboutAppView from '@/views/auth/AboutAppView.vue'
+
+// System Views
+import DashBoardView from '@/views/system/DashBoardView.vue'
+import MapView from '@/views/system/MapView.vue'
+import ProfileView from '@/views/system/ProfileView.vue'
+import RatingsView from '@/views/system/RatingsView.vue'
+import AboutAppView from '@/views/system/AboutAppView.vue'
+import DormDetailsViews from '@/views/system/DormDetailsViews.vue'
+
+// Error Views
+import ForbiddenView from '@/views/error/ForbiddenView.vue'
+import NotFoundView from '@/views/error/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,91 +25,89 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: LandingPageView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/register',
       name: 'register',
       component: RegisterView,
+      meta: { requiresAuth: false },
     },
     {
       path: '/dashboard',
       name: 'dashboard',
       component: DashBoardView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/map',
       name: 'map',
-      component: GoogleMapView,
+      component: MapView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/ratings',
       name: 'ratings',
       component: RatingsView,
+      meta: { requiresAuth: true },
     },
-
     {
       path: '/about',
       name: 'about',
       component: AboutAppView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/error/forbidden',
+      name: 'forbidden',
+      component: ForbiddenView,
+    },
+    {
+      path: '/error/not-found',
+      name: 'not-found',
+      component: NotFoundView,
+    },
+    {
+      path: '/dorm-details/:id',
+      name: 'dorm-details',
+      component: DormDetailsViews,
+      meta: { requiresAuth: true },
+      props: true,
     },
 
     {
-      path: '/amplayoboardinghousedetails',
-      name: 'amplayoboardinghousedetails',
-      component: AmplayoBoardingHouseView,
-    },
-    {
-      path: '/blissfulboardinghousedetails',
-      name: 'blissfulboardinghousedetails',
-      component: BlissfulBoardingHouseView,
-    },
-    {
-      path: '/blueboardinghousedetails',
-      name: 'blueboardinghousedetails',
-      component: BlueBoardingHouseView,
-    },
-    {
-      path: '/chelseaboardinghousedetails',
-      name: 'chelseaboardinghousedetails',
-      component: ChelseaBoardingHouseView,
-    },
-    {
-      path: '/karmoboardinghousedetails',
-      name: 'karmoboardinghousedetails',
-      component: KarmoBoardingHouseView,
-    },
-    {
-      path: '/licayanboardinghousedetails',
-      name: 'licayanboardinghousedetails',
-      component: LicayanBoardingHouseView,
-    },
-    {
-      path: '/magduraboardinghousedetails',
-      name: 'magduraboardinghousedetails',
-      component: MagduraBoardingHouseView,
-    },
-    {
-      path: '/tgbgboardinghousedetails',
-      name: 'tgbgboardinghousedetails',
-      component: TgbgBoardingHouseView,
-    },
-
-    {
-      path: '/',
-      name: 'home',
-      component: LandingPageView,
+      path: '/:catchAll(.*)',
+      component: NotFoundView,
     },
   ],
+})
+router.beforeEach(async (to) => {
+  const loggedIn = await isAuthenticated()
+
+  // Redirect logged-in users from public pages to dashboard
+  if (loggedIn && !to.meta.requiresAuth) {
+    return { name: 'dashboard' }
+  }
+
+  // Redirect guests from protected pages to home (not login)
+  if (!loggedIn && to.meta.requiresAuth) {
+    return { name: 'home' }
+  }
+
+  // No redirection needed
+  return true
 })
 
 export default router

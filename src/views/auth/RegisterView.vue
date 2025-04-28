@@ -10,6 +10,7 @@ import {
 import dayjs from 'dayjs'
 import AlertNotification from '@/components/common/AlertNotification.vue'
 import { useRouter } from 'vue-router'
+import { calculateAge } from '@/utils/helper'
 
 const router = useRouter()
 const showPassword = ref(false)
@@ -26,13 +27,16 @@ const formDataDefault = {
   password_confirmation: '',
 }
 const formData = ref({ ...formDataDefault })
-const formAction = ref({ formActionDefault })
+const formAction = ref({ ...formActionDefault })
 
 const onSubmit = async () => {
   formAction.value = {
     ...formActionDefault,
   }
   formAction.value.formProcess = true
+
+  // Calculate age from birthday
+  const age = formData.value.birthday ? calculateAge(formData.value.birthday) : null
 
   const { data, error } = await supabase.auth.signUp({
     email: formData.value.email,
@@ -43,6 +47,7 @@ const onSubmit = async () => {
         lastname: formData.value.lastname,
         birthday: formData.value.birthday,
         gender: formData.value.gender,
+        age: age, // Add the calculated age here
       },
     },
   })
@@ -55,7 +60,7 @@ const onSubmit = async () => {
     console.log(data)
     formAction.value.formSuccessMessage = 'Successfully Registered Account'
     refVForm.value?.reset()
-    router.replace('/dashboard')
+    router.replace('/system/dashboard')
   }
 
   formAction.value.formProcess = false
@@ -103,6 +108,7 @@ function handleActiveState(event) {
           :form-success-message="formAction.formSuccessMessage"
           :form-error-message="formAction.formErrorMessage"
         ></AlertNotification>
+
         <v-form ref="refVForm" @submit.prevent="onFormSubmit">
           <v-row class="ma-0 pb-2">
             <v-col cols="12" sm="6" class="pa-0 pr-1">

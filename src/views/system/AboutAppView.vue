@@ -61,12 +61,20 @@ const route = useRoute()
         <!-- Content Section -->
         <v-col cols="12" md="9">
           <div class="about-section pa-6">
-            <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="font-weight-bold">
-                <span style="color: #ffba00">DORM</span>
-                <span style="color: #0c3b2e"> QUEST</span>
-              </h2>
-              <v-btn color="#ffba00" class="font-weight-bold" rounded>ALL ABOUT</v-btn>
+            <div class="d-flex align-center justify-between mb-6">
+              <!-- Left Group (Logo + Title) -->
+              <div class="d-flex align-center mb-4 mb-md-0">
+                <h2 class="font-weight-bold mb-0">
+                  <span style="color: #ffba00">DORM</span>
+                  <span style="color: #0c3b2e"> QUEST</span>
+                </h2>
+              </div>
+
+              <!-- Right Group (Chip) -->
+              <v-chip class="pa-5 ml-auto">
+                <v-icon icon="mdi-information" start></v-icon>
+                ALL ABOUT APP
+              </v-chip>
             </div>
 
             <v-card flat class="pa-6 about-box">
