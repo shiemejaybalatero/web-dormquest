@@ -3,12 +3,17 @@ import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import DormitoryReview from '@/components/system/DormitoryReview.vue'
+import { supabase } from '@/utils/supabase'
 
 const route = useRoute()
 const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
+const showReviewModal = ref(false)
+const ratingStats = ref({ average: 0, count: 0 })
+const dormRatings = ref([])
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
@@ -20,6 +25,12 @@ const errorMessage = computed(() => boardingHouseStore.errorMessage)
 
 // Safe computed property for dorm details
 const dormDetails = computed(() => selectedBoardingHouse.value)
+
+// New computed property for the display rating
+const displayRating = computed(() => {
+  const rating = ratingStats.value.average || (dormDetails.value?.rating ?? 0)
+  return rating.toFixed(1)
+})
 
 const dormImageMap = {
   1: {
@@ -98,8 +109,38 @@ const toggleContact = () => {
   showContact.value = !showContact.value
 }
 
+const openReviewModal = () => {
+  showReviewModal.value = true
+}
+
+const closeReviewModal = () => {
+  showReviewModal.value = false
+}
+
 const goBack = () => {
   router.push({ name: 'dashboard' })
+}
+
+const fetchRatings = async () => {
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('rating_score')
+    .eq('dormitory_id', dormId)
+
+  if (error) {
+    console.error('Failed to fetch ratings:', error)
+    return
+  }
+
+  if (data && data.length) {
+    const sum = data.reduce((acc, r) => acc + r.rating_score, 0)
+    ratingStats.value = {
+      average: sum / data.length,
+      count: data.length,
+    }
+  } else {
+    ratingStats.value = { average: 0, count: 0 }
+  }
 }
 
 const refetchData = () => {
@@ -113,16 +154,33 @@ const viewOnMap = () => {
   router.push({
     name: 'map', // The name of your map route in your router configuration
     query: {
-      highlight: dormId.value, // Pass the dormitory ID as a query parameter
+      highlight: dormId, // Pass the dormitory ID as a query parameter
       fromDetails: true, // Flag to indicate we're coming from details page
     },
   })
+}
+
+// Handle rating updates from the rating component
+const handleRatingUpdated = (stats) => {
+  ratingStats.value = stats
+}
+
+// Handle a new rating submission
+const handleSubmitRating = (newRating) => {
+  console.log('New rating submitted:', newRating)
+  // In a real app, you would send this to your API
+  // For now, we just add it to our local state
+  dormRatings.value = [newRating, ...dormRatings.value]
+
+  // You might want to update the boarding house store with the new average rating
+  // boardingHouseStore.updateDormRating(dormId, ratingStats.value.average)
 }
 
 onMounted(() => {
   if (!isNaN(dormId)) {
     console.log(`Mounting DormDetails with ID: ${dormId}`)
     refetchData()
+    fetchRatings() // fetch ratings on load
   }
 })
 
@@ -195,10 +253,32 @@ watch(
                 </div>
               </div>
 
-              <!-- Right: Rating -->
+              <!-- Right: Rating display with View Ratings button -->
               <div class="d-flex align-center pe-3">
-                <v-icon color="amber" size="18">mdi-star</v-icon>
-                <span class="ml-1 text-body-2">{{ dormDetails.rating }}</span>
+                <div class="d-flex align-center me-2">
+                  <v-rating
+                    :model-value="ratingStats.average || dormDetails.rating || 0"
+                    color="amber"
+                    size="small"
+                    half-increments
+                    readonly
+                    density="compact"
+                  ></v-rating>
+                  <span class="ml-1 text-body-2">
+                    {{ displayRating }}
+                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
+                  </span>
+                </div>
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  density="comfortable"
+                  @click="openReviewModal"
+                  class="ms-2 text-none"
+                >
+                  <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
+                  View Ratings
+                </v-btn>
               </div>
             </v-row>
 
@@ -328,6 +408,16 @@ watch(
             </v-row>
           </v-col>
         </v-row>
+
+        <!-- DormitoryReview Modal Component -->
+        <DormitoryReview
+          :dorm-id="dormId"
+          :is-open="showReviewModal"
+          :initial-ratings="dormRatings"
+          @close="closeReviewModal"
+          @rating-updated="handleRatingUpdated"
+          @submit-rating="handleSubmitRating"
+        />
       </v-container>
     </template>
   </AppLayout>
@@ -381,5 +471,9 @@ watch(
 
 .down {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.text-none {
+  text-transform: none;
 }
 </style>

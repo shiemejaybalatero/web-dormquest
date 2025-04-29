@@ -1,254 +1,324 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { formatDistanceToNow } from 'date-fns'
 import { supabase } from '@/utils/supabase'
-import DormRatingForm from './DormRatingForm.vue' // Import the rating form component
 
 const props = defineProps({
   dormId: {
     type: Number,
     required: true,
   },
-})
-
-const reviews = ref([])
-const loading = ref(true)
-const errorMessage = ref('')
-const ratingStats = ref({
-  average: 0,
-  total: 0,
-  distribution: {
-    5: 0,
-    4: 0,
-    3: 0,
-    2: 0,
-    1: 0,
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
+  initialRatings: {
+    type: Array,
+    default: () => [],
   },
 })
 
-// Calculate percentage for rating bars
-const getPercentage = (count) => {
-  if (ratingStats.value.total === 0) return 0
-  return (count / ratingStats.value.total) * 100
+const emit = defineEmits(['close', 'rating-updated', 'submit-rating'])
+
+const newRating = ref(0)
+const newComment = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+const commentsLoading = ref(false)
+const ratings = ref(props.initialRatings || [])
+const currentUser = ref(null)
+
+// Get current user from Supabase auth - using metadata instead of profiles table
+async function getCurrentUser() {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      // Extract user display name from metadata or use fallbacks
+      const displayName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split('@')[0] ||
+        'User'
+
+      currentUser.value = {
+        id: user.id,
+        name: displayName,
+        email: user.email,
+      }
+    }
+  } catch (error) {
+    console.error('Error getting current user:', error)
+  }
 }
 
-// Fetch all reviews for this dormitory
-const fetchReviews = async () => {
+const ratingStats = computed(() => ({
+  average: calculateAverageRating(ratings.value),
+  count: ratings.value.length,
+}))
+
+function calculateAverageRating(ratings) {
+  if (!ratings || ratings.length === 0) return 0
+  const total = ratings.reduce((sum, rating) => sum + (rating.rating_score || 0), 0)
+  return Number((total / ratings.length).toFixed(1))
+}
+
+function formatDate(dateString) {
+  try {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true })
+  } catch {
+    return 'Unknown date'
+  }
+}
+
+async function submitComment() {
+  if (newRating.value === 0) {
+    errorMessage.value = 'Please select a rating'
+    return
+  }
+
+  if (!currentUser.value) {
+    errorMessage.value = 'You must be logged in to submit a comment'
+    return
+  }
+
   loading.value = true
   errorMessage.value = ''
 
   try {
-    // Get all ratings for this dorm with user information
-    const { data, error } = await supabase
-      .from('ratings')
-      .select(
-        `
-        id,
-        rating,
-        comment,
-        created_at,
-        user_id,
-        users (id, full_name, avatar_url)
-      `,
-      )
-      .eq('dorm_id', props.dormId)
-      .order('created_at', { ascending: false })
+    const newRatingObj = {
+      dormitory_id: props.dormId,
+      // Convert rating to integer to match bigint column type
+      rating_score: Math.round(newRating.value),
+      comment: newComment.value,
+      user_id: currentUser.value.id,
+      created_at: new Date().toISOString(),
+    }
+
+    const { data, error } = await supabase.from('ratings').insert([newRatingObj]).select()
 
     if (error) throw error
+    if (!data || data.length === 0) throw new Error('No data returned from insert')
 
-    reviews.value = data || []
+    ratings.value = [data[0], ...ratings.value]
+    emit('submit-rating', data[0])
+    emit('rating-updated', ratingStats.value)
 
-    // Calculate statistics
-    calculateRatingStats()
-  } catch (err) {
-    console.error('Error fetching reviews:', err)
-    errorMessage.value = `Failed to load reviews: ${err.message}`
+    newComment.value = ''
+    newRating.value = 0
+    successMessage.value = 'Your comment has been submitted'
+
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+  } catch (error) {
+    errorMessage.value = error.message || 'Failed to submit comment'
+    console.error('Submission error:', error)
   } finally {
     loading.value = false
   }
 }
 
-// Calculate rating statistics
-const calculateRatingStats = () => {
-  const stats = {
-    average: 0,
-    total: reviews.value.length,
-    distribution: {
-      5: 0,
-      4: 0,
-      3: 0,
-      2: 0,
-      1: 0,
-    },
+async function loadRatings() {
+  commentsLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const { data, error } = await supabase
+      .from('ratings')
+      .select('*')
+      .eq('dormitory_id', props.dormId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    ratings.value = data || []
+    emit('rating-updated', ratingStats.value)
+  } catch (error) {
+    errorMessage.value = 'Failed to load comments. ' + error.message
+    console.error('Error loading ratings:', error)
+  } finally {
+    commentsLoading.value = false
   }
-
-  // Count each rating
-  reviews.value.forEach((review) => {
-    const rating = Math.round(review.rating)
-    if (stats.distribution[rating] !== undefined) {
-      stats.distribution[rating]++
-    }
-  })
-
-  // Calculate average
-  const sum = reviews.value.reduce((acc, review) => acc + review.rating, 0)
-  stats.average = stats.total > 0 ? (sum / stats.total).toFixed(1) : 0
-
-  ratingStats.value = stats
 }
 
-// Format date to be more readable
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+function closeModal() {
+  emit('close')
 }
 
-// Handle new rating submission
-const handleRatingSubmitted = () => {
-  fetchReviews()
-}
-
-// Watch for changes in dormId
 watch(
   () => props.dormId,
-  () => {
-    fetchReviews()
+  (newId) => {
+    if (newId) loadRatings()
+  },
+)
+
+watch(
+  () => props.isOpen,
+  (isOpen) => {
+    if (isOpen) {
+      loadRatings()
+      getCurrentUser()
+    }
   },
 )
 
 onMounted(() => {
-  fetchReviews()
+  getCurrentUser()
+  if (props.isOpen && props.dormId) loadRatings()
 })
 </script>
 
 <template>
-  <div class="reviews-container">
-    <v-row>
-      <!-- Rating statistics -->
-      <v-col cols="12" md="4">
-        <v-card class="pa-4 stats-card">
-          <v-card-title class="text-h6 font-weight-bold mb-4">Rating Overview</v-card-title>
+  <v-dialog :model-value="props.isOpen" @update:model-value="$emit('close')" width="800">
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center pa-4">
+        <span class="text-h5">Ratings & comments</span>
+        <v-btn icon @click="closeModal">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
 
-          <div class="d-flex align-center justify-center mb-6">
-            <span class="text-h3 font-weight-bold mr-2">{{ ratingStats.average }}</span>
+      <v-divider></v-divider>
+
+      <!-- Summary stats -->
+      <v-card-text class="pa-4">
+        <v-row>
+          <v-col cols="12" md="4" class="text-center">
+            <div class="text-h3 primary--text">{{ ratingStats.average }}</div>
             <v-rating
-              :model-value="parseFloat(ratingStats.average)"
+              :model-value="ratingStats.average"
               color="amber"
-              density="compact"
-              size="small"
-              readonly
               half-increments
+              readonly
+              class="justify-center"
             ></v-rating>
-            <span class="text-caption text-grey ml-1">({{ ratingStats.total }} reviews)</span>
-          </div>
+            <div class="text-caption">{{ ratingStats.count }} comments</div>
+          </v-col>
 
-          <!-- Rating distribution -->
-          <div v-for="i in 5" :key="i" class="d-flex align-center mb-3">
-            <span class="mr-2">{{ 6 - i }}</span>
-            <v-icon color="amber" size="16">mdi-star</v-icon>
-            <v-progress-linear
-              class="mx-3"
-              color="amber"
-              :model-value="getPercentage(ratingStats.distribution[6 - i])"
-              height="8"
-              rounded
-            ></v-progress-linear>
-            <span class="text-caption">{{ ratingStats.distribution[6 - i] }}</span>
-          </div>
-        </v-card>
+          <v-col cols="12" md="8">
+            <v-alert v-if="successMessage" type="success" class="mb-4">
+              {{ successMessage }}
+            </v-alert>
 
-        <!-- Rating form -->
-        <DormRatingForm
-          :dorm-id="dormId"
-          :on-rating-submitted="handleRatingSubmitted"
-          class="mt-6"
-        />
-      </v-col>
-
-      <!-- Reviews list -->
-      <v-col cols="12" md="8">
-        <v-card class="pa-4 reviews-list-card">
-          <v-card-title class="text-h6 font-weight-bold">
-            Reviews
-            <v-chip class="ml-2" color="primary" size="small">{{ ratingStats.total }}</v-chip>
-          </v-card-title>
-
-          <v-card-text>
-            <!-- Loading -->
-            <div v-if="loading" class="text-center py-6">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
-              <div class="mt-2">Loading reviews...</div>
-            </div>
-
-            <!-- Error -->
-            <v-alert v-if="errorMessage" type="error" class="mt-2" density="compact">
+            <v-alert v-if="errorMessage" type="error" class="mb-4">
               {{ errorMessage }}
             </v-alert>
 
-            <!-- No reviews -->
-            <div v-if="!loading && reviews.length === 0" class="text-center py-6">
-              <v-icon size="48" color="grey">mdi-comment-outline</v-icon>
-              <div class="mt-2 text-grey">No reviews yet. Be the first to leave a review!</div>
+            <v-card class="pa-4" variant="outlined" v-if="currentUser">
+              <h3 class="mb-4">Leave a comment</h3>
+
+              <div class="d-flex align-center mb-3">
+                <span class="me-2">Your Rating:</span>
+                <v-rating
+                  v-model="newRating"
+                  color="amber"
+                  hover
+                  half-increments
+                  class="me-2"
+                ></v-rating>
+                <span v-if="newRating" class="text-subtitle-2">({{ newRating }})</span>
+              </div>
+
+              <v-textarea
+                v-model="newComment"
+                label="Your comment"
+                variant="outlined"
+                rows="3"
+                hide-details
+                class="mb-3"
+              ></v-textarea>
+
+              <v-btn
+                @click="submitComment"
+                color="primary"
+                :loading="loading"
+                :disabled="loading"
+                class="mt-2"
+              >
+                Submit comment
+              </v-btn>
+            </v-card>
+
+            <v-card v-else class="pa-4 text-center" variant="outlined">
+              <p>Please log in to leave a comment</p>
+              <v-btn color="primary" to="/login">Log In</v-btn>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-card-text>
+
+      <v-divider></v-divider>
+
+      <!-- comments list -->
+      <v-card-text class="pa-4">
+        <h3 class="mb-4">All comments</h3>
+
+        <div v-if="commentsLoading" class="text-center py-4">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          <div class="mt-2">Loading comments...</div>
+        </div>
+
+        <div v-else-if="ratings.length === 0" class="text-center py-4">
+          <p>No comments yet. Be the first to leave a comment!</p>
+        </div>
+
+        <v-list v-else>
+          <v-list-item v-for="(rating, index) in ratings" :key="rating.id || index" class="mb-3">
+            <template v-slot:prepend>
+              <v-avatar size="40" color="grey-lighten-3">
+                <v-icon>mdi-account</v-icon>
+              </v-avatar>
+            </template>
+
+            <v-list-item-title>
+              <div class="d-flex justify-space-between align-center">
+                <!-- Show the current user's name if it's their comment, otherwise show a generic username -->
+                <span class="font-weight-bold">
+                  {{ rating.user_id === currentUser?.id ? currentUser.name : 'User' }}
+                </span>
+                <span class="text-caption">{{ formatDate(rating.created_at) }}</span>
+              </div>
+            </v-list-item-title>
+
+            <v-list-item-subtitle>
+              <v-rating
+                :model-value="rating.rating_score"
+                color="amber"
+                density="compact"
+                readonly
+                size="small"
+                half-increments
+              ></v-rating>
+            </v-list-item-subtitle>
+
+            <div class="mt-2">
+              <p v-if="rating.comment">{{ rating.comment }}</p>
+              <p v-else class="text-caption text-italic">No written comment</p>
             </div>
 
-            <!-- Reviews list -->
-            <div v-for="review in reviews" :key="review.id" class="review-item pa-4 mb-4">
-              <div class="d-flex align-start mb-2">
-                <v-avatar size="36" class="mr-3">
-                  <v-img v-if="review.users?.avatar_url" :src="review.users.avatar_url" />
-                  <span v-else class="text-caption text-uppercase">
-                    {{ review.users?.full_name?.[0] || 'U' }}
-                  </span>
-                </v-avatar>
-
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-space-between align-center">
-                    <span class="font-weight-medium">{{
-                      review.users?.full_name || 'Anonymous User'
-                    }}</span>
-                    <span class="text-caption text-grey">{{ formatDate(review.created_at) }}</span>
-                  </div>
-
-                  <v-rating
-                    :model-value="review.rating"
-                    color="amber"
-                    density="compact"
-                    size="x-small"
-                    readonly
-                    half-increments
-                  ></v-rating>
-                </div>
-              </div>
-
-              <div class="pl-12 text-body-2" v-if="review.comment">
-                {{ review.comment }}
-              </div>
-              <div class="pl-12 text-body-2 text-grey-darken-1" v-else>
-                <i>No comment provided</i>
-              </div>
-
-              <v-divider class="mt-4"></v-divider>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </div>
+            <v-divider v-if="index < ratings.length - 1" class="mt-2"></v-divider>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
-.stats-card,
-.reviews-list-card {
-  background-color: #fafff9;
-  border: 1px solid #e0f2f1;
-  border-radius: 16px;
+.text-italic {
+  font-style: italic;
 }
 
-.review-item {
-  background-color: #f9fffe;
+.v-list-item {
+  padding: 12px;
   border-radius: 8px;
+}
+
+.v-list-item:hover {
+  background-color: #f5f5f5;
 }
 </style>
