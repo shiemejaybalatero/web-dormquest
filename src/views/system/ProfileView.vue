@@ -14,22 +14,9 @@ const sidebarLinks = [
 
 const formAction = ref({ ...formActionDefault })
 const profileImage = ref(null)
-const isEditing = ref(false)
-const editForm = ref({
-  fullname: '',
-  birthday: '',
-  gender: '',
-})
-const isSaving = ref(false)
-const editError = ref('')
-const avatarFile = ref(null)
+const showEditDialog = ref(false)
 
-// Functions for profile logic (same as before)
-const triggerFileInput = () => {}
-const handleEditFileUpload = (e) => {
-  avatarFile.value = e.target.files[0]
-}
-const getUser = async () => {
+onMounted(async () => {
   formAction.value.formProcess = true
   await fetchUserProfile()
   profileImage.value = userProfile.value.avatar_url
@@ -110,31 +97,6 @@ const handleProfileUpdated = async () => {
                     Edit Profile
                   </v-btn>
                 </div>
-
-                <v-expand-transition>
-                  <div v-if="isEditing" class="mt-4 w-100 text-end">
-                    <v-card flat class="pa-4">
-                      <v-text-field v-model="editForm.fullname" label="Full Name" />
-                      <v-text-field v-model="editForm.birthday" label="Birthday" type="date" />
-                      <v-select
-                        v-model="editForm.gender"
-                        :items="['Male', 'Female', 'Rather not to say']"
-                        label="Gender"
-                      />
-                      <v-file-input
-                        label="Upload New Avatar"
-                        accept="image/*"
-                        @change="handleEditFileUpload"
-                      />
-
-                      <v-btn class="mt-3" color="success" :loading="isSaving" @click="saveChanges">
-                        Save Changes
-                      </v-btn>
-
-                      <div v-if="editError" class="error-text mt-2">{{ editError }}</div>
-                    </v-card>
-                  </div>
-                </v-expand-transition>
               </v-card>
             </div>
           </div>
