@@ -348,4 +348,15 @@ onBeforeUnmount(() => {
     flex: 1 1 0;
   }
 }
+.search-wrapper .v-btn:hover {
+  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
+  transform: scale(1.1);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.search-wrapper .v-btn:hover .v-icon {
+  color: #2e7d32; /* Green icon color on hover */
+}
 </style>

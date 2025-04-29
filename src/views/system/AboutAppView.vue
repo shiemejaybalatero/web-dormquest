@@ -1,64 +1,24 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
-import { useRoute } from 'vue-router'
+import SidebarLayout from '@/components/layout/SidebarLayout.vue'
 
-const route = useRoute()
+const sidebarLinks = [
+  { path: '/profile', icon: 'mdi-account', title: 'Personal Information' },
+  { path: '/ratings', icon: 'mdi-star', title: 'Ratings' },
+  { path: '/about', icon: 'mdi-information', title: 'About App' },
+]
 </script>
 
 <template>
   <AppLayout>
     <template #content>
       <v-row>
-        <!-- Sidebar -->
+        <!-- Sidebar using reusable layout -->
         <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/profile' }" class="mt-3 mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-account</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/ratings" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/ratings' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-star</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/about" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/about' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-information</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">About app</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/" style="text-decoration: none; color: inherit">
-              <v-list-item :class="{ selected: route.path === '/' }" class="mb-2">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#0c3b2e' : ''" class="mr-2"
-                    >mdi-logout</v-icon
-                  >
-                  <span class="font-weight-bold text-body-1">Log out</span>
-                </div>
-              </v-list-item>
-            </router-link>
-          </v-list>
+          <SidebarLayout :links="sidebarLinks" />
         </v-col>
 
-        <!-- Content Section with Ratings Layout -->
+        <!-- Content Section -->
         <v-col cols="12" md="9">
           <div class="about-section pa-6">
             <div class="d-flex align-center justify-between mb-6">
@@ -104,28 +64,21 @@ const route = useRoute()
 </template>
 
 <style scoped>
-.sidebar {
-  min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  border-radius: 16px;
-}
-
-.selected {
-  background-color: #ffba00 !important;
-  border-radius: 20px;
-  color: #0c3b2e;
-}
-
 .about-section {
-  border-radius: 16px;
   background: linear-gradient(180deg, #dbead3, #6d9773);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  min-height: 65vh;
+  padding-top: 24px;
+  padding-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .about-box {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.97);
   border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  line-height: 1.6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
 }
 </style>

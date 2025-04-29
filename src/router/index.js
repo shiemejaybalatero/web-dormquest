@@ -86,7 +86,6 @@ const router = createRouter({
       meta: { requiresAuth: true },
       props: true,
     },
-
     {
       path: '/:catchAll(.*)',
       component: NotFoundView,
