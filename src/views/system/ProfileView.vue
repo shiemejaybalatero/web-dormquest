@@ -2,8 +2,8 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SidebarLayout from '@/components/layout/SidebarLayout.vue'
 import { ref, onMounted } from 'vue'
-import { supabase, formActionDefault } from '@/utils/supabase'
-import { calculateAge } from '@/utils/helper'
+import { formActionDefault } from '@/utils/supabase'
+import { userProfile, isLoadingUser, fetchUserProfile, updateUserProfile } from '@/stores/userStore'
 
 // Sidebar links for this Profile page
 const sidebarLinks = [
@@ -12,15 +12,6 @@ const sidebarLinks = [
   { title: 'About App', icon: 'mdi-information', path: '/about' },
 ]
 
-// Your userData and form states here (same as before)
-const userData = ref({
-  email: '',
-  name: '',
-  age: '',
-  gender: '',
-  birthday: '',
-  avatar_url: '',
-})
 const formAction = ref({ ...formActionDefault })
 const profileImage = ref(null)
 const isEditing = ref(false)
@@ -33,75 +24,52 @@ const isSaving = ref(false)
 const editError = ref('')
 const avatarFile = ref(null)
 
-// Functions for profile logic (same as before)
+// Function to handle file uploads
 const handleEditFileUpload = (e) => {
   avatarFile.value = e.target.files[0]
 }
-const getUser = async () => {
-  formAction.value.formProcess = true
-  const { data, error } = await supabase.auth.getUser()
-  if (!error && data?.user) {
-    const metadata = data.user.user_metadata
-    userData.value.email = metadata.email || data.user.email
-    userData.value.birthday = metadata.birthday || ''
-    userData.value.age = metadata.birthday ? calculateAge(metadata.birthday) : metadata.age || ''
-    userData.value.gender = metadata.gender || ''
-    userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
-    userData.value.avatar_url = metadata.avatar_url
-    profileImage.value = metadata.avatar_url
-  }
-  formAction.value.formProcess = false
-}
+
+// Function to start editing profile
 const startEditing = () => {
   isEditing.value = true
-  editForm.value.fullname = userData.value.fullname
-  editForm.value.birthday = userData.value.birthday
-  editForm.value.gender = userData.value.gender
+  editForm.value.fullname = userProfile.value.fullname
+  editForm.value.birthday = userProfile.value.birthday
+  editForm.value.gender = userProfile.value.gender
 }
+
+// Function to save changes
 const saveChanges = async () => {
   isSaving.value = true
   editError.value = ''
-  try {
-    let avatarUrl = profileImage.value
-    if (avatarFile.value) {
-      const fileExt = avatarFile.value.name.split('.').pop()
-      const fileName = `avatar_${Date.now()}.${fileExt}`
-      const filePath = `public/${fileName}`
-      const { error: uploadError } = await supabase.storage
-        .from('dormquest')
-        .upload(filePath, avatarFile.value, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-      if (uploadError) throw uploadError
-      const { data: urlData } = supabase.storage.from('dormquest').getPublicUrl(filePath)
-      if (urlData?.publicUrl) avatarUrl = urlData.publicUrl
+
+  // Update profile using the store function
+  const result = await updateUserProfile(
+    {
+      fullname: editForm.value.fullname,
+      birthday: editForm.value.birthday,
+      gender: editForm.value.gender,
+    },
+    avatarFile.value,
+  )
+
+  if (result.success) {
+    // Update profile image preview
+    if (userProfile.value.avatar_url) {
+      profileImage.value = userProfile.value.avatar_url
     }
-    const nameParts = editForm.value.fullname.split(' ')
-    const firstname = nameParts[0] || ''
-    const lastname = nameParts.slice(1).join(' ') || ''
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        firstname,
-        lastname,
-        birthday: editForm.value.birthday,
-        gender: editForm.value.gender,
-        avatar_url: avatarUrl,
-      },
-    })
-    if (updateError) throw updateError
-    profileImage.value = avatarUrl
     isEditing.value = false
-    getUser()
-  } catch (error) {
-    editError.value = error.message || 'Failed to update profile'
-  } finally {
-    isSaving.value = false
+  } else {
+    editError.value = result.error || 'Failed to update profile'
   }
+
+  isSaving.value = false
 }
 
-onMounted(() => {
-  getUser()
+onMounted(async () => {
+  formAction.value.formProcess = true
+  await fetchUserProfile()
+  profileImage.value = userProfile.value.avatar_url
+  formAction.value.formProcess = false
 })
 </script>
 
@@ -140,23 +108,23 @@ onMounted(() => {
                     <v-row>
                       <v-col cols="12" sm="6">
                         <div class="field-label">Full Name</div>
-                        <div class="field-value">{{ userData.fullname }}</div>
+                        <div class="field-value">{{ userProfile.fullname }}</div>
                       </v-col>
                       <v-col cols="12" sm="6">
                         <div class="field-label">Age</div>
-                        <div class="field-value">{{ userData.age }}</div>
+                        <div class="field-value">{{ userProfile.age }}</div>
                       </v-col>
                       <v-col cols="12" sm="6">
                         <div class="field-label">Email</div>
-                        <div class="field-value">{{ userData.email }}</div>
+                        <div class="field-value">{{ userProfile.email }}</div>
                       </v-col>
                       <v-col cols="12" sm="6">
                         <div class="field-label">Gender</div>
-                        <div class="field-value">{{ userData.gender }}</div>
+                        <div class="field-value">{{ userProfile.gender }}</div>
                       </v-col>
-                      <v-col cols="12" sm="6" v-if="userData.birthday">
+                      <v-col cols="12" sm="6" v-if="userProfile.birthday">
                         <div class="field-label">Birthday</div>
-                        <div class="field-value">{{ userData.birthday }}</div>
+                        <div class="field-value">{{ userProfile.birthday }}</div>
                       </v-col>
                     </v-row>
                   </v-col>
@@ -197,7 +165,10 @@ onMounted(() => {
           </div>
 
           <!-- Loading overlay -->
-          <v-overlay :model-value="formAction.formProcess" class="align-center justify-center">
+          <v-overlay
+            :model-value="formAction.formProcess || isLoadingUser"
+            class="align-center justify-center"
+          >
             <v-progress-circular indeterminate size="64" />
           </v-overlay>
         </v-col>

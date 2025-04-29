@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase, formActionDefault } from '@/utils/supabase'
-import { getAvatarText } from '@/utils/helper'
+import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,12 +13,6 @@ const drawer = ref(false)
 const search = ref('')
 
 const formAction = ref({ ...formActionDefault })
-
-const userData = ref({
-  initials: '',
-  email: '',
-  fullname: '',
-})
 
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
@@ -46,25 +40,11 @@ const scrollToTop = () => {
   }
 }
 
-const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser()
+onMounted(async () => {
+  // Load user profile data
+  await fetchUserProfile()
 
-  if (error) {
-    console.error('Error getting user:', error)
-    return
-  }
-
-  const metadata = data?.user?.user_metadata
-
-  if (metadata) {
-    userData.value.email = metadata.email || ''
-    userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
-    userData.value.initials = getAvatarText(userData.value.fullname)
-  }
-}
-
-onMounted(() => {
-  getUser()
+  // Add scroll event listener
   if (mainContent.value) {
     mainContent.value.$el.addEventListener('scroll', handleScroll)
   }
@@ -162,14 +142,22 @@ onBeforeUnmount(() => {
                       icon
                       v-bind="props"
                     >
-                      <v-avatar
-                        class="avatar-btn"
-                        :class="{
-                          'green-btn': ['/profile', '/ratings', '/about'].includes(route.path),
-                        }"
-                        size="large"
-                      >
-                        <span class="text-subtitle-2">{{ userData.initials }}</span>
+                      <v-avatar class="avatar-btn" size="large">
+                        <!-- Show loading indicator while fetching data -->
+                        <template v-if="isLoadingUser">
+                          <v-progress-circular
+                            indeterminate
+                            size="24"
+                            color="primary"
+                          ></v-progress-circular>
+                        </template>
+                        <!-- Show profile image if available, otherwise show initials -->
+                        <v-img
+                          v-else-if="userProfile.avatar_url"
+                          :src="userProfile.avatar_url"
+                          alt="User Avatar"
+                        ></v-img>
+                        <span v-else class="text-subtitle-2">{{ userProfile.initials }}</span>
                       </v-avatar>
                     </v-btn>
                   </template>
@@ -177,11 +165,25 @@ onBeforeUnmount(() => {
                     <v-card-text>
                       <div class="mx-auto text-center">
                         <v-avatar color="orange">
-                          <span class="text-h5">{{ userData.initials }}</span>
+                          <!-- Show loading indicator while fetching data -->
+                          <template v-if="isLoadingUser">
+                            <v-progress-circular
+                              indeterminate
+                              size="24"
+                              color="white"
+                            ></v-progress-circular>
+                          </template>
+                          <!-- Show profile image if available, otherwise show initials -->
+                          <v-img
+                            v-else-if="userProfile.avatar_url"
+                            :src="userProfile.avatar_url"
+                            alt="User Avatar"
+                          ></v-img>
+                          <span v-else class="text-h5">{{ userProfile.initials }}</span>
                         </v-avatar>
-                        <h3>{{ userData.fullName }}</h3>
+                        <h3>{{ userProfile.fullname }}</h3>
                         <p class="text-caption mt-1">
-                          {{ userData.email }}
+                          {{ userProfile.email }}
                         </p>
                         <v-divider class="my-3"></v-divider>
                         <router-link to="/profile">
