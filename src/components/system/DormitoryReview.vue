@@ -105,7 +105,12 @@ async function submitComment() {
 
     ratings.value = [data[0], ...ratings.value]
     emit('submit-rating', data[0])
-    emit('rating-updated', ratingStats.value)
+
+    // IMPORTANT: Update the parent component with new rating stats
+    emit('rating-updated', {
+      average: ratingStats.value.average,
+      count: ratingStats.value.count,
+    })
 
     newComment.value = ''
     newRating.value = 0
@@ -136,7 +141,12 @@ async function loadRatings() {
     if (error) throw error
 
     ratings.value = data || []
-    emit('rating-updated', ratingStats.value)
+
+    // IMPORTANT: Update the parent component with new rating stats whenever ratings load
+    emit('rating-updated', {
+      average: ratingStats.value.average,
+      count: ratingStats.value.count,
+    })
   } catch (error) {
     errorMessage.value = 'Failed to load comments. ' + error.message
     console.error('Error loading ratings:', error)

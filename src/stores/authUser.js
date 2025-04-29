@@ -101,7 +101,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
     // Upload the file with the user ID and file extension
     const { data, error } = await supabase.storage
-      .from('shirlix')
+      .from('dormquest')
       .upload('avatars/' + userData.value.id + '-avatar.png', file, {
         cacheControl: '3600',
         upsert: true,
@@ -114,7 +114,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
     // If no error set data to userData state with the image_url
     else if (data) {
       // Retrieve Image Public Url
-      const { data: imageData } = supabase.storage.from('shirlix').getPublicUrl(data.path)
+      const { data: imageData } = supabase.storage.from('dormquest').getPublicUrl(data.path)
 
       // Update the user information with the new image_url
       return await updateUserInformation({ ...userData.value, image_url: imageData.publicUrl })
