@@ -2,12 +2,8 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SidebarLayout from '@/components/layout/SidebarLayout.vue'
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
 import { supabase, formActionDefault } from '@/utils/supabase'
 import { calculateAge } from '@/utils/helper'
-
-// Router
-const route = useRoute()
 
 // Sidebar links for this Profile page
 const sidebarLinks = [
@@ -38,7 +34,6 @@ const editError = ref('')
 const avatarFile = ref(null)
 
 // Functions for profile logic (same as before)
-const triggerFileInput = () => {}
 const handleEditFileUpload = (e) => {
   avatarFile.value = e.target.files[0]
 }
