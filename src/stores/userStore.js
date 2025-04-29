@@ -132,3 +132,81 @@ export async function updateUserProfile(userData, avatarFile = null) {
     return { success: false, error: error.message || 'Failed to update profile' }
   }
 }
+
+/**
+ * Update user email
+ * @param {Object} data - Contains newEmail and password
+ * @returns {Object} - Success status and error message if any
+ */
+export const updateUserEmail = async (data) => {
+  try {
+    // Validate input parameters
+    if (!data || !data.newEmail || !data.password) {
+      return { success: false, error: 'Missing required fields' }
+    }
+
+    // Check if userProfile.value has the necessary properties
+    if (!userProfile.value || !userProfile.value.email) {
+      return { success: false, error: 'User profile information is missing' }
+    }
+
+    // Verify current password first for security
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: userProfile.value.email,
+      password: data.password,
+    })
+
+    if (signInError) {
+      return { success: false, error: 'Current password is incorrect' }
+    }
+
+    // Then update the email
+    const { error } = await supabase.auth.updateUser({
+      email: data.newEmail,
+    })
+
+    if (error) {
+      console.error('Error updating email:', error.message)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, message: 'Verification email sent. Please check your inbox.' }
+  } catch (error) {
+    console.error('Exception updating email:', error)
+    return { success: false, error: error.message || 'Failed to update email' }
+  }
+}
+
+/**
+ * Update user password
+ * @param {Object} data - Contains currentPassword and newPassword
+ * @returns {Object} - Success status and error message if any
+ */
+export const updateUserPassword = async (data) => {
+  try {
+    // First, validate the current password by attempting to sign in
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: userProfile.value.email,
+      password: data.currentPassword,
+    })
+
+    if (signInError) {
+      return { success: false, error: 'Current password is incorrect' }
+    }
+
+    // Then update the password
+    const { error } = await supabase.auth.updateUser({
+      password: data.newPassword,
+    })
+
+    if (error) {
+      console.error('Error updating password:', error.message)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Exception updating password:', error)
+    return { success: false, error: error.message || 'Failed to update password' }
+  }
+}

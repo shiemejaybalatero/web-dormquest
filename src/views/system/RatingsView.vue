@@ -208,7 +208,7 @@ onMounted(async () => {
                 />
               </v-col>
 
-              <v-col cols="12" md="9" class="py-4">
+              <v-col cols="12" md="9">
                 <h3 class="font-weight-bold mb-1">{{ name }}</h3>
                 <div class="text-grey-darken-1 mb-2">{{ email }}</div>
                 <div class="d-flex align-center">
@@ -260,7 +260,7 @@ onMounted(async () => {
               <div class="ratings-scroll">
                 <v-row>
                   <v-col cols="12" v-for="(dorm, index) in userRatings" :key="index">
-                    <div class="rating-card px-4 py-3 mb-3" @click="viewDormitory(dorm.dormId)">
+                    <div class="rating-card px-4 py-3" @click="viewDormitory(dorm.dormId)">
                       <div class="d-flex justify-space-between align-center">
                         <div>
                           <div class="font-weight-medium text-subtitle-1">{{ dorm.name }}</div>

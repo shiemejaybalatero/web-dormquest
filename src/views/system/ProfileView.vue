@@ -1,11 +1,11 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SidebarLayout from '@/components/layout/SidebarLayout.vue'
+import EditProfile from '@/components/system/EditProfile.vue'
 import { ref, onMounted } from 'vue'
 import { formActionDefault } from '@/utils/supabase'
-import { userProfile, isLoadingUser, fetchUserProfile, updateUserProfile } from '@/stores/userStore'
+import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 
-// Sidebar links for this Profile page
 const sidebarLinks = [
   { title: 'Personal Information', icon: 'mdi-account', path: '/profile' },
   { title: 'Ratings', icon: 'mdi-star', path: '/ratings' },
@@ -14,56 +14,7 @@ const sidebarLinks = [
 
 const formAction = ref({ ...formActionDefault })
 const profileImage = ref(null)
-const isEditing = ref(false)
-const editForm = ref({
-  fullname: '',
-  birthday: '',
-  gender: '',
-})
-const isSaving = ref(false)
-const editError = ref('')
-const avatarFile = ref(null)
-
-// Function to handle file uploads
-const handleEditFileUpload = (e) => {
-  avatarFile.value = e.target.files[0]
-}
-
-// Function to start editing profile
-const startEditing = () => {
-  isEditing.value = true
-  editForm.value.fullname = userProfile.value.fullname
-  editForm.value.birthday = userProfile.value.birthday
-  editForm.value.gender = userProfile.value.gender
-}
-
-// Function to save changes
-const saveChanges = async () => {
-  isSaving.value = true
-  editError.value = ''
-
-  // Update profile using the store function
-  const result = await updateUserProfile(
-    {
-      fullname: editForm.value.fullname,
-      birthday: editForm.value.birthday,
-      gender: editForm.value.gender,
-    },
-    avatarFile.value,
-  )
-
-  if (result.success) {
-    // Update profile image preview
-    if (userProfile.value.avatar_url) {
-      profileImage.value = userProfile.value.avatar_url
-    }
-    isEditing.value = false
-  } else {
-    editError.value = result.error || 'Failed to update profile'
-  }
-
-  isSaving.value = false
-}
+const showEditDialog = ref(false)
 
 onMounted(async () => {
   formAction.value.formProcess = true
@@ -71,6 +22,17 @@ onMounted(async () => {
   profileImage.value = userProfile.value.avatar_url
   formAction.value.formProcess = false
 })
+
+// Function to handle profile update completion
+const handleProfileUpdated = async () => {
+  // Refresh user profile data
+  await fetchUserProfile()
+
+  // Update profile image preview
+  if (userProfile.value.avatar_url) {
+    profileImage.value = userProfile.value.avatar_url
+  }
+}
 </script>
 
 <template>
@@ -131,35 +93,10 @@ onMounted(async () => {
                 </v-row>
 
                 <div class="d-flex justify-end mt-4">
-                  <v-btn color="#0c3b2e" variant="outlined" @click="startEditing"
-                    >Edit Profile</v-btn
-                  >
+                  <v-btn color="#0c3b2e" variant="outlined" @click="showEditDialog = true">
+                    Edit Profile
+                  </v-btn>
                 </div>
-
-                <v-expand-transition>
-                  <div v-if="isEditing" class="mt-4 w-100 text-end">
-                    <v-card flat class="pa-4">
-                      <v-text-field v-model="editForm.fullname" label="Full Name" />
-                      <v-text-field v-model="editForm.birthday" label="Birthday" type="date" />
-                      <v-select
-                        v-model="editForm.gender"
-                        :items="['Male', 'Female', 'Rather not to say']"
-                        label="Gender"
-                      />
-                      <v-file-input
-                        label="Upload New Avatar"
-                        accept="image/*"
-                        @change="handleEditFileUpload"
-                      />
-
-                      <v-btn class="mt-3" color="success" :loading="isSaving" @click="saveChanges">
-                        Save Changes
-                      </v-btn>
-
-                      <div v-if="editError" class="error-text mt-2">{{ editError }}</div>
-                    </v-card>
-                  </div>
-                </v-expand-transition>
               </v-card>
             </div>
           </div>
@@ -175,6 +112,13 @@ onMounted(async () => {
       </v-row>
     </template>
   </AppLayout>
+
+  <!-- Profile Edit Dialog Component -->
+  <EditProfile
+    v-model="showEditDialog"
+    :userData="userProfile"
+    @profile-updated="handleProfileUpdated"
+  />
 </template>
 
 <style scoped>
@@ -216,10 +160,5 @@ onMounted(async () => {
   min-height: 45px;
   display: flex;
   align-items: center;
-}
-
-.error-text {
-  color: #ff5252;
-  font-size: 0.75rem;
 }
 </style>
