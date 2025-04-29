@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
     >
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
-          <v-container>
+          <v-container-fluid>
             <!-- Search & Buttons -->
             <div class="d-flex align-center search-wrapper mb-4">
               <v-text-field
@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
             <v-row>
               <slot name="content"></slot>
             </v-row>
-          </v-container>
+          </v-container-fluid>
         </template>
 
         <template v-else>
@@ -271,6 +271,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  margin-left: 25%;
 }
 
 .search-wrapper .v-btn:hover {
