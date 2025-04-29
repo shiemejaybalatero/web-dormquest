@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #0c3b2e;
+  color: #fdfaf6;
   font-size: larger;
 }
 
@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-app-bar {
-  background: linear-gradient(290deg, #fffae6, #6d9773);
+  background: #0c3b2e;
   color: #000;
 }
 
