@@ -104,8 +104,8 @@ onMounted(() => {
 }
 
 .dorm-card {
-  background-color: #0c3b2e;
-  color: #0c3b2e;
+  background-color: #2c3930;
+  color: #f8f8e1;
   border-radius: 16px;
 }
 
