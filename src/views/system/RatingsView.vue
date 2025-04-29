@@ -18,7 +18,7 @@ const errorMessage = ref('')
 const averageRating = ref(0)
 const userRatings = ref([])
 
-/*
+/* not used
 // Function to set active sidebar item
 const activeItem = ref(route.path)
 const setActiveItem = (path) => {

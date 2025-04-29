@@ -22,7 +22,7 @@ const sidebarLinks = [
         <v-col cols="12" md="9">
           <div class="about-section px-4 px-md-8 py-6 py-md-10">
             <!-- Header (Modified) -->
-            <div class="d-flex justify-center mb-6">
+            <div class="d-flex justify-left mb-6">
               <h2 class="font-weight-bold mb-0 text-center">
                 <span style="color: #ffba00">DORM</span>
                 <span style="color: white"> QUEST</span>
