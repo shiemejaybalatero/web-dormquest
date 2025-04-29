@@ -104,13 +104,13 @@ onMounted(() => {
 }
 
 .dorm-card {
-  background-color: #f5fdf8;
+  background-color: #0c3b2e;
   color: #0c3b2e;
   border-radius: 16px;
 }
 
 .dorm-title {
-  color: #1b4332;
+  color: #f8f8e1;
   font-family: 'Nunito', sans-serif;
 }
 
@@ -120,6 +120,6 @@ onMounted(() => {
 }
 
 .dorm-text {
-  color: #4e4a50 !important;
+  color: #f8f8e1 !important;
 }
 </style>
