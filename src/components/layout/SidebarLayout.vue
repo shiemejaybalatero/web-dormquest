@@ -85,4 +85,15 @@ const onLogout = async () => {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.sidebar {
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  background: #0c3b2e;
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  /* No min-height, no max-height! */
+}
 </style>

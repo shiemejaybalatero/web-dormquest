@@ -93,10 +93,10 @@ onBeforeUnmount(() => {
         <span class="stext font-weight-bold text-white">QUEST</span>
       </router-link>
 
-      <!-- Logo for mobile/small screens -->
+      <!-- Logo for mobile/small screens not working -->
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
-        <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
+        <span class="stext font-weight-bold text-subtitle-3 ms-2">QUEST</span>
       </router-link>
 
       <v-spacer />
@@ -104,6 +104,8 @@ onBeforeUnmount(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
     </v-app-bar>
 
+    <v-main ref="mainContent" class="main-no-gap">
+      <!--
     <v-main
       ref="mainContent"
       :style="
@@ -111,7 +113,9 @@ onBeforeUnmount(() => {
           ? 'overflow: hidden; height: 100vh; padding: 0;'
           : 'overflow-y: auto; height: 100vh;'
       "
-    >
+    -->
+
+      >
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
           <v-container>
@@ -246,7 +250,7 @@ onBeforeUnmount(() => {
   padding: 1rem;
   overflow-y: auto;
 }
-  */
+
 
 .gradient-bg {
   background-color: #fffdf6;
@@ -254,13 +258,25 @@ onBeforeUnmount(() => {
   padding: 1rem;
   overflow-y: auto;
 }
+  */
+
+.gradient-bg {
+  background-color: #fffdf6;
+  padding: 1rem;
+  /* REMOVE height: 100vh and overflow-y: auto */
+}
 
 .gradient-app-bar {
-  /*
+  /* gi pulihan
   background: linear-gradient(290deg, #fffae6, #6d9773);
   */
   background-color: #0c3b2e;
   color: #000;
+}
+/* add */
+.main-no-gap {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 .avatar-btn {
@@ -284,6 +300,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 30px;
 }
 
 .search-wrapper .v-btn:hover {
