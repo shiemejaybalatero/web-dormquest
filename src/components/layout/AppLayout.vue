@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
         <span class="ftext ms-10 font-weight-bold">DORM</span>
-        <span class="stext font-weight-bold">QUEST</span>
+        <span class="stext font-weight-bold text-white">QUEST</span>
       </router-link>
 
       <!-- Logo for mobile/small screens -->
@@ -238,15 +238,28 @@ onBeforeUnmount(() => {
   font-size: larger;
 }
 
+/* gi wala ang admin bg
+
 .gradient-bg {
   background-image: url('/bg-admin.jpg');
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;
 }
+  */
+
+.gradient-bg {
+  background-color: #fffdf6;
+  height: 100vh;
+  padding: 1rem;
+  overflow-y: auto;
+}
 
 .gradient-app-bar {
+  /*
   background: linear-gradient(290deg, #fffae6, #6d9773);
+  */
+  background-color: #0c3b2e;
   color: #000;
 }
 

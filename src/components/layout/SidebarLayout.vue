@@ -43,10 +43,10 @@ const onLogout = async () => {
     >
       <v-list-item :class="{ selected: route.path === link.path }" class="mb-2">
         <div class="d-flex align-center pl-2">
-          <v-icon :color="route.path === link.path ? '#0c3b2e' : ''" class="mr-2">
+          <v-icon :color="route.path === link.path ? '#ffffff' : '#ffffff'" class="mr-2">
             {{ link.icon }}
           </v-icon>
-          <span class="font-weight-bold text-body-1">{{ link.title }}</span>
+          <span class="font-weight text-body-1 text-white">{{ link.title }}</span>
         </div>
       </v-list-item>
     </router-link>
@@ -58,8 +58,8 @@ const onLogout = async () => {
       :disabled="formAction.formProcess"
     >
       <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2" :color="'#0c3b2e'"> mdi-logout </v-icon>
-        <span class="font-weight-bold text-body-1">Log out</span>
+        <v-icon class="mr-2" :color="'#ffffff'"> mdi-logout </v-icon>
+        <span class="font-weight text-body-1 text-white">Log out</span>
       </div>
     </v-list-item>
   </v-list>
@@ -68,7 +68,7 @@ const onLogout = async () => {
 <style scoped>
 .sidebar {
   min-height: 40vh;
-  background: linear-gradient(180deg, #dbead3, #6d9773);
+  background: #0c3b2e;
   border-radius: 16px;
 }
 

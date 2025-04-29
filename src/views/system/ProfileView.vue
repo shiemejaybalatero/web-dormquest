@@ -124,7 +124,7 @@ onMounted(() => {
           <div class="profile-section d-flex flex-column align-center justify-center pa-6">
             <div class="profile-wrapper">
               <div class="d-flex justify-space-between align-center mb-6 w-100">
-                <h3 class="font-weight-bold mb-0">Profile Information</h3>
+                <h3 class="font-weight-bold mb-0 text-white">Profile Information</h3>
               </div>
 
               <v-card class="pa-6 profile-card" flat>
@@ -213,7 +213,10 @@ onMounted(() => {
 
 <style scoped>
 .profile-section {
+  /*
   background: linear-gradient(180deg, #dbead3, #6d9773);
+  */
+  background-color: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
   padding-top: 24px;
