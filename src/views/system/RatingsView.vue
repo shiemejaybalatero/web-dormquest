@@ -4,38 +4,18 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
+import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useAuthUserStore()
 
-const profileImage = ref(null)
-const fileInput = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
 
-// User data
-const name = ref('')
-const email = ref('')
+// User ratings
 const averageRating = ref(0)
-
-// User's ratings
 const userRatings = ref([])
-
-const triggerFileInput = () => {
-  fileInput.value.click()
-}
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      profileImage.value = e.target.result
-    }
-    reader.readAsDataURL(file)
-  }
-}
 
 // Function to set active sidebar item
 const activeItem = ref(route.path)
@@ -106,26 +86,12 @@ const viewDormitory = (dormId) => {
   router.push({ name: 'dorm-details', params: { id: dormId } })
 }
 
-// Load user data
-const fetchUserProfile = async () => {
-  try {
-    // First try to get user from current session
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    const user = session?.user || userStore.user
-
-    if (user) {
-      name.value = user.user_metadata?.full_name || user.email || 'User'
-      email.value = user.email || ''
-    }
-  } catch (error) {
-    console.error('Error fetching user profile:', error)
-  }
-}
-
 onMounted(async () => {
-  await fetchUserProfile()
+  // Load user profile data if not already loaded
+  if (!userProfile.id) {
+    await fetchUserProfile()
+  }
+
   // Only fetch ratings if we're not using dummy data (real user is logged in)
   if (userStore.user || (await supabase.auth.getSession()).data.session?.user) {
     fetchUserRatings()
@@ -189,28 +155,43 @@ onMounted(async () => {
         <!-- Ratings Section -->
         <v-col cols="12" md="9">
           <div class="ratings-section pa-6">
-            <!-- Profile header -->
+            <!-- Profile header - Updated to rely on profileView -->
             <v-row align="center">
               <v-col cols="12" md="3" class="text-center py-4">
-                <v-avatar size="100">
+                <!-- Avatar from profileView with no upload functionality -->
+                <v-avatar size="100" color="grey-lighten-2">
+                  <!-- Show loading indicator while user data is being fetched -->
+                  <template v-if="isLoadingUser">
+                    <v-progress-circular
+                      indeterminate
+                      size="50"
+                      color="primary"
+                    ></v-progress-circular>
+                  </template>
+
+                  <!-- Show avatar if available -->
                   <v-img
-                    :src="profileImage || 'https://via.placeholder.com/100'"
+                    v-else-if="userProfile.avatar_url"
+                    :src="userProfile.avatar_url"
                     alt="Profile Picture"
-                  />
+                  ></v-img>
+
+                  <!-- Show initials if no avatar -->
+                  <span v-else class="text-h4">{{ userProfile.initials }}</span>
                 </v-avatar>
-                <v-btn small class="mt-2" @click="triggerFileInput">Upload</v-btn>
-                <input
-                  ref="fileInput"
-                  type="file"
-                  style="display: none"
-                  accept="image/*"
-                  @change="handleFileUpload"
-                />
               </v-col>
 
               <v-col cols="12" md="9">
-                <h3 class="font-weight-bold mb-1">{{ name }}</h3>
-                <div class="text-grey-darken-1 mb-2">{{ email }}</div>
+                <!-- User details -->
+                <div v-if="isLoadingUser" class="d-flex align-center">
+                  <v-skeleton-loader type="text" width="200px" class="mb-2"></v-skeleton-loader>
+                </div>
+                <template v-else>
+                  <h3 class="font-weight-bold mb-1">{{ userProfile.fullname }}</h3>
+                  <div class="text-grey-darken-1 mb-2">{{ userProfile.email }}</div>
+                </template>
+
+                <!-- Ratings section -->
                 <div class="d-flex align-center">
                   <span class="mr-2 font-weight-bold">{{ averageRating.toFixed(1) }}</span>
                   <v-rating
