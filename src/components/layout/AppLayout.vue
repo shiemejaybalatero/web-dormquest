@@ -271,7 +271,6 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  margin-left: 25%;
 }
 
 .search-wrapper .v-btn:hover {
@@ -347,6 +346,13 @@ onBeforeUnmount(() => {
 
   .filter-row > .v-col {
     flex: 1 1 0;
+  }
+}
+
+@media (min-width: 960px) {
+  .search-wrapper {
+    justify-content: flex-start; /* Align left on large screens */
+    margin-left: 25%;
   }
 }
 </style>
