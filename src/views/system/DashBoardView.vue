@@ -1,11 +1,75 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { supabase } from '@/utils/supabase'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
+
+// Add reactive ratings state
+const dormRatings = ref({})
+
+const fetchAllRatings = async () => {
+  const { data, error } = await supabase.from('ratings').select('dormitory_id, rating_score')
+
+  if (error) {
+    console.error('Failed to fetch ratings:', error)
+    return
+  }
+
+  // Process the ratings by dormitory
+  const ratingsByDorm = {}
+
+  if (data && data.length) {
+    // Group ratings by dormitory_id
+    data.forEach((rating) => {
+      const dormId = rating.dormitory_id
+
+      if (!ratingsByDorm[dormId]) {
+        ratingsByDorm[dormId] = {
+          scores: [],
+          average: 0,
+          count: 0,
+        }
+      }
+
+      ratingsByDorm[dormId].scores.push(rating.rating_score)
+    })
+
+    // Calculate average for each dormitory
+    Object.keys(ratingsByDorm).forEach((dormId) => {
+      const scores = ratingsByDorm[dormId].scores
+      const sum = scores.reduce((acc, score) => acc + score, 0)
+      ratingsByDorm[dormId].average = sum / scores.length
+      ratingsByDorm[dormId].count = scores.length
+    })
+  }
+
+  dormRatings.value = ratingsByDorm
+  console.log('All dormitory ratings:', dormRatings.value)
+}
+
+// Improved getDormRating function
+const getDormRating = (dormId) => {
+  // First check if we have ratings from the ratings table
+  const dormRating = dormRatings.value[dormId]
+
+  if (dormRating && dormRating.count > 0) {
+    return {
+      average: dormRating.average.toFixed(1),
+      count: dormRating.count,
+      hasRating: true,
+    }
+  }
+
+  return {
+    average: '0.0',
+    count: 0,
+    hasRating: false,
+  }
+}
 
 const navigateToDorm = (dorm) => {
   router.push({ name: 'dorm-details', params: { id: dorm.id } })
@@ -26,6 +90,7 @@ const distanceRanges = [
 
 onMounted(() => {
   boardingHouseStore.fetchBoardingHouses()
+  fetchAllRatings() // Fetch ratings when component mounts
 })
 </script>
 
@@ -103,7 +168,15 @@ onMounted(() => {
                   <span class="text-body-1 font-weight-medium dorm-title">{{ dorm.name }}</span>
                   <div class="d-flex align-center">
                     <v-icon color="amber" size="18">mdi-star</v-icon>
-                    <span class="ml-1 text-body-2">{{ dorm.rating }}</span>
+                    <span class="ml-1 text-body-2">
+                      <template v-if="getDormRating(dorm.id).hasRating">
+                        {{ getDormRating(dorm.id).average }}
+                        <span class="text-caption"> ({{ getDormRating(dorm.id).count }}) </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-caption">No ratings</span>
+                      </template>
+                    </span>
                   </div>
                 </div>
                 <div class="text-subtitle-2 text-grey dorm-subtitle">

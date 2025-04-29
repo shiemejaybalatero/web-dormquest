@@ -2,7 +2,8 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase, formActionDefault } from '@/utils/supabase'
-import { getAvatarText } from '@/utils/helper'
+import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
+import EditProfile from '@/components/system/EditProfile.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,12 +14,6 @@ const drawer = ref(false)
 const search = ref('')
 
 const formAction = ref({ ...formActionDefault })
-
-const userData = ref({
-  initials: '',
-  email: '',
-  fullname: '',
-})
 
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
@@ -46,25 +41,20 @@ const scrollToTop = () => {
   }
 }
 
-const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser()
+// Control the visibility of the profile edit dialog
+const showProfileEditDialog = ref(false)
 
-  if (error) {
-    console.error('Error getting user:', error)
-    return
-  }
-
-  const metadata = data?.user?.user_metadata
-
-  if (metadata) {
-    userData.value.email = metadata.email || ''
-    userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
-    userData.value.initials = getAvatarText(userData.value.fullname)
-  }
+// Handle profile update event
+const handleProfileUpdated = () => {
+  // You might want to refresh profile data or perform other actions after update
+  console.log('Profile updated successfully')
 }
 
-onMounted(() => {
-  getUser()
+onMounted(async () => {
+  // Load user profile data
+  await fetchUserProfile()
+
+  // Add scroll event listener
   if (mainContent.value) {
     mainContent.value.$el.addEventListener('scroll', handleScroll)
   }
@@ -81,11 +71,27 @@ onBeforeUnmount(() => {
   <v-app>
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
-        <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
-        <v-list-item title="Settings" prepend-icon="mdi-cog" />
+        <v-list>
+          <v-list-item
+            title="Dashboard"
+            prepend-icon="mdi-view-dashboard"
+            :to="{ path: '/dashboard' }"
+            router
+            exact
+          />
+          <v-list-item title="Ratings" prepend-icon="mdi-star" :to="{ path: '/ratings' }" router />
+          <v-list-item
+            title="About App"
+            prepend-icon="mdi-information"
+            :to="{ path: '/about' }"
+            router
+          />
+        </v-list>
+
         <v-list-item />
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar app flat class="gradient-app-bar">
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
@@ -173,14 +179,16 @@ onBeforeUnmount(() => {
                       icon
                       v-bind="props"
                     >
-                      <v-avatar
-                        class="avatar-btn"
-                        :class="{
-                          'green-btn': ['/profile', '/ratings', '/about'].includes(route.path),
-                        }"
-                        size="large"
-                      >
-                        <span class="text-subtitle-2">{{ userData.initials }}</span>
+                      <v-avatar class="avatar-btn" size="large">
+                        <template v-if="isLoadingUser">
+                          <v-progress-circular indeterminate size="24" color="primary" />
+                        </template>
+                        <v-img
+                          v-else-if="userProfile.avatar_url"
+                          :src="userProfile.avatar_url"
+                          alt="User Avatar"
+                        />
+                        <span v-else class="text-subtitle-2">{{ userProfile.initials }}</span>
                       </v-avatar>
                     </v-btn>
                   </template>
@@ -188,22 +196,29 @@ onBeforeUnmount(() => {
                     <v-card-text>
                       <div class="mx-auto text-center">
                         <v-avatar color="orange">
-                          <span class="text-h5">{{ userData.initials }}</span>
+                          <template v-if="isLoadingUser">
+                            <v-progress-circular indeterminate size="24" color="white" />
+                          </template>
+                          <v-img
+                            v-else-if="userProfile.avatar_url"
+                            :src="userProfile.avatar_url"
+                            alt="User Avatar"
+                          />
+                          <span v-else class="text-h5">{{ userProfile.initials }}</span>
                         </v-avatar>
-                        <h3>{{ userData.fullName }}</h3>
-                        <p class="text-caption mt-1">
-                          {{ userData.email }}
-                        </p>
-                        <v-divider class="my-3"></v-divider>
+                        <h3>{{ userProfile.fullname }}</h3>
+                        <p class="text-caption mt-1">{{ userProfile.email }}</p>
+                        <v-divider class="my-3" />
                         <router-link to="/profile">
                           <v-btn variant="text" rounded class="mx-1 personal-info">
                             Personal Information
                           </v-btn>
                         </router-link>
-                        <v-divider class="my-3"></v-divider>
-                        <v-btn variant="text" rounded> Edit Account </v-btn>
-                        <v-divider class="my-3"></v-divider>
-
+                        <v-divider class="my-3" />
+                        <v-btn variant="text" rounded @click="showProfileEditDialog = true">
+                          Edit Account
+                        </v-btn>
+                        <v-divider class="my-3" />
                         <v-btn
                           prepend-icon="mdi-logout"
                           variant="plain"
@@ -235,6 +250,13 @@ onBeforeUnmount(() => {
         </template>
       </div>
     </v-main>
+
+    <!-- Move EditProfile here so it's always mounted -->
+    <EditProfile
+      v-model="showProfileEditDialog"
+      :userData="userProfile"
+      @profile-updated="handleProfileUpdated"
+    />
   </v-app>
 </template>
 
@@ -311,7 +333,7 @@ onBeforeUnmount(() => {
 }
 
 .search-wrapper .v-btn:hover {
-  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
+  background-color: rgba(0, 128, 0, 0.1);
   transform: scale(1.1);
   transition:
     background-color 0.2s ease,
