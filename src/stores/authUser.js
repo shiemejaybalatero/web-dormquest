@@ -3,135 +3,184 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useAuthUserStore = defineStore('authUser', () => {
-  // States
-  const userData = ref(null)
+  // State
+  const user = ref(null)
+  const loading = ref(false)
+  const error = ref(null)
   const authPages = ref([])
   const authBranchIds = ref([])
 
   // Getters
-  // Computed Properties; Use for getting the state but not modifying its reactive state
+  const isAuthenticated = computed(() => !!user.value)
+  const userId = computed(() => user.value?.id)
+  const userEmail = computed(() => user.value?.email)
+  const userMetadata = computed(() => user.value?.user_metadata)
   const userRole = computed(() => {
-    return userData.value?.is_admin ? 'Super Administrator' : userData.value.user_role
+    return user.value?.is_admin ? 'Super Administrator' : user.value?.user_role
   })
 
-  // Reset State Action
-  function $reset() {
-    userData.value = null
+  // Reset state
+  function resetState() {
+    user.value = null
+    loading.value = false
+    error.value = null
     authPages.value = []
     authBranchIds.value = []
   }
 
-  // Actions
-  // Retrieve User Session if Logged
-  async function isAuthenticated() {
-    const { data } = await supabase.auth.getSession()
-
-    if (data.session) {
-      const { id, email, user_metadata } = data.session.user
-      userData.value = { id, email, ...user_metadata }
+  // Load session
+  async function loadUser() {
+    loading.value = true
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      user.value = session?.user || null
+    } catch (err) {
+      console.error('Error loading user:', err)
+      error.value = 'Failed to load user data'
+    } finally {
+      loading.value = false
     }
-
-    return !!data.session
   }
 
-  // Retrieve User Information
-  async function getUserInformation() {
-    const {
-      data: {
-        // Retrieve Id, Email and Metadata thru Destructuring
-        user: { id, email, user_metadata },
-      },
-    } = await supabase.auth.getUser()
-
-    // Set the retrieved information to state
-    userData.value = { id, email, ...user_metadata }
+  // Sign in
+  async function signIn({ email, password }) {
+    loading.value = true
+    error.value = null
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+      if (authError) throw authError
+      user.value = data.user
+      return data
+    } catch (err) {
+      console.error('Login error:', err)
+      error.value = err.message || 'Failed to sign in'
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
-  // Retrieve User Roles Pages
-  async function getAuthPages(name) {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('*, pages: user_role_pages (page)')
-      .eq('user_role', name)
-
-    // Set the retrieved data to state
-    if (data.length > 0) authPages.value = data[0].pages.map((p) => p.page)
+  // Sign out
+  async function signOut() {
+    loading.value = true
+    try {
+      await supabase.auth.signOut()
+      user.value = null
+    } catch (err) {
+      console.error('Logout error:', err)
+      error.value = 'Failed to sign out'
+    } finally {
+      loading.value = false
+    }
   }
 
-  // Retrieve Branch Ids
-  async function getAuthBranchIds() {
-    const { data } = await supabase
-      .from('branches')
-      .select('id')
-      .in('name', userData.value.branch.split(','))
+  // Update profile
+  async function updateProfile(profileData) {
+    if (!user.value) return null
 
-    authBranchIds.value = data.map((b) => b.id)
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: updateError } = await supabase.auth.updateUser({ data: profileData })
+      if (updateError) throw updateError
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: user.value.id,
+        ...profileData,
+        updated_at: new Date(),
+      })
+
+      if (profileError) throw profileError
+
+      user.value = data.user
+      return data.user
+    } catch (err) {
+      console.error('Profile update error:', err)
+      error.value = err.message || 'Failed to update profile'
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
-  // Update User Information
+  // Update metadata (user information)
   async function updateUserInformation(updatedData) {
     const {
       data: {
-        // Retrieve Id, Email and Metadata thru Destructuring
         user: { id, email, user_metadata },
       },
       error,
-    } = await supabase.auth.updateUser({
-      data: {
-        ...updatedData,
-      },
-    })
+    } = await supabase.auth.updateUser({ data: updatedData })
 
-    // Check if it has error
-    if (error) {
-      return { error }
-    }
-    // If no error set updatedData to userData state
-    else if (user_metadata) {
-      userData.value = { id, email, ...user_metadata }
+    if (error) return { error }
 
-      return { data: userData.value }
-    }
+    user.value = { id, email, ...user_metadata }
+    return { data: user.value }
   }
 
-  // Update User Profile Image
+  // Upload user image
   async function updateUserImage(file) {
-    // Get the file extension from the uploaded file
-    // const fileExtension = file.name.split('.').pop()
-
-    // Upload the file with the user ID and file extension
     const { data, error } = await supabase.storage
-      .from('shirlix')
-      .upload('avatars/' + userData.value.id + '-avatar.png', file, {
+      .from('dormquest')
+      .upload('avatars/' + user.value.id + '-avatar.png', file, {
         cacheControl: '3600',
         upsert: true,
       })
 
-    // Check if it has error
-    if (error) {
-      return { error }
-    }
-    // If no error set data to userData state with the image_url
-    else if (data) {
-      // Retrieve Image Public Url
-      const { data: imageData } = supabase.storage.from('shirlix').getPublicUrl(data.path)
+    if (error) return { error }
 
-      // Update the user information with the new image_url
-      return await updateUserInformation({ ...userData.value, image_url: imageData.publicUrl })
-    }
+    const { data: imageData } = supabase.storage.from('dormquest').getPublicUrl(data.path)
+    return await updateUserInformation({ ...user.value, image_url: imageData.publicUrl })
+  }
+
+  // Fetch auth pages
+  async function getAuthPages(roleName) {
+    const { data } = await supabase
+      .from('user_roles')
+      .select('*, pages: user_role_pages (page)')
+      .eq('user_role', roleName)
+
+    if (data?.length > 0) authPages.value = data[0].pages.map((p) => p.page)
+  }
+
+  // Fetch branch IDs
+  async function getAuthBranchIds() {
+    if (!user.value?.branch) return
+    const { data } = await supabase
+      .from('branches')
+      .select('id')
+      .in('name', user.value.branch.split(','))
+
+    authBranchIds.value = data.map((b) => b.id)
   }
 
   return {
-    userData,
-    userRole,
+    // State
+    user,
+    loading,
+    error,
     authPages,
     authBranchIds,
-    $reset,
+
+    // Getters
     isAuthenticated,
-    getUserInformation,
-    getAuthPages,
-    getAuthBranchIds,
+    userId,
+    userEmail,
+    userMetadata,
+    userRole,
+
+    // Actions
+    resetState,
+    loadUser,
+    signIn,
+    signOut,
+    updateProfile,
     updateUserInformation,
     updateUserImage,
+    getAuthPages,
+    getAuthBranchIds,
   }
 })

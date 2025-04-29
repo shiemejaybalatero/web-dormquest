@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "axios": "^1.9.0",
     "bootstrap-icons": "^1.11.3",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "leaflet": "^1.9.4",
     "leaflet.locatecontrol": "^0.84.1",
@@ -22,7 +23,7 @@
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vuetify": "^3.7.19"
+    "vuetify": "^3.8.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
