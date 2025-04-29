@@ -34,7 +34,7 @@ const onLogout = async () => {
 </script>
 
 <template>
-  <v-list dense nav class="sidebar pa-4">
+  <v-list dense nav class="sidebar pa-4 ma-0">
     <router-link
       v-for="link in links"
       :key="link.path"
@@ -67,7 +67,7 @@ const onLogout = async () => {
 
 <style scoped>
 .sidebar {
-  min-height: 40vh;
+  min-height: 65vh;
   background: #0c3b2e;
   border-radius: 16px;
 }
