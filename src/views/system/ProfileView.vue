@@ -37,11 +37,26 @@ const isSaving = ref(false)
 const editError = ref('')
 const avatarFile = ref(null)
 
-// Functions for profile logic (same as before)
+const fileInputRef = ref(null)
+
+const triggerFileInput = () => {
+  if (fileInputRef.value) {
+    fileInputRef.value.$el.querySelector('input[type="file"]').click()
+  }
+}
+
+const handleEditFileUpload = (e) => {
+  avatarFile.value = e.target.files[0]
+}
+
+/* Functions for profile logic (same as before)
 const triggerFileInput = () => {}
 const handleEditFileUpload = (e) => {
   avatarFile.value = e.target.files[0]
 }
+pulihan again -zyeke
+*/
+
 const getUser = async () => {
   formAction.value.formProcess = true
   const { data, error } = await supabase.auth.getUser()
@@ -183,15 +198,36 @@ onMounted(() => {
                         :items="['Male', 'Female', 'Rather not to say']"
                         label="Gender"
                       />
+
+                      <v-file-input
+                        ref="fileInputRef"
+                        label="Upload New Avatar"
+                        accept="image/*"
+                        style="display: none"
+                        @change="handleEditFileUpload"
+                      />
+                      <v-row class="mt-3" align="center" justify="space-between">
+                        <v-col cols="auto">
+                          <v-btn @click="triggerFileInput" color="primary"> Choose Avatar </v-btn>
+                        </v-col>
+                        <v-spacer />
+
+                        <v-col cols="auto">
+                          <v-btn color="success" :loading="isSaving" @click="saveChanges">
+                            Save Changes
+                          </v-btn>
+                        </v-col>
+
+                        <span v-if="avatarFile" class="mt-2">{{ avatarFile.name }}</span>
+                      </v-row>
+
+                      <!-- pulihan sa nako kay nag error -zyeke
                       <v-file-input
                         label="Upload New Avatar"
                         accept="image/*"
                         @change="handleEditFileUpload"
                       />
-
-                      <v-btn class="mt-3" color="success" :loading="isSaving" @click="saveChanges">
-                        Save Changes
-                      </v-btn>
+                      -->
 
                       <div v-if="editError" class="error-text mt-2">{{ editError }}</div>
                     </v-card>
