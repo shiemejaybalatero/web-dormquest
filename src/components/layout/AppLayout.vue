@@ -93,10 +93,17 @@ onBeforeUnmount(() => {
         <span class="stext font-weight-bold text-white">QUEST</span>
       </router-link>
 
-      <!-- Logo for mobile/small screens not working -->
+      <!-- Logo for mobile/small screens not working
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
         <span class="stext font-weight-bold text-subtitle-3 ms-2">QUEST</span>
+      </router-link>
+      -->
+
+      <!-- Logo for mobile/small screens -->
+      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
+        <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
+        <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
       </router-link>
 
       <v-spacer />
