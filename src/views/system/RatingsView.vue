@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
+import SidebarLayout from '@/components/layout/SidebarLayout.vue'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
@@ -17,11 +18,20 @@ const errorMessage = ref('')
 const averageRating = ref(0)
 const userRatings = ref([])
 
+/*
 // Function to set active sidebar item
 const activeItem = ref(route.path)
 const setActiveItem = (path) => {
   activeItem.value = path
 }
+  */
+
+// Sidebar links
+const sidebarLinks = [
+  { title: 'Personal Information', icon: 'mdi-account', path: '/profile' },
+  { title: 'Ratings', icon: 'mdi-star', path: '/ratings' },
+  { title: 'About App', icon: 'mdi-information', path: '/about' },
+]
 
 // Fetch user ratings from Supabase
 const fetchUserRatings = async () => {
@@ -105,167 +115,133 @@ onMounted(async () => {
       <v-row>
         <!-- Sidebar -->
         <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/profile')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-account
-                  </v-icon>
-                  <span class="icon-name">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/ratings')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-star
-                  </v-icon>
-                  <span class="icon-name">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/about" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/about')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-information
-                  </v-icon>
-                  <span class="icon-name">About App</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-logout
-                  </v-icon>
-                  <span class="icon-name">Log Out</span>
-                </div>
-              </v-list-item>
-            </router-link>
-          </v-list>
+          <SidebarLayout :links="sidebarLinks" />
         </v-col>
 
         <!-- Ratings Section -->
         <v-col cols="12" md="9">
-          <div class="ratings-section pa-6">
-            <!-- Profile header - Updated to rely on profileView -->
-            <v-row align="center">
-              <v-col cols="12" md="3" class="text-center py-4">
-                <!-- Avatar from profileView with no upload functionality -->
-                <v-avatar size="100" color="grey-lighten-2">
-                  <!-- Show loading indicator while user data is being fetched -->
-                  <template v-if="isLoadingUser">
-                    <v-progress-circular
-                      indeterminate
-                      size="50"
-                      color="primary"
-                    ></v-progress-circular>
-                  </template>
-
-                  <!-- Show avatar if available -->
-                  <v-img
-                    v-else-if="userProfile.avatar_url"
-                    :src="userProfile.avatar_url"
-                    alt="Profile Picture"
-                  ></v-img>
-
-                  <!-- Show initials if no avatar -->
-                  <span v-else class="text-h4">{{ userProfile.initials }}</span>
-                </v-avatar>
-              </v-col>
-
-              <v-col cols="12" md="9">
-                <!-- User details -->
-                <div v-if="isLoadingUser" class="d-flex align-center">
-                  <v-skeleton-loader type="text" width="200px" class="mb-2"></v-skeleton-loader>
-                </div>
-                <template v-else>
-                  <h3 class="font-weight-bold mb-1">{{ userProfile.fullname }}</h3>
-                  <div class="text-grey-darken-1 mb-2">{{ userProfile.email }}</div>
-                </template>
-
-                <!-- Ratings section -->
-                <div class="d-flex align-center">
-                  <span class="mr-2 font-weight-bold">{{ averageRating.toFixed(1) }}</span>
-                  <v-rating
-                    :model-value="averageRating"
-                    half-increments
-                    color="#FFD700"
-                    background-color="#d0d0d0"
-                    size="24"
-                    readonly
-                  />
-                  <span class="ml-2 text-grey-darken-1">({{ userRatings.length }} ratings)</span>
-                </div>
-              </v-col>
-            </v-row>
-
-            <v-divider class="my-5" />
-
-            <!-- Loading state -->
-            <div v-if="loading" class="text-center py-5">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
-              <div class="mt-2">Loading your ratings...</div>
-            </div>
-
-            <!-- Error message -->
-            <v-alert v-if="errorMessage" type="error" class="mb-4">
-              {{ errorMessage }}
-              <div class="mt-2">
-                <v-btn @click="fetchUserRatings" variant="outlined" size="small">Try Again</v-btn>
+          <div class="ratings-section d-flex flex-column align-center justify-center pa-6">
+            <div class="ratings-wrapper">
+              <div class="d-flex justify-space-between align-center mb-6 w-100">
+                <h3 class="font-weight-bold mb-0 text-white">Your Ratings</h3>
               </div>
-            </v-alert>
 
-            <!-- No ratings message -->
-            <div
-              v-if="!loading && !errorMessage && userRatings.length === 0"
-              class="text-center py-5"
-            >
-              <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
-              <h4 class="mt-3 text-grey-darken-1">You haven't rated any dormitories yet</h4>
-              <v-btn color="primary" class="mt-3" @click="router.push({ name: 'dashboard' })">
-                Browse Dormitories
-              </v-btn>
-            </div>
+              <v-card class="pa-6 ratings-card" flat>
+                <!-- Profile header - Updated to rely on profileView -->
+                <v-row align="center">
+                  <v-col cols="12" md="3" class="text-center py-4">
+                    <!-- Avatar from profileView with no upload functionality -->
+                    <v-avatar size="100" color="grey-lighten-2">
+                      <!-- Show loading indicator while user data is being fetched -->
+                      <template v-if="isLoadingUser">
+                        <v-progress-circular indeterminate size="50" color="primary" />
+                      </template>
 
-            <!-- Ratings list -->
-            <template v-if="!loading && !errorMessage && userRatings.length > 0">
-              <h4 class="font-weight-medium mb-4">Your Ratings ({{ userRatings.length }})</h4>
-              <div class="ratings-scroll">
-                <v-row>
-                  <v-col cols="12" v-for="(dorm, index) in userRatings" :key="index">
-                    <div class="rating-card px-4 py-3" @click="viewDormitory(dorm.dormId)">
-                      <div class="d-flex justify-space-between align-center">
-                        <div>
-                          <div class="font-weight-medium text-subtitle-1">{{ dorm.name }}</div>
-                          <div class="text-caption text-grey-darken-1">
-                            Rated on {{ dorm.date }}
-                          </div>
-                          <div v-if="dorm.comment" class="text-body-2 mt-1">{{ dorm.comment }}</div>
-                        </div>
-                        <div class="text-right">
-                          <v-rating
-                            :model-value="dorm.rating"
-                            half-increments
-                            color="#FFD700"
-                            background-color="#d0d0d0"
-                            size="22"
-                            readonly
-                          />
-                        </div>
-                      </div>
+                      <!-- Show avatar if available -->
+                      <v-img
+                        v-else-if="userProfile.avatar_url"
+                        :src="userProfile.avatar_url"
+                        alt="Profile Picture"
+                      />
+
+                      <!-- Show initials if no avatar -->
+                      <span v-else class="text-h4">{{ userProfile.initials }}</span>
+                    </v-avatar>
+                  </v-col>
+
+                  <v-col cols="12" md="9">
+                    <!-- User details -->
+                    <div v-if="isLoadingUser" class="d-flex align-center">
+                      <v-skeleton-loader type="text" width="200px" class="mb-2"></v-skeleton-loader>
+                    </div>
+                    <template v-else>
+                      <h3 class="font-weight-bold mb-1">{{ userProfile.fullname }}</h3>
+                      <div class="text-grey-darken-1 mb-2">{{ userProfile.email }}</div>
+                    </template>
+
+                    <!-- Ratings section -->
+                    <div class="d-flex align-center">
+                      <span class="mr-2 font-weight-bold">{{ averageRating.toFixed(1) }}</span>
+                      <v-rating
+                        :model-value="averageRating"
+                        half-increments
+                        color="#FFD700"
+                        background-color="#d0d0d0"
+                        size="24"
+                        readonly
+                      />
+                      <span class="ml-2 text-grey-darken-1"
+                        >({{ userRatings.length }} ratings)</span
+                      >
                     </div>
                   </v-col>
                 </v-row>
-              </div>
-            </template>
+
+                <v-divider class="my-5" />
+
+                <!-- Loading state -->
+                <div v-if="loading" class="text-center py-5">
+                  <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                  <div class="mt-2">Loading your ratings...</div>
+                </div>
+
+                <!-- Error message -->
+                <v-alert v-if="errorMessage" type="error" class="mb-4">
+                  {{ errorMessage }}
+                  <div class="mt-2">
+                    <v-btn @click="fetchUserRatings" variant="outlined" size="small"
+                      >Try Again</v-btn
+                    >
+                  </div>
+                </v-alert>
+
+                <!-- No ratings message -->
+                <div
+                  v-if="!loading && !errorMessage && userRatings.length === 0"
+                  class="text-center py-5"
+                >
+                  <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
+                  <h4 class="mt-3 text-grey-darken-1">You haven't rated any dormitories yet</h4>
+                  <v-btn color="primary" class="mt-3" @click="router.push({ name: 'dashboard' })">
+                    Browse Dormitories
+                  </v-btn>
+                </div>
+
+                <!-- Ratings list -->
+                <template v-if="!loading && !errorMessage && userRatings.length > 0">
+                  <h4 class="font-weight-medium mb-4">Your Ratings ({{ userRatings.length }})</h4>
+                  <div class="ratings-scroll">
+                    <v-row>
+                      <v-col cols="12" v-for="(dorm, index) in userRatings" :key="index">
+                        <div class="rating-card" @click="viewDormitory(dorm.dormId)">
+                          <div class="d-flex justify-space-between align-center">
+                            <div>
+                              <div class="font-weight-medium text-subtitle-1">{{ dorm.name }}</div>
+                              <div class="text-caption text-grey-darken-1">
+                                Rated on {{ dorm.date }}
+                              </div>
+                              <div v-if="dorm.comment" class="text-body-2 mt-1">
+                                {{ dorm.comment }}
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <v-rating
+                                :model-value="dorm.rating"
+                                half-increments
+                                color="#FFD700"
+                                background-color="#d0d0d0"
+                                size="22"
+                                readonly
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </div>
+                </template>
+              </v-card>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -275,83 +251,69 @@ onMounted(async () => {
 
 <style scoped>
 .sidebar {
-  min-height: 40vh;
-  background: transparent;
+  position: sticky;
+  top: 20px;
+  min-height: 65vh;
+  background: #0c3b2e;
   border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
 }
-
-.icon-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+.side-path {
+  color: inherit;
+  text-decoration: none;
 }
-
-.icon-name {
-  margin-left: 10px;
-  font-size: 14px;
-  color: #fff;
-  opacity: 0;
-  transition:
-    opacity 0.3s ease,
-    color 0.3s ease;
-  font-weight: bolder;
-}
-
-.icon-container:hover .icon-name {
-  opacity: 1;
-  font-weight: 700;
+.selected {
+  background-color: #ffba00 !important;
+  border-radius: 20px;
   color: #0c3b2e;
 }
-
-.icon {
-  font-size: 25px;
-  border-radius: 100%;
-  background-color: #0c3b2e;
-  padding: 20px;
-  color: white;
-  transition:
-    background-color 0.5s ease,
-    box-shadow 0.5s ease;
+.cursor-pointer {
   cursor: pointer;
 }
-
-.icon-container:hover .icon {
-  background-color: #ffba00;
-  box-shadow: 0 1px 5px rgba(249, 241, 3, 0.3);
-}
-
-.icon-container {
+.v-list-item .d-flex {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 8px;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
 }
-
-.icon-container:hover {
-  background-color: rgba(255, 186, 0, 0.1);
-  border-color: #ffba00;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+.v-list-item .v-icon {
+  margin-right: 12px;
 }
-
+.v-icon {
+  color: #ffffff;
+}
+.v-list-item span {
+  color: #ffffff;
+  font-weight: bold;
+}
+.v-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
 .ratings-section {
-  background: white;
+  background-color: #0c3b2e;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 65vh;
+  padding-top: 24px;
+  padding-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
+.ratings-wrapper {
+  width: 100%;
+  max-width: 900px;
+}
+.ratings-card {
+  background-color: #fffdf6;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+.ratings-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
 .rating-card {
   background: #f5f5f5;
   border-radius: 12px;
@@ -360,14 +322,13 @@ onMounted(async () => {
     box-shadow 0.2s;
   cursor: pointer;
   position: relative;
+  padding: 16px;
 }
-
 .rating-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #f0f0f0;
 }
-
 .rating-card::after {
   content: '';
   position: absolute;
@@ -381,14 +342,7 @@ onMounted(async () => {
   background-size: contain;
   transition: opacity 0.2s;
 }
-
 .rating-card:hover::after {
   opacity: 0.5;
-}
-
-.ratings-scroll {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 8px;
 }
 </style>
