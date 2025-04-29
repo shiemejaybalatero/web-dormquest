@@ -289,10 +289,17 @@ onBeforeUnmount(() => {
 }
   */
 
+/*
 .gradient-bg {
   background-color: #fffdf6;
   padding: 1rem;
-  /* REMOVE height: 100vh and overflow-y: auto */
+  /* REMOVE height: 100vh and overflow-y: auto
+} */
+
+.gradient-bg {
+  background-color: #fffdf6;
+  min-height: 100vh;
+  padding-bottom: 2rem;
 }
 
 .gradient-app-bar {
@@ -329,7 +336,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .search-wrapper .v-btn:hover {
