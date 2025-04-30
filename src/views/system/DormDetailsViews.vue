@@ -219,7 +219,7 @@ const closeCarousel = () => {
                 <v-img
                   :src="mainImage"
                   height="350"
-                  class="rounded-xl mb-4 cursor-pointer hover-effect"
+                  class="rounded-xl cursor-pointer hover-effect"
                   cover
                   @click="openCarouselWithMainImage()"
                 />
@@ -227,7 +227,7 @@ const closeCarousel = () => {
 
               <!-- Gallery Images -->
               <v-col cols="12" md="6">
-                <v-row dense class="mb-4">
+                <v-row dense>
                   <v-col v-for="(img, index) in galleryImages" :key="index" cols="6" md="6">
                     <v-img
                       :src="img"
@@ -273,12 +273,6 @@ const closeCarousel = () => {
                       <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
                       <p class="mb-0">Owner</p>
                     </div>
-                  </div>
-
-                  <!-- Right: Rating -->
-                  <div class="d-flex align-center pe-3">
-                    <v-icon color="amber" size="18">mdi-star</v-icon>
-                    <span class="ml-1 text-body-2">{{ dormDetails.rating }}</span>
                   </div>
                 </v-row>
 

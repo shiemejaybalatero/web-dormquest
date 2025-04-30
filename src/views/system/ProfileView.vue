@@ -114,23 +114,18 @@ onMounted(() => {
   <AppLayout>
     <template #content>
       <v-row>
-        <!-- Sidebar -->
-        <v-col cols="12" md="3">
-          <SidebarLayout :links="sidebarLinks" />
-        </v-col>
-
         <!-- Profile Information -->
-        <v-col cols="12" md="9">
-          <div class="profile-section d-flex flex-column align-center justify-center pa-6">
+        <v-col cols="12" md="7">
+          <div class="profile-section d-flex flex-column align-center justify-center">
             <div class="profile-wrapper">
               <div class="d-flex justify-space-between align-center mb-6 w-100">
-                <h3 class="font-weight-bold mb-0">Profile Information</h3>
+                <h3 class="font-weight-bold mb-0 text-profile ms-3">Personal Information</h3>
               </div>
 
-              <v-card class="pa-6 profile-card" flat>
+              <v-card class="pa-10 profile-card" flat>
                 <v-row>
                   <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
-                    <v-avatar class="mt-5" size="200">
+                    <v-avatar class="mt-5" size="250">
                       <v-img
                         :src="
                           profileImage ||
@@ -201,6 +196,11 @@ onMounted(() => {
             </div>
           </div>
 
+          <!-- Sidebar -->
+          <v-col cols="12" md="4">
+            <SidebarLayout :links="sidebarLinks" />
+          </v-col>
+
           <!-- Loading overlay -->
           <v-overlay :model-value="formAction.formProcess" class="align-center justify-center">
             <v-progress-circular indeterminate size="64" />
@@ -213,7 +213,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-section {
-  background: linear-gradient(180deg, #dbead3, #6d9773);
+  background-color: transparent;
   border-radius: 16px;
   min-height: 65vh;
   padding-top: 24px;
@@ -221,6 +221,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #000;
 }
 
 .profile-wrapper {
@@ -255,5 +256,10 @@ onMounted(() => {
 .error-text {
   color: #ff5252;
   font-size: 0.75rem;
+}
+
+.text-profile {
+  font-size: 25px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 </style>
