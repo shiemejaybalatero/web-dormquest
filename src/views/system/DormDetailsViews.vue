@@ -9,6 +9,8 @@ const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
+const showCarousel = ref(false) // New ref to control carousel visibility
+const selectedImageIndex = ref(0) // New ref to track which image was clicked
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
@@ -137,12 +139,55 @@ watch(
     }
   },
 )
+
+const carouselSection = ref(null)
+
+// Open carousel with main image
+const openCarouselWithMainImage = () => {
+  selectedImageIndex.value = 0 // Main image is usually first
+  showCarousel.value = true
+  // Prevent scrolling on the body when modal is open
+  document.body.style.overflow = 'hidden'
+}
+
+// Open carousel with gallery image
+const openCarouselWithGalleryImage = (index) => {
+  selectedImageIndex.value = index
+  showCarousel.value = true
+  // Prevent scrolling on the body when modal is open
+  document.body.style.overflow = 'hidden'
+}
+
+// Close carousel
+const closeCarousel = () => {
+  showCarousel.value = false
+  // Restore scrolling when modal is closed
+  document.body.style.overflow = 'auto'
+}
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-container fluid>
+      <!-- Modal Carousel Overlay - only visible when showCarousel is true -->
+      <div v-if="showCarousel" class="carousel-overlay">
+        <div class="carousel-modal">
+          <div class="d-flex justify-end pa-2">
+            <v-btn icon @click="closeCarousel" class="close-btn">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <v-carousel :model-value="selectedImageIndex" height="80vh" hide-delimiters>
+            <v-carousel-item
+              v-for="(img, index) in galleryImages"
+              :key="index"
+              :src="img"
+              contain
+            />
+          </v-carousel>
+        </div>
+      </div>
+      <v-container>
         <!-- Back button -->
         <v-btn class="mb-4" variant="text" prepend-icon="mdi-arrow-left" @click="goBack">
           Back to Dashboard
@@ -167,7 +212,17 @@ watch(
         <!-- Dormitory details when loaded -->
         <v-row v-if="dormDetails && !loading">
           <v-col cols="12" md="6">
-            <v-img :src="mainImage" height="350" class="rounded-xl mb-4" cover />
+            <!-- Main image clickable to open carousel -->
+            <v-img
+              :src="mainImage"
+              height="350"
+              class="rounded-xl mb-4 cursor-pointer"
+              cover
+              @click="openCarouselWithMainImage"
+            />
+
+            <!-- Reference div for scroll position -->
+            <div ref="carouselSection"></div>
 
             <h2 class="top font-weight-bold">{{ dormDetails.name }}</h2>
             <p class="down mb-5">
@@ -210,8 +265,9 @@ watch(
               <!-- Messenger Section -->
               <v-col cols="6">
                 <v-btn
-                  class="w-100 d-flex align-center justify-center"
-                  @click="toggleMessenger"
+                  class="w-100 d-flex align-center justify-center messenger-btn"
+                  @mouseenter="showFacebook = true"
+                  @mouseleave="showFacebook = false"
                   style="text-transform: none"
                 >
                   <v-icon class="mr-2">mdi-facebook</v-icon>
@@ -234,10 +290,11 @@ watch(
               </v-col>
 
               <!-- Contact Section -->
-              <v-col cols="6">
+              <v-col cols="6 mobile-phone">
                 <v-btn
-                  class="w-100 d-flex align-center justify-center"
-                  @click="toggleContact"
+                  class="w-100 d-flex align-center justify-center phone-btn"
+                  @mouseenter="showContact = true"
+                  @mouseleave="showContact = false"
                   style="text-transform: none"
                 >
                   <v-icon class="mr-2">mdi-phone</v-icon>
@@ -271,7 +328,13 @@ watch(
           <v-col cols="12" md="6">
             <v-row dense class="mb-4">
               <v-col v-for="(img, index) in galleryImages" :key="index" cols="6" md="6">
-                <v-img :src="img" height="170" class="rounded" cover />
+                <v-img
+                  :src="img"
+                  height="170"
+                  class="rounded cursor-pointer"
+                  cover
+                  @click="openCarouselWithGalleryImage(index)"
+                />
               </v-col>
             </v-row>
 
@@ -359,6 +422,24 @@ watch(
   color: #0c3b2e;
 }
 
+.messenger-btn,
+.phone-btn {
+  background-color: #0c3b2e; /* Facebook Blue */
+  color: white;
+}
+
+.messenger-btn:hover {
+  background-color: #b19470;
+}
+
+.phone-btn:hover {
+  background-color: #b19470;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .price {
     font-size: 20px;
@@ -381,5 +462,38 @@ watch(
 
 .down {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+/* Modal Carousel Overlay Styles */
+.carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.carousel-modal {
+  width: 90%;
+  max-width: 1200px;
+  background-color: transparent;
+  border-radius: 8px;
+  position: relative;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1001;
+  background-color: rgba(255, 255, 255, 0.7) !important;
 }
 </style>
