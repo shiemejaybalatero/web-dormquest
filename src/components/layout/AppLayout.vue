@@ -128,7 +128,6 @@ onBeforeUnmount(() => {
       "
     -->
 
-      >
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
           <v-container fluid>
