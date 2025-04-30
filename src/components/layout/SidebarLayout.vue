@@ -7,7 +7,7 @@ const formActionDefault = {
   formProcess: false,
 }
 
-const props = defineProps({
+defineProps({
   links: {
     type: Array,
     required: true,
@@ -34,7 +34,7 @@ const onLogout = async () => {
 </script>
 
 <template>
-  <v-list dense nav class="sidebar pt-7">
+  <v-list dense nav class="sidebar pa-4 ma-0">
     <router-link
       v-for="link in links"
       :key="link.path"
@@ -43,33 +43,33 @@ const onLogout = async () => {
     >
       <v-list-item :class="{ selected: route.path === link.path }" class="mb-2">
         <div class="d-flex align-center pl-2">
-          <v-icon :color="route.path === link.path ? '#0c3b2e' : ''" class="mr-2">
+          <v-icon :color="route.path === link.path ? '#ffffff' : '#ffffff'" class="mr-2">
             {{ link.icon }}
           </v-icon>
-          <span class="font-weight-bold text-body-1">{{ link.title }}</span>
+          <span class="font-weight text-body-1 text-white">{{ link.title }}</span>
         </div>
       </v-list-item>
     </router-link>
 
-    <v-btn
-      prepend-icon="mdi-logout"
-      variant="plain"
-      class="ml-2 font-weight-bold text-body-1"
+    <!-- Logout as list item -->
+    <v-list-item
+      class="mt-3 mb-2 cursor-pointer"
       @click="onLogout"
-      :loading="formAction.formProcess"
       :disabled="formAction.formProcess"
     >
-      Logout
-    </v-btn>
+      <div class="d-flex align-center pl-2">
+        <v-icon class="mr-2" :color="'#ffffff'"> mdi-logout </v-icon>
+        <span class="font-weight text-body-1 text-white">Log out</span>
+      </div>
+    </v-list-item>
   </v-list>
 </template>
 
 <style scoped>
 .sidebar {
-  min-height: 40vh;
-  background: linear-gradient(360deg, #dbead3, #6d9773);
-  border-radius: 10px;
-  border: 1px solid #0c3b2e;
+  min-height: 65vh;
+  background: #0c3b2e;
+  border-radius: 16px;
 }
 
 .side-path {
@@ -84,5 +84,16 @@ const onLogout = async () => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.sidebar {
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  background: #0c3b2e;
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  /* No min-height, no max-height! */
 }
 </style>
