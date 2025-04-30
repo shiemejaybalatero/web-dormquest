@@ -283,22 +283,6 @@ const closeCarousel = () => {
                   cover
                   @click="openCarouselWithMainImage()"
                 />
-
-                <!-- Owner info moved under main image -->
-                <div class="d-flex align-center mt-3">
-                  <v-img
-                    src="/account-icon.jpg"
-                    alt="Profile Image"
-                    width="36"
-                    height="36"
-                    class="mr-3"
-                    style="border-radius: 50%"
-                  />
-                  <div class="owner-detail">
-                    <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
-                    <p class="mb-0">Owner</p>
-                  </div>
-                </div>
               </v-col>
 
               <!-- Gallery Images -->
@@ -314,32 +298,6 @@ const closeCarousel = () => {
                     />
                   </v-col>
                 </v-row>
-
-                <!-- Rating display -->
-                <div class="d-flex align-center mt-3">
-                  <v-rating
-                    :model-value="ratingStats.average || dormDetails.rating || 0"
-                    color="amber"
-                    size="small"
-                    half-increments
-                    readonly
-                    density="compact"
-                  ></v-rating>
-                  <span class="ml-1 text-body-2">
-                    {{ displayRating }}
-                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
-                  </span>
-                  <v-btn
-                    variant="text"
-                    color="primary"
-                    density="comfortable"
-                    @click="openReviewModal"
-                    class="ms-2 text-none"
-                  >
-                    <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
-                    View Ratings
-                  </v-btn>
-                </div>
               </v-col>
             </v-row>
           </v-col>
@@ -351,14 +309,46 @@ const closeCarousel = () => {
               <v-col cols="12" md="6">
                 <div ref="carouselSection"></div>
 
-                <h2 class="top font-weight-bold mt-sm-0">
-                  {{ dormDetails.name }}
-                </h2>
+                <!-- Modified section - Title and Rating in the same line -->
+                <div class="d-flex align-center justify-space-between mt-sm-0">
+                  <h2 class="top font-weight-bold">
+                    {{ dormDetails.name }}
+                  </h2>
+
+                  <!-- Rating display moved from gallery section to here -->
+                  <div class="d-flex align-center">
+                    <v-rating
+                      :model-value="ratingStats.average || dormDetails.rating || 0"
+                      color="amber"
+                      size="small"
+                      half-increments
+                      readonly
+                      density="compact"
+                    ></v-rating>
+                    <span class="ml-1 text-body-2">
+                      {{ displayRating }}
+                      <span class="text-caption">({{ ratingStats.count || 0 }})</span>
+                    </span>
+                  </div>
+                </div>
+                <!-- End modified section -->
+
                 <p class="down mb-5">
                   {{ dormDetails.number_of_room }} rooms | {{ dormDetails.room_capacity }} beds/room
                   | 3 private baths | Female dorm
                 </p>
 
+                <hr />
+                <br />
+                <!-- Owner info moved under main image -->
+                <div class="owner-detail">
+                  <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
+                  <p class="mb-0">Owner</p>
+                </div>
+
+                <br />
+                <hr />
+                <br />
                 <h4 class="mb-3">Contact Details</h4>
 
                 <v-row class="text-center">
@@ -420,7 +410,17 @@ const closeCarousel = () => {
                 </p>
                 <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
                 <hr />
-                <h3 class="mt-2">Ratings</h3>
+                <h3 class="mt-2 mb-3">Ratings</h3>
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  density="comfortable"
+                  @click="openReviewModal"
+                  class="ms-2 text-none"
+                >
+                  <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
+                  View Ratings
+                </v-btn>
               </v-col>
 
               <!-- Right column: Price + Details Card -->
@@ -627,5 +627,9 @@ const closeCarousel = () => {
 
 .hover-effect:hover::after {
   opacity: 1;
+}
+
+.owner-detail {
+  font-size: 18px;
 }
 </style>
