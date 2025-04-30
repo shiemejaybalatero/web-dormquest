@@ -1,22 +1,23 @@
+<!-- For AppLayout.vue -->
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useTheme } from 'vuetify' // Added missing import for theme
 import { supabase, formActionDefault } from '@/utils/supabase'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 import EditProfile from '@/components/system/EditProfile.vue'
-import { useTheme } from 'vuetify'
 
 const route = useRoute()
 const router = useRouter()
-const theme = useTheme()
+const theme = useTheme() // Initialize theme
 
 const showScrollTop = ref(false)
-const mainContent = ref(null)
 const drawer = ref(false)
 const search = ref('')
+const formAction = ref({ ...formActionDefault })
 const isDarkMode = ref(theme.global.name.value === 'dark')
 
-/* Custom function to update theme colors based on mode
+// Custom function to update theme colors based on mode
 function updateThemeColors() {
   if (isDarkMode.value) {
     // Dark mode: Deep green colors
@@ -33,16 +34,34 @@ function updateThemeColors() {
   }
 }
 
-function onClick() {
-  // Toggle theme using Vuetify's theme API
-  theme.global.name.value = isDarkMode.value ? 'light' : 'dark'
-  isDarkMode.value = !isDarkMode.value
-  // Update colors based on new theme
+// Added missing onClick function for theme toggle
+const onClick = () => {
+  theme.global.name.value = theme.global.name.value === 'light' ? 'dark' : 'light'
+  isDarkMode.value = theme.global.name.value === 'dark'
   updateThemeColors()
 }
-  */
 
-const formAction = ref({ ...formActionDefault })
+// Watch for theme changes
+watch(
+  () => theme.global.name.value,
+  () => {
+    isDarkMode.value = theme.global.name.value === 'dark'
+    updateThemeColors()
+  },
+)
+
+const handleScroll = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  showScrollTop.value = scrollTop > 300
+}
+
+const scrollToTop = () => {
+  // Use window.scrollTo for more reliable scrolling behavior
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
 
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
@@ -58,54 +77,39 @@ const onLogout = async () => {
   router.replace('/')
 }
 
-const handleScroll = () => {
-  if (!mainContent.value) return
-  const scrollTop = mainContent.value.$el.scrollTop
-  showScrollTop.value = scrollTop > 300
-}
-
-const scrollToTop = () => {
-  if (mainContent.value) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
 // Control the visibility of the profile edit dialog
 const showProfileEditDialog = ref(false)
 
 // Handle profile update event
 const handleProfileUpdated = () => {
+  // You might want to refresh profile data or perform other actions after update
   console.log('Profile updated successfully')
+  fetchUserProfile() // Refresh profile data after update
 }
 
 onMounted(async () => {
-  // Set initial theme colors
-  // updateThemeColors()
-
   // Load user profile data
   await fetchUserProfile()
 
-  // Add scroll event listener
-  if (mainContent.value) {
-    mainContent.value.$el.addEventListener('scroll', handleScroll)
-  }
+  // Add scroll event listener to window
+  window.addEventListener('scroll', handleScroll)
+
+  // Check initial scroll position
+  handleScroll()
+
+  // Initialize theme colors
+  updateThemeColors()
 })
 
 onBeforeUnmount(() => {
-  if (mainContent.value) {
-    mainContent.value.$el.removeEventListener('scroll', handleScroll)
-  }
+  // Clean up the event listener when component is unmounted
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <template>
   <v-app :theme="isDarkMode ? 'dark' : 'light'">
-    <v-navigation-drawer
-      v-model="drawer"
-      app
-      temporary
-      :class="isDarkMode ? 'dark-drawer' : 'light-drawer'"
-    >
+    <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
         <v-list-item
           title="Dashboard"
@@ -121,31 +125,30 @@ onBeforeUnmount(() => {
           :to="{ path: '/about' }"
           router
         />
+
+        <v-divider class="my-3"></v-divider>
+
+        <!-- Theme toggle in navigation drawer -->
+        <v-list-item
+          :prepend-icon="isDarkMode ? 'mdi-weather-night' : 'mdi-weather-sunny'"
+          @click="onClick"
+        >
+          <v-list-item-title>{{ isDarkMode ? 'Dark' : 'Light' }} Mode</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app flat :class="isDarkMode ? 'dark-app-bar' : 'light-app-bar'">
+    <v-app-bar app flat class="gradient-app-bar">
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
         <span class="ftext ms-10 font-weight-bold">DORM</span>
-        <span class="stext font-weight-bold" :class="isDarkMode ? 'text-white' : ''">QUEST</span>
+        <span class="stext font-weight-bold text-white">QUEST</span>
       </router-link>
-
-      <!-- Logo for mobile/small screens not working
-      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
-        <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
-        <span class="stext font-weight-bold text-subtitle-3 ms-2">QUEST</span>
-      </router-link>
-      -->
 
       <!-- Logo for mobile/small screens -->
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
-        <span
-          class="stext font-weight-bold text-subtitle-3 ms-1"
-          :class="isDarkMode ? 'text-white' : ''"
-          >QUEST</span
-        >
+        <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
       </router-link>
 
       <v-spacer />
@@ -153,23 +156,12 @@ onBeforeUnmount(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
     </v-app-bar>
 
-    <v-main ref="mainContent" class="main-no-gap">
-      <!--
-    <v-main
-      ref="mainContent"
-      :style="
-        route.path === '/map'
-          ? 'overflow: hidden; height: 100vh; padding: 0;'
-          : 'overflow-y: auto; height: 100vh;'
-      "
-    -->
-
-      >
+    <v-main ref="mainContentEl" class="main-no-gap">
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
           <v-container fluid>
             <!-- Search & Buttons -->
-            <div class="d-flex align-center search-wrapper mb-4">
+            <div class="d-flex align-center search-wrapper mt-3 mb-4">
               <v-text-field
                 v-model="search"
                 placeholder="Search for dormitories or boarding house"
@@ -180,18 +172,22 @@ onBeforeUnmount(() => {
                 hide-details
                 clearable
                 density="comfortable"
-                :bg-color="isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'white'"
               />
 
               <div class="action-buttons">
-                <v-btn
-                  v-if="showScrollTop"
-                  icon
-                  :class="isDarkMode ? 'dark-scroll-top-btn' : 'scroll-top-btn'"
-                  @click="scrollToTop"
-                >
-                  <v-icon>mdi-arrow-up</v-icon>
-                </v-btn>
+                <!-- Modified scroll to top button - outside of any specific container -->
+                <v-fade-transition>
+                  <v-btn
+                    v-if="showScrollTop"
+                    icon
+                    class="scroll-top-btn"
+                    @click="scrollToTop"
+                    elevation="4"
+                    color="#0c3b2e"
+                  >
+                    <v-icon>mdi-arrow-up</v-icon>
+                  </v-btn>
+                </v-fade-transition>
 
                 <router-link to="/dashboard">
                   <v-btn
@@ -200,12 +196,6 @@ onBeforeUnmount(() => {
                     :class="{
                       'green-btn':
                         route.path === '/dashboard' || route.path.startsWith('/dorm-details'),
-                      'light-green-btn':
-                        !isDarkMode &&
-                        (route.path === '/dashboard' || route.path.startsWith('/dorm-details')),
-                      'dark-green-btn':
-                        isDarkMode &&
-                        (route.path === '/dashboard' || route.path.startsWith('/dorm-details')),
                     }"
                   >
                     <v-icon>mdi-home-outline</v-icon>
@@ -213,15 +203,7 @@ onBeforeUnmount(() => {
                 </router-link>
 
                 <router-link to="/map">
-                  <v-btn
-                    icon
-                    class="mx-1"
-                    :class="{
-                      'green-btn': route.path === '/map',
-                      'light-green-btn': !isDarkMode && route.path === '/map',
-                      'dark-green-btn': isDarkMode && route.path === '/map',
-                    }"
-                  >
+                  <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
                     <v-icon>mdi-map-marker-outline</v-icon>
                   </v-btn>
                 </router-link>
@@ -231,11 +213,7 @@ onBeforeUnmount(() => {
                   <template v-slot:activator="{ props }">
                     <v-btn
                       class="mx-1"
-                      :class="{
-                        'green-btn': route.path === '/personal',
-                        'light-green-btn': !isDarkMode && route.path === '/personal',
-                        'dark-green-btn': isDarkMode && route.path === '/personal',
-                      }"
+                      :class="{ 'green-btn': route.path === '/personal' }"
                       icon
                       v-bind="props"
                     >
@@ -252,12 +230,12 @@ onBeforeUnmount(() => {
                       </v-avatar>
                     </v-btn>
                   </template>
-                  <v-card :class="isDarkMode ? 'dark-card' : 'light-card'">
+                  <v-card>
                     <v-card-text>
                       <div class="mx-auto text-center">
                         <v-avatar color="orange">
                           <template v-if="isLoadingUser">
-                            <v-progress-circular indeterminate size="20" color="white" />
+                            <v-progress-circular indeterminate size="24" color="white" />
                           </template>
                           <v-img
                             v-else-if="userProfile.avatar_url"
@@ -311,7 +289,6 @@ onBeforeUnmount(() => {
       </div>
     </v-main>
 
-    <!-- Move EditProfile here so it's always mounted -->
     <EditProfile
       v-model="showProfileEditDialog"
       :userData="userProfile"
@@ -323,7 +300,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .ftext {
   color: #ffba00;
-  font-size: 30px;
+  font-size: larger;
 }
 
 .stext {
@@ -331,33 +308,8 @@ onBeforeUnmount(() => {
   font-size: larger;
 }
 
-/* gi wala ang admin bg
-
 .gradient-bg {
-  background-color: #fbfbfb;
-  height: 100vh;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-
-.gradient-bg {
-  background-color: var(--gradient-bg-color);
-  height: 100vh;
-  padding: 1rem;
-  overflow-y: auto;
-}
-  */
-
-/*
-.gradient-bg {
-  background-color: #fffdf6;
-  padding: 1rem;
-  /* REMOVE height: 100vh and overflow-y: auto
-} */
-
-.gradient-bg {
-  background-color: #fffdf6;
+  background-color: var(--gradient-bg-color, #fffdf6);
   min-height: 100vh;
   padding-bottom: 2rem;
 }
@@ -365,31 +317,6 @@ onBeforeUnmount(() => {
 .gradient-app-bar {
   background: #0c3b2e;
   color: #000;
-}
-
-.dark-app-bar {
-  background-color: #0c3b2e !important;
-  color: #fff;
-}
-
-/* Drawer themes */
-.light-drawer {
-  background-color: #e8f5e9 !important;
-}
-
-.dark-drawer {
-  background-color: #0a2e23 !important;
-  color: #fff;
-}
-
-/* Card themes */
-.light-card {
-  background-color: #ffffff !important;
-}
-
-.dark-card {
-  background-color: #1e3b33 !important;
-  color: #e0e0e0 !important;
 }
 
 .avatar-btn {
@@ -443,43 +370,23 @@ onBeforeUnmount(() => {
   position: fixed;
   bottom: 30px;
   right: 20px;
-  background-color: #6d9773 !important; /* Light green for light mode */
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.dark-scroll-top-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 20px;
-  background-color: #0c3b2e !important; /* Dark green for dark mode */
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: white !important;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
 }
 
 .icon-color {
   color: #0c3b2e;
 }
 
-/* Button styles for different themes */
 .green-btn {
-  color: white !important;
-}
-
-.light-green-btn {
-  background-color: #6d9773 !important; /* Light green for light mode */
-  color: white !important;
-}
-
-.dark-green-btn {
-  background-color: #0c3b2e !important; /* Dark green for dark mode */
+  background-color: #0c3b2e !important;
   color: white !important;
 }
 
 .personal-info {
-  text-decoration: none; /* Ensures no underline */
+  color: black;
+  text-decoration: none;
 }
 
 .no-underline {
@@ -492,6 +399,19 @@ onBeforeUnmount(() => {
   flex-wrap: nowrap;
 }
 
+/* Makes sure v-main has proper scroll behavior */
+.main-no-gap {
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Theme toggle button styling */
+.theme-toggle-wrapper {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media (max-width: 600px) {
   .filter-row {
     flex-direction: row;
@@ -499,6 +419,12 @@ onBeforeUnmount(() => {
 
   .filter-row > .v-col {
     flex: 1 1 0;
+  }
+
+  /* Adjust scroll-top button position on mobile */
+  .scroll-top-btn {
+    bottom: 70px;
+    right: 15px;
   }
 }
 

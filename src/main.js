@@ -17,7 +17,7 @@ export default createVuetify({
       light: {
         dark: false,
         colors: {
-          primary: '#0C3B2E', // Deep green
+          primary: '#6D9773', // Light green
           secondary: '#FFBA00', // Gold/yellow
           accent: '#81C784', // Another light green shade
           error: '#FF5252',
