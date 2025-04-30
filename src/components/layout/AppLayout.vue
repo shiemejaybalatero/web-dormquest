@@ -131,7 +131,7 @@ onBeforeUnmount(() => {
       >
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
-          <v-container>
+          <v-container fluid>
             <!-- Search & Buttons -->
             <div class="d-flex align-center search-wrapper mb-4">
               <v-text-field
@@ -267,14 +267,14 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #0c3b2e;
+  color: #fbfbfb;
   font-size: larger;
 }
 
 /* gi wala ang admin bg
 
 .gradient-bg {
-  background-image: url('/bg-admin.jpg');
+  background-color: #fbfbfb;
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;
@@ -303,16 +303,8 @@ onBeforeUnmount(() => {
 }
 
 .gradient-app-bar {
-  /* gi pulihan
-  background: linear-gradient(290deg, #fffae6, #6d9773);
-  */
-  background-color: #0c3b2e;
+  background: #0c3b2e;
   color: #000;
-}
-/* add */
-.main-no-gap {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
 }
 
 .avatar-btn {
@@ -414,15 +406,11 @@ onBeforeUnmount(() => {
     flex: 1 1 0;
   }
 }
-.search-wrapper .v-btn:hover {
-  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
-  transform: scale(1.1);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
-}
 
-.search-wrapper .v-btn:hover .v-icon {
-  color: #2e7d32; /* Green icon color on hover */
+@media (min-width: 960px) {
+  .search-wrapper {
+    justify-content: flex-start; /* Align left on large screens */
+    margin-left: 25%;
+  }
 }
 </style>

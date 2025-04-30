@@ -11,9 +11,8 @@ const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
-const showReviewModal = ref(false)
-const ratingStats = ref({ average: 0, count: 0 })
-const dormRatings = ref([])
+const showCarousel = ref(false) // New ref to control carousel visibility
+const selectedImageIndex = ref(0) // New ref to track which image was clicked
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
@@ -195,12 +194,55 @@ watch(
     }
   },
 )
+
+const carouselSection = ref(null)
+
+// Open carousel with main image
+const openCarouselWithMainImage = () => {
+  selectedImageIndex.value = 0 // Main image is usually first
+  showCarousel.value = true
+  // Prevent scrolling on the body when modal is open
+  document.body.style.overflow = 'hidden'
+}
+
+// Open carousel with gallery image
+const openCarouselWithGalleryImage = (index) => {
+  selectedImageIndex.value = index
+  showCarousel.value = true
+  // Prevent scrolling on the body when modal is open
+  document.body.style.overflow = 'hidden'
+}
+
+// Close carousel
+const closeCarousel = () => {
+  showCarousel.value = false
+  // Restore scrolling when modal is closed
+  document.body.style.overflow = 'auto'
+}
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-container fluid>
+      <!-- Modal Carousel Overlay - only visible when showCarousel is true -->
+      <div v-if="showCarousel" class="carousel-overlay">
+        <div class="carousel-modal">
+          <div class="d-flex justify-end pa-2">
+            <v-btn icon @click="closeCarousel" class="close-btn">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <v-carousel :model-value="selectedImageIndex" height="80vh" hide-delimiters>
+            <v-carousel-item
+              v-for="(img, index) in galleryImages"
+              :key="index"
+              :src="img"
+              contain
+            />
+          </v-carousel>
+        </div>
+      </div>
+      <v-container>
         <!-- Back button -->
         <v-btn class="mb-4" variant="text" prepend-icon="mdi-arrow-left" @click="goBack">
           Back to Dashboard
@@ -224,186 +266,201 @@ watch(
 
         <!-- Dormitory details when loaded -->
         <v-row v-if="dormDetails && !loading">
-          <v-col cols="12" md="6">
-            <v-img :src="mainImage" height="350" class="rounded-xl mb-4" cover />
-
-            <h2 class="top font-weight-bold">{{ dormDetails.name }}</h2>
-            <p class="down mb-5">
-              {{ dormDetails.number_of_room }} rooms | {{ dormDetails.room_capacity }} beds/room | 3
-              private baths | Female dorm
-            </p>
-            <br />
-            <v-row
-              class="details-card d-flex align-center justify-space-between pa-3"
-              style="background-color: #c8d6c5; border-radius: 12px; min-height: 80px"
-            >
-              <!-- Left: Profile Image + Name -->
-              <div class="d-flex align-center ps-3">
+          <!-- First row: main image and gallery images -->
+          <v-col cols="12">
+            <v-row>
+              <!-- Main Image -->
+              <v-col cols="12" md="6">
                 <v-img
-                  src="/account-icon.jpg"
-                  alt="Profile Image"
-                  width="36"
-                  height="36"
-                  class="mr-3"
-                  style="border-radius: 50%"
+                  :src="mainImage"
+                  height="350"
+                  class="rounded-xl cursor-pointer hover-effect"
+                  cover
+                  @click="openCarouselWithMainImage()"
                 />
-                <div class="owner-detail ps-4">
-                  <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
-                  <p class="mb-0">Owner</p>
-                </div>
-              </div>
-
-              <!-- Right: Rating display with View Ratings button -->
-              <div class="d-flex align-center pe-3">
-                <div class="d-flex align-center me-2">
-                  <v-rating
-                    :model-value="ratingStats.average || dormDetails.rating || 0"
-                    color="amber"
-                    size="small"
-                    half-increments
-                    readonly
-                    density="compact"
-                  ></v-rating>
-                  <span class="ml-1 text-body-2">
-                    {{ displayRating }}
-                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
-                  </span>
-                </div>
-                <v-btn
-                  variant="text"
-                  color="primary"
-                  density="comfortable"
-                  @click="openReviewModal"
-                  class="ms-2 text-none"
-                >
-                  <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
-                  View Ratings
-                </v-btn>
-              </div>
-            </v-row>
-
-            <br />
-            <!-- Contact Information -->
-            <h4 class="mb-3">Contact Details</h4>
-
-            <v-row class="text-center">
-              <!-- Messenger Section -->
-              <v-col cols="6">
-                <v-btn
-                  class="w-100 d-flex align-center justify-center"
-                  @click="toggleMessenger"
-                  style="text-transform: none"
-                >
-                  <v-icon class="mr-2">mdi-facebook</v-icon>
-                  Facebook
-                </v-btn>
-
-                <v-expand-transition>
-                  <div v-show="showFacebook" class="mt-1">
-                    <v-btn
-                      href="https://m.me/antongranza"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="text"
-                      class="text-capitalize"
-                    >
-                      {{ dormDetails.messenger_name }}
-                    </v-btn>
-                  </div>
-                </v-expand-transition>
               </v-col>
 
-              <!-- Contact Section -->
-              <v-col cols="6">
-                <v-btn
-                  class="w-100 d-flex align-center justify-center"
-                  @click="toggleContact"
-                  style="text-transform: none"
-                >
-                  <v-icon class="mr-2">mdi-phone</v-icon>
-                  Phone Number
-                </v-btn>
-
-                <v-expand-transition>
-                  <div v-show="showContact" class="mt-1">
-                    <v-btn
-                      :href="`tel:${dormDetails.contact_number}`"
-                      variant="text"
-                      class="text-capitalize"
-                    >
-                      {{ dormDetails.contact_number }}
-                    </v-btn>
-                  </div>
-                </v-expand-transition>
+              <!-- Gallery Images -->
+              <v-col cols="12" md="6">
+                <v-row dense>
+                  <v-col v-for="(img, index) in galleryImages" :key="index" cols="6" md="6">
+                    <v-img
+                      :src="img"
+                      height="170"
+                      class="rounded cursor-pointer hover-effect d-none d-sm-flex"
+                      cover
+                      @click="openCarouselWithGalleryImage(index)"
+                    />
+                  </v-col>
+                </v-row>
               </v-col>
             </v-row>
-            <br />
-            <hr />
-            <br />
-            <p class="text-body-2 d-flex align-center font-weight-bold">
-              <v-icon class="mr-2" color="black">mdi-map-marker-outline</v-icon>
-              {{ dormDetails.address }}
-            </p>
-            <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
-            <hr />
           </v-col>
 
-          <v-col cols="12" md="6">
-            <v-row dense class="mb-4">
-              <v-col v-for="(img, index) in galleryImages" :key="index" cols="6" md="6">
-                <v-img :src="img" height="170" class="rounded" cover />
+          <!-- Second row: dorm details (left), price + info card (right) -->
+          <v-col cols="12">
+            <v-row>
+              <!-- Dorm Details Left -->
+              <v-col cols="12" md="6">
+                <div ref="carouselSection"></div>
+
+                <h2 class="top font-weight-bold mt-sm-0">
+                  {{ dormDetails.name }}
+                </h2>
+                <p class="down mb-5">
+                  {{ dormDetails.number_of_room }} rooms | {{ dormDetails.room_capacity }} beds/room
+                  | 3 private baths | Female dorm
+                </p>
+
+                <v-row
+                  class="details-card d-flex align-center justify-space-between pa-3"
+                  style="background-color: #c8d6c5; border-radius: 12px; min-height: 80px"
+                >
+                  <!-- Left: Profile Image + Name -->
+                  <div class="d-flex align-center ps-3">
+                    <v-img
+                      src="/account-icon.jpg"
+                      alt="Profile Image"
+                      width="36"
+                      height="36"
+                      class="mr-3"
+                      style="border-radius: 50%"
+                    />
+                    <div class="owner-detail ps-4">
+                      <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
+                      <p class="mb-0">Owner</p>
+                    </div>
+                  </div>
+                </v-row>
+
+                <br />
+                <h4 class="mb-3">Contact Details</h4>
+
+                <v-row class="text-center">
+                  <!-- Messenger -->
+                  <v-col cols="6">
+                    <v-btn
+                      class="w-100 d-flex align-center justify-center messenger-btn"
+                      @mouseenter="showFacebook = true"
+                      @mouseleave="showFacebook = false"
+                      style="text-transform: none"
+                    >
+                      <v-icon class="mr-2">mdi-facebook</v-icon>
+                      Facebook
+                    </v-btn>
+                    <v-expand-transition>
+                      <div v-show="showFacebook" class="mt-1">
+                        <v-btn
+                          href="https://m.me/antongranza"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="text"
+                          class="text-capitalize"
+                        >
+                          {{ dormDetails.messenger_name }}
+                        </v-btn>
+                      </div>
+                    </v-expand-transition>
+                  </v-col>
+
+                  <!-- Phone -->
+                  <v-col cols="6">
+                    <v-btn
+                      class="w-100 d-flex align-center justify-center phone-btn"
+                      @mouseenter="showContact = true"
+                      @mouseleave="showContact = false"
+                      style="text-transform: none"
+                    >
+                      <v-icon class="mr-2">mdi-phone</v-icon>
+                      Phone Number
+                    </v-btn>
+                    <v-expand-transition>
+                      <div v-show="showContact" class="mt-1">
+                        <v-btn
+                          :href="`tel:${dormDetails.contact_number}`"
+                          variant="text"
+                          class="text-capitalize"
+                        >
+                          {{ dormDetails.contact_number }}
+                        </v-btn>
+                      </div>
+                    </v-expand-transition>
+                  </v-col>
+                </v-row>
+
+                <br />
+                <hr />
+                <br />
+                <p class="text-body-2 d-flex align-center font-weight-bold">
+                  <v-icon class="mr-2" color="black">mdi-map-marker-outline</v-icon>
+                  {{ dormDetails.address }}
+                </p>
+                <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
+                <hr />
+                <h3 class="mt-2">Ratings</h3>
               </v-col>
-            </v-row>
 
-            <div class="d-flex justify-center mb-4">
-              <v-btn class="price-btn" prepend-icon="mdi-tag">Prices included all fees</v-btn>
-            </div>
-
-            <v-row class="details-card ms-5 px-10" no-gutters>
-              <v-col cols="12">
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                  <span class="price"
-                    >₱{{ dormDetails.price }} <span class="text-caption">Monthly</span></span
-                  >
-                  <v-btn
-                    variant="outlined"
-                    prepend-icon="mdi-map-marker"
-                    @click="viewOnMap"
-                    class="view-map-btn ms-auto"
-                  >
-                    View in Map
+              <!-- Right column: Price + Details Card -->
+              <v-col cols="12" md="6">
+                <div class="d-flex justify-center mb-4">
+                  <v-btn class="price-btn">
+                    <v-icon class="me-4" size="24">mdi-tag</v-icon>
+                    Prices included all fees
                   </v-btn>
                 </div>
-                <br />
-                <hr />
-                <br />
-              </v-col>
 
-              <!-- Left column -->
-              <v-col cols="12" md="5">
-                <p class="my-4"><strong>Distance:</strong> {{ dormDetails.distance_to_campus }}</p>
-                <hr />
-                <p class="my-4"><strong>Room number:</strong> {{ dormDetails.number_of_room }}</p>
-                <hr />
-                <p class="my-4">
-                  <strong>Amenities:</strong>
-                  {{ dormDetails.amenity }}
-                </p>
-              </v-col>
+                <v-row class="details-card mx-sm-md-5 px-10" no-gutters>
+                  <v-col cols="12">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                      <span class="price"
+                        >₱{{ dormDetails.price }} <span class="text-caption">Monthly</span></span
+                      >
+                      <v-btn
+                        variant="outlined"
+                        prepend-icon="mdi-map-marker"
+                        @click="viewOnMap"
+                        class="view-map-btn ms-auto"
+                      >
+                        View in Map
+                      </v-btn>
+                    </div>
+                    <br />
+                    <hr />
+                    <br />
+                  </v-col>
 
-              <!-- center column -->
-              <v-col cols="12" md="2"> </v-col>
+                  <!-- Left info -->
+                  <v-col cols="12" md="5">
+                    <p class="my-4">
+                      <strong>Distance:</strong> {{ dormDetails.distance_to_campus }}
+                    </p>
+                    <hr />
+                    <p class="my-4">
+                      <strong>Room number:</strong> {{ dormDetails.number_of_room }}
+                    </p>
+                    <hr />
+                    <p class="my-4"><strong>Amenities:</strong> {{ dormDetails.amenity }}</p>
+                    <hr />
+                  </v-col>
 
-              <!-- Right column -->
-              <v-col cols="12" md="5">
-                <p class="my-4"><strong>Room Capacity:</strong> {{ dormDetails.room_capacity }}</p>
-                <hr />
-                <p class="my-4"><strong>Room Type:</strong> {{ dormDetails.room_type }}</p>
-                <hr />
-                <p class="my-4">
-                  <strong>Availability:</strong>
-                  {{ dormDetails.availability_status ? 'Yes' : 'No' }}
-                </p>
+                  <!-- Spacer -->
+                  <v-col cols="12" md="2"> </v-col>
+
+                  <!-- Right info -->
+                  <v-col cols="12" md="5">
+                    <p class="my-4">
+                      <strong>Room Capacity:</strong> {{ dormDetails.room_capacity }}
+                    </p>
+                    <hr />
+                    <p class="my-4"><strong>Room Type:</strong> {{ dormDetails.room_type }}</p>
+                    <hr />
+                    <p class="my-4">
+                      <strong>Availability:</strong>
+                      {{ dormDetails.availability_status ? 'Yes' : 'No' }}
+                    </p>
+                    <hr />
+                  </v-col>
+                </v-row>
               </v-col>
             </v-row>
           </v-col>
@@ -449,6 +506,24 @@ watch(
   color: #0c3b2e;
 }
 
+.messenger-btn,
+.phone-btn {
+  background-color: #0c3b2e; /* Facebook Blue */
+  color: white;
+}
+
+.messenger-btn:hover {
+  background-color: #b19470;
+}
+
+.phone-btn:hover {
+  background-color: #b19470;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .price {
     font-size: 20px;
@@ -475,5 +550,59 @@ watch(
 
 .text-none {
   text-transform: none;
+}
+
+/* Modal Carousel Overlay Styles */
+.carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.carousel-modal {
+  width: 90%;
+  max-width: 1200px;
+  background-color: transparent;
+  border-radius: 8px;
+  position: relative;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1001;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.hover-effect {
+  position: relative;
+}
+
+.hover-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.3); /* Light white overlay */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.hover-effect:hover::after {
+  opacity: 1;
 }
 </style>

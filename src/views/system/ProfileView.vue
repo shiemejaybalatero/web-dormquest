@@ -38,6 +38,7 @@ const handleProfileUpdated = async () => {
 <template>
   <AppLayout>
     <template #content>
+      <!-- <v-container> -->
       <v-row>
         <!-- Sidebar -->
         <v-col cols="12" md="3">
@@ -110,6 +111,7 @@ const handleProfileUpdated = async () => {
           </v-overlay>
         </v-col>
       </v-row>
+      <!-- </v-container>  -->
     </template>
   </AppLayout>
 
