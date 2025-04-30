@@ -234,12 +234,12 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #fdfaf6;
+  color: #fbfbfb;
   font-size: larger;
 }
 
 .gradient-bg {
-  background-image: #fdfaf6;
+  background-color: #fbfbfb;
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;

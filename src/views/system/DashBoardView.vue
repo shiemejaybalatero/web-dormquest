@@ -41,7 +41,6 @@ onMounted(() => {
             cols="12"
             sm="6"
             md="4"
-            lg="3"
             class="pa-4"
           >
             <v-card
@@ -52,7 +51,7 @@ onMounted(() => {
             >
               <v-img
                 :src="dorm.image || 'https://via.placeholder.com/400x200?text=No+Image'"
-                height="200px"
+                class="responsive-img"
                 cover
               />
               <v-card-text>
@@ -111,8 +110,10 @@ onMounted(() => {
 }
 
 .dorm-title {
-  color: #f8f8e1;
-  font-family: 'Nunito', sans-serif;
+  color: #f8f8e1 !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 1.25rem !important; /* Or use 20px */
+  font-weight: 700 !important;
 }
 
 .dorm-subtitle {
@@ -122,5 +123,22 @@ onMounted(() => {
 
 .dorm-text {
   color: #f8f8e1 !important;
+}
+
+.responsive-img {
+  height: 200px;
+}
+
+@media (min-width: 960px) {
+  .dorm-card {
+    height: 400px;
+  }
+}
+
+/* Height for medium screens and up */
+@media (min-width: 960px) {
+  .responsive-img {
+    height: 280px;
+  }
 }
 </style>
