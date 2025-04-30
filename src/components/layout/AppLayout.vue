@@ -131,6 +131,13 @@ onBeforeUnmount(() => {
         <span class="stext font-weight-bold" :class="isDarkMode ? 'text-white' : ''">QUEST</span>
       </router-link>
 
+      <!-- Logo for mobile/small screens not working
+      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
+        <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
+        <span class="stext font-weight-bold text-subtitle-3 ms-2">QUEST</span>
+      </router-link>
+      -->
+
       <!-- Logo for mobile/small screens -->
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
@@ -146,6 +153,8 @@ onBeforeUnmount(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
     </v-app-bar>
 
+    <v-main ref="mainContent" class="main-no-gap">
+      <!--
     <v-main
       ref="mainContent"
       :style="
@@ -153,12 +162,12 @@ onBeforeUnmount(() => {
           ? 'overflow: hidden; height: 100vh; padding: 0;'
           : 'overflow-y: auto; height: 100vh;'
       "
-    >
-      <div
-        :class="[route.path === '/map' ? '' : 'gradient-bg', isDarkMode ? 'dark-bg' : 'light-bg']"
+    -->
+
       >
+      <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
-          <v-container>
+          <v-container fluid>
             <!-- Search & Buttons -->
             <div class="d-flex align-center search-wrapper mb-4">
               <v-text-field
@@ -318,13 +327,19 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #0c3b2e;
-  font-size: 30px;
+  color: #fbfbfb;
+  font-size: larger;
 }
 
-:root {
-  --gradient-bg-color: #e8f5e9;
+/* gi wala ang admin bg
+
+.gradient-bg {
+  background-color: #fbfbfb;
+  height: 100vh;
+  padding: 1rem;
+  overflow-y: auto;
 }
+
 
 .gradient-bg {
   background-color: var(--gradient-bg-color);
@@ -332,19 +347,23 @@ onBeforeUnmount(() => {
   padding: 1rem;
   overflow-y: auto;
 }
+  */
 
-.light-bg {
-  background-color: #e8f5e9;
+/*
+.gradient-bg {
+  background-color: #fffdf6;
+  padding: 1rem;
+  /* REMOVE height: 100vh and overflow-y: auto
+} */
+
+.gradient-bg {
+  background-color: #fffdf6;
+  min-height: 100vh;
+  padding-bottom: 2rem;
 }
 
-.dark-bg {
-  background-color: #0a2e23;
-  color: #e8f5e9;
-}
-
-/* App bar themes */
-.light-app-bar {
-  background-color: #6d9773 !important;
+.gradient-app-bar {
+  background: #0c3b2e;
   color: #000;
 }
 
@@ -394,6 +413,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 40px;
 }
 
 .search-wrapper .v-btn:hover {
@@ -479,6 +499,13 @@ onBeforeUnmount(() => {
 
   .filter-row > .v-col {
     flex: 1 1 0;
+  }
+}
+
+@media (min-width: 960px) {
+  .search-wrapper {
+    justify-content: flex-start; /* Align left on large screens */
+    margin-left: 25%;
   }
 }
 </style>
