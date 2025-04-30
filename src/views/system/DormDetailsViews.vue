@@ -249,7 +249,9 @@ const closeCarousel = () => {
               <v-col cols="12" md="6">
                 <div ref="carouselSection"></div>
 
-                <h2 class="top font-weight-bold">{{ dormDetails.name }}</h2>
+                <h2 class="top font-weight-bold mt-sm-0">
+                  {{ dormDetails.name }}
+                </h2>
                 <p class="down mb-5">
                   {{ dormDetails.number_of_room }} rooms | {{ dormDetails.room_capacity }} beds/room
                   | 3 private baths | Female dorm
@@ -340,6 +342,7 @@ const closeCarousel = () => {
                 </p>
                 <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
                 <hr />
+                <h3 class="mt-2">Ratings</h3>
               </v-col>
 
               <!-- Right column: Price + Details Card -->
@@ -351,7 +354,7 @@ const closeCarousel = () => {
                   </v-btn>
                 </div>
 
-                <v-row class="details-card ms-5 px-10" no-gutters>
+                <v-row class="details-card mx-sm-md-5 px-10" no-gutters>
                   <v-col cols="12">
                     <div class="d-flex justify-content-between align-items-center mt-3">
                       <span class="price"
@@ -382,6 +385,7 @@ const closeCarousel = () => {
                     </p>
                     <hr />
                     <p class="my-4"><strong>Amenities:</strong> {{ dormDetails.amenity }}</p>
+                    <hr />
                   </v-col>
 
                   <!-- Spacer -->
@@ -399,6 +403,7 @@ const closeCarousel = () => {
                       <strong>Availability:</strong>
                       {{ dormDetails.availability_status ? 'Yes' : 'No' }}
                     </p>
+                    <hr />
                   </v-col>
                 </v-row>
               </v-col>
