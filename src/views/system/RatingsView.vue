@@ -2,12 +2,11 @@
 import AppLayout from '@/components/layout/AppLayout.vue'
 import SidebarLayout from '@/components/layout/SidebarLayout.vue'
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 
-const route = useRoute()
 const router = useRouter()
 const userStore = useAuthUserStore()
 

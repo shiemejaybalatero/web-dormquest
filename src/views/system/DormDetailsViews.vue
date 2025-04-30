@@ -11,8 +11,11 @@ const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
-const showCarousel = ref(false) // New ref to control carousel visibility
-const selectedImageIndex = ref(0) // New ref to track which image was clicked
+const showCarousel = ref(false) // Control carousel visibility
+const selectedImageIndex = ref(0) // Track which image was clicked
+const showReviewModal = ref(false) // Added missing declaration
+const ratingStats = ref({ average: 0, count: 0 }) // Added missing declaration
+const dormRatings = ref([]) // Added missing declaration
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
@@ -25,7 +28,7 @@ const errorMessage = computed(() => boardingHouseStore.errorMessage)
 // Safe computed property for dorm details
 const dormDetails = computed(() => selectedBoardingHouse.value)
 
-// New computed property for the display rating
+// Computed property for the display rating
 const displayRating = computed(() => {
   const rating = ratingStats.value.average || (dormDetails.value?.rating ?? 0)
   return rating.toFixed(1)
@@ -89,7 +92,7 @@ const dormImageMap = {
 const defaultMainImage = '/Default/default.jpg'
 const defaultGallery = ['/Default/default.jpg']
 
-// More defensive computed properties with null checks
+// Defensive computed properties with null checks
 const mainImage = computed(() => {
   if (!dormDetails.value) return defaultMainImage
   return dormImageMap[dormDetails.value.id]?.main || defaultMainImage
@@ -121,23 +124,28 @@ const goBack = () => {
 }
 
 const fetchRatings = async () => {
-  const { data, error } = await supabase
-    .from('ratings')
-    .select('rating_score')
-    .eq('dormitory_id', dormId)
+  try {
+    const { data, error } = await supabase
+      .from('ratings')
+      .select('rating_score')
+      .eq('dormitory_id', dormId)
 
-  if (error) {
-    console.error('Failed to fetch ratings:', error)
-    return
-  }
-
-  if (data && data.length) {
-    const sum = data.reduce((acc, r) => acc + r.rating_score, 0)
-    ratingStats.value = {
-      average: sum / data.length,
-      count: data.length,
+    if (error) {
+      console.error('Failed to fetch ratings:', error)
+      return
     }
-  } else {
+
+    if (data && data.length) {
+      const sum = data.reduce((acc, r) => acc + r.rating_score, 0)
+      ratingStats.value = {
+        average: sum / data.length,
+        count: data.length,
+      }
+    } else {
+      ratingStats.value = { average: 0, count: 0 }
+    }
+  } catch (err) {
+    console.error('Error in fetchRatings:', err)
     ratingStats.value = { average: 0, count: 0 }
   }
 }
@@ -167,10 +175,7 @@ const handleRatingUpdated = (stats) => {
 // Handle a new rating submission
 const handleSubmitRating = (newRating) => {
   console.log('New rating submitted:', newRating)
-  // In a real app, you would send this to your API
-  // For now, we just add it to our local state
   dormRatings.value = [newRating, ...dormRatings.value]
-
   // You might want to update the boarding house store with the new average rating
   // boardingHouseStore.updateDormRating(dormId, ratingStats.value.average)
 }
@@ -278,6 +283,22 @@ const closeCarousel = () => {
                   cover
                   @click="openCarouselWithMainImage()"
                 />
+
+                <!-- Owner info moved under main image -->
+                <div class="d-flex align-center mt-3">
+                  <v-img
+                    src="/account-icon.jpg"
+                    alt="Profile Image"
+                    width="36"
+                    height="36"
+                    class="mr-3"
+                    style="border-radius: 50%"
+                  />
+                  <div class="owner-detail">
+                    <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
+                    <p class="mb-0">Owner</p>
+                  </div>
+                </div>
               </v-col>
 
               <!-- Gallery Images -->
@@ -293,6 +314,32 @@ const closeCarousel = () => {
                     />
                   </v-col>
                 </v-row>
+
+                <!-- Rating display -->
+                <div class="d-flex align-center mt-3">
+                  <v-rating
+                    :model-value="ratingStats.average || dormDetails.rating || 0"
+                    color="amber"
+                    size="small"
+                    half-increments
+                    readonly
+                    density="compact"
+                  ></v-rating>
+                  <span class="ml-1 text-body-2">
+                    {{ displayRating }}
+                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
+                  </span>
+                  <v-btn
+                    variant="text"
+                    color="primary"
+                    density="comfortable"
+                    @click="openReviewModal"
+                    class="ms-2 text-none"
+                  >
+                    <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
+                    View Ratings
+                  </v-btn>
+                </div>
               </v-col>
             </v-row>
           </v-col>
@@ -312,37 +359,14 @@ const closeCarousel = () => {
                   | 3 private baths | Female dorm
                 </p>
 
-                <v-row
-                  class="details-card d-flex align-center justify-space-between pa-3"
-                  style="background-color: #c8d6c5; border-radius: 12px; min-height: 80px"
-                >
-                  <!-- Left: Profile Image + Name -->
-                  <div class="d-flex align-center ps-3">
-                    <v-img
-                      src="/account-icon.jpg"
-                      alt="Profile Image"
-                      width="36"
-                      height="36"
-                      class="mr-3"
-                      style="border-radius: 50%"
-                    />
-                    <div class="owner-detail ps-4">
-                      <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
-                      <p class="mb-0">Owner</p>
-                    </div>
-                  </div>
-                </v-row>
-
-                <br />
                 <h4 class="mb-3">Contact Details</h4>
 
                 <v-row class="text-center">
-                  <!-- Messenger -->
+                  <!-- Messenger - Consistent event handling with toggle functions -->
                   <v-col cols="6">
                     <v-btn
                       class="w-100 d-flex align-center justify-center messenger-btn"
-                      @mouseenter="showFacebook = true"
-                      @mouseleave="showFacebook = false"
+                      @click="toggleMessenger"
                       style="text-transform: none"
                     >
                       <v-icon class="mr-2">mdi-facebook</v-icon>
@@ -363,12 +387,11 @@ const closeCarousel = () => {
                     </v-expand-transition>
                   </v-col>
 
-                  <!-- Phone -->
+                  <!-- Phone - Consistent event handling with toggle functions -->
                   <v-col cols="6">
                     <v-btn
                       class="w-100 d-flex align-center justify-center phone-btn"
-                      @mouseenter="showContact = true"
-                      @mouseleave="showContact = false"
+                      @click="toggleContact"
                       style="text-transform: none"
                     >
                       <v-icon class="mr-2">mdi-phone</v-icon>
