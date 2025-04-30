@@ -4,14 +4,43 @@ import { useRoute, useRouter } from 'vue-router'
 import { supabase, formActionDefault } from '@/utils/supabase'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 import EditProfile from '@/components/system/EditProfile.vue'
+import { useTheme } from 'vuetify'
 
 const route = useRoute()
 const router = useRouter()
+const theme = useTheme()
 
 const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
 const search = ref('')
+const isDarkMode = ref(theme.global.name.value === 'dark')
+
+/* Custom function to update theme colors based on mode
+function updateThemeColors() {
+  if (isDarkMode.value) {
+    // Dark mode: Deep green colors
+    theme.themes.value.dark.colors.primary = '#0C3B2E' // Deep green
+    theme.themes.value.dark.colors.secondary = '#FFBA00' // Gold accent
+    theme.themes.value.dark.colors.background = '#0A2E23' // Darker green background
+    document.body.style.setProperty('--gradient-bg-color', '#0A2E23')
+  } else {
+    // Light mode: Light green colors
+    theme.themes.value.light.colors.primary = '#6D9773' // Light green
+    theme.themes.value.light.colors.secondary = '#FFBA00' // Keep gold accent
+    theme.themes.value.light.colors.background = '#E8F5E9' // Very light green background
+    document.body.style.setProperty('--gradient-bg-color', '#E8F5E9')
+  }
+}
+
+function onClick() {
+  // Toggle theme using Vuetify's theme API
+  theme.global.name.value = isDarkMode.value ? 'light' : 'dark'
+  isDarkMode.value = !isDarkMode.value
+  // Update colors based on new theme
+  updateThemeColors()
+}
+  */
 
 const formAction = ref({ ...formActionDefault })
 
@@ -46,11 +75,13 @@ const showProfileEditDialog = ref(false)
 
 // Handle profile update event
 const handleProfileUpdated = () => {
-  // You might want to refresh profile data or perform other actions after update
   console.log('Profile updated successfully')
 }
 
 onMounted(async () => {
+  // Set initial theme colors
+  // updateThemeColors()
+
   // Load user profile data
   await fetchUserProfile()
 
@@ -68,41 +99,46 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <v-app>
-    <v-navigation-drawer v-model="drawer" app temporary>
+  <v-app :theme="isDarkMode ? 'dark' : 'light'">
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      temporary
+      :class="isDarkMode ? 'dark-drawer' : 'light-drawer'"
+    >
       <v-list>
-        <v-list>
-          <v-list-item
-            title="Dashboard"
-            prepend-icon="mdi-view-dashboard"
-            :to="{ path: '/dashboard' }"
-            router
-            exact
-          />
-          <v-list-item title="Ratings" prepend-icon="mdi-star" :to="{ path: '/ratings' }" router />
-          <v-list-item
-            title="About App"
-            prepend-icon="mdi-information"
-            :to="{ path: '/about' }"
-            router
-          />
-        </v-list>
-
-        <v-list-item />
+        <v-list-item
+          title="Dashboard"
+          prepend-icon="mdi-view-dashboard"
+          :to="{ path: '/dashboard' }"
+          router
+          exact
+        />
+        <v-list-item title="Ratings" prepend-icon="mdi-star" :to="{ path: '/ratings' }" router />
+        <v-list-item
+          title="About App"
+          prepend-icon="mdi-information"
+          :to="{ path: '/about' }"
+          router
+        />
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app flat class="gradient-app-bar">
+    <v-app-bar app flat :class="isDarkMode ? 'dark-app-bar' : 'light-app-bar'">
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
         <span class="ftext ms-10 font-weight-bold">DORM</span>
-        <span class="stext font-weight-bold text-white">QUEST</span>
+        <span class="stext font-weight-bold" :class="isDarkMode ? 'text-white' : ''">QUEST</span>
       </router-link>
 
       <!-- Logo for mobile/small screens -->
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
         <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
-        <span class="stext font-weight-bold text-subtitle-3 ms-1">QUEST</span>
+        <span
+          class="stext font-weight-bold text-subtitle-3 ms-1"
+          :class="isDarkMode ? 'text-white' : ''"
+          >QUEST</span
+        >
       </router-link>
 
       <v-spacer />
@@ -118,7 +154,9 @@ onBeforeUnmount(() => {
           : 'overflow-y: auto; height: 100vh;'
       "
     >
-      <div :class="route.path === '/map' ? '' : 'gradient-bg'">
+      <div
+        :class="[route.path === '/map' ? '' : 'gradient-bg', isDarkMode ? 'dark-bg' : 'light-bg']"
+      >
         <template v-if="route.path !== '/map'">
           <v-container>
             <!-- Search & Buttons -->
@@ -133,10 +171,16 @@ onBeforeUnmount(() => {
                 hide-details
                 clearable
                 density="comfortable"
+                :bg-color="isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'white'"
               />
 
               <div class="action-buttons">
-                <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
+                <v-btn
+                  v-if="showScrollTop"
+                  icon
+                  :class="isDarkMode ? 'dark-scroll-top-btn' : 'scroll-top-btn'"
+                  @click="scrollToTop"
+                >
                   <v-icon>mdi-arrow-up</v-icon>
                 </v-btn>
 
@@ -147,6 +191,12 @@ onBeforeUnmount(() => {
                     :class="{
                       'green-btn':
                         route.path === '/dashboard' || route.path.startsWith('/dorm-details'),
+                      'light-green-btn':
+                        !isDarkMode &&
+                        (route.path === '/dashboard' || route.path.startsWith('/dorm-details')),
+                      'dark-green-btn':
+                        isDarkMode &&
+                        (route.path === '/dashboard' || route.path.startsWith('/dorm-details')),
                     }"
                   >
                     <v-icon>mdi-home-outline</v-icon>
@@ -154,7 +204,15 @@ onBeforeUnmount(() => {
                 </router-link>
 
                 <router-link to="/map">
-                  <v-btn icon class="mx-1" :class="{ 'green-btn': route.path === '/map' }">
+                  <v-btn
+                    icon
+                    class="mx-1"
+                    :class="{
+                      'green-btn': route.path === '/map',
+                      'light-green-btn': !isDarkMode && route.path === '/map',
+                      'dark-green-btn': isDarkMode && route.path === '/map',
+                    }"
+                  >
                     <v-icon>mdi-map-marker-outline</v-icon>
                   </v-btn>
                 </router-link>
@@ -164,7 +222,11 @@ onBeforeUnmount(() => {
                   <template v-slot:activator="{ props }">
                     <v-btn
                       class="mx-1"
-                      :class="{ 'green-btn': route.path === '/personal' }"
+                      :class="{
+                        'green-btn': route.path === '/personal',
+                        'light-green-btn': !isDarkMode && route.path === '/personal',
+                        'dark-green-btn': isDarkMode && route.path === '/personal',
+                      }"
                       icon
                       v-bind="props"
                     >
@@ -181,12 +243,12 @@ onBeforeUnmount(() => {
                       </v-avatar>
                     </v-btn>
                   </template>
-                  <v-card>
+                  <v-card :class="isDarkMode ? 'dark-card' : 'light-card'">
                     <v-card-text>
                       <div class="mx-auto text-center">
                         <v-avatar color="orange">
                           <template v-if="isLoadingUser">
-                            <v-progress-circular indeterminate size="24" color="white" />
+                            <v-progress-circular indeterminate size="20" color="white" />
                           </template>
                           <v-img
                             v-else-if="userProfile.avatar_url"
@@ -252,37 +314,63 @@ onBeforeUnmount(() => {
 <style scoped>
 .ftext {
   color: #ffba00;
-  font-size: larger;
+  font-size: 30px;
 }
 
 .stext {
   color: #0c3b2e;
-  font-size: larger;
+  font-size: 30px;
 }
 
-/* gi wala ang admin bg
-
-.gradient-bg {
-  background-image: url('/bg-admin.jpg');
-  height: 100vh;
-  padding: 1rem;
-  overflow-y: auto;
+:root {
+  --gradient-bg-color: #e8f5e9;
 }
-  */
 
 .gradient-bg {
-  background-color: #fffdf6;
+  background-color: var(--gradient-bg-color);
   height: 100vh;
   padding: 1rem;
   overflow-y: auto;
 }
 
-.gradient-app-bar {
-  /*
-  background: linear-gradient(290deg, #fffae6, #6d9773);
-  */
-  background-color: #0c3b2e;
+.light-bg {
+  background-color: #e8f5e9;
+}
+
+.dark-bg {
+  background-color: #0a2e23;
+  color: #e8f5e9;
+}
+
+/* App bar themes */
+.light-app-bar {
+  background-color: #6d9773 !important;
   color: #000;
+}
+
+.dark-app-bar {
+  background-color: #0c3b2e !important;
+  color: #fff;
+}
+
+/* Drawer themes */
+.light-drawer {
+  background-color: #e8f5e9 !important;
+}
+
+.dark-drawer {
+  background-color: #0a2e23 !important;
+  color: #fff;
+}
+
+/* Card themes */
+.light-card {
+  background-color: #ffffff !important;
+}
+
+.dark-card {
+  background-color: #1e3b33 !important;
+  color: #e0e0e0 !important;
 }
 
 .avatar-btn {
@@ -335,7 +423,17 @@ onBeforeUnmount(() => {
   position: fixed;
   bottom: 30px;
   right: 20px;
-  background-color: #0c3b2e;
+  background-color: #6d9773 !important; /* Light green for light mode */
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  background-color: #0c3b2e !important; /* Dark green for dark mode */
   color: white;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -344,28 +442,28 @@ onBeforeUnmount(() => {
 .icon-color {
   color: #0c3b2e;
 }
+
+/* Button styles for different themes */
 .green-btn {
-  background-color: #0c3b2e !important;
+  color: white !important;
+}
+
+.light-green-btn {
+  background-color: #6d9773 !important; /* Light green for light mode */
+  color: white !important;
+}
+
+.dark-green-btn {
+  background-color: #0c3b2e !important; /* Dark green for dark mode */
   color: white !important;
 }
 
 .personal-info {
-  color: black; /* White text */
   text-decoration: none; /* Ensures no underline */
 }
 
 .no-underline {
   text-decoration: none !important;
-}
-
-.scroll-top-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 20px;
-  background-color: #0c3b2e;
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .filter-row {
@@ -382,16 +480,5 @@ onBeforeUnmount(() => {
   .filter-row > .v-col {
     flex: 1 1 0;
   }
-}
-.search-wrapper .v-btn:hover {
-  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
-  transform: scale(1.1);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.search-wrapper .v-btn:hover .v-icon {
-  color: #2e7d32; /* Green icon color on hover */
 }
 </style>
