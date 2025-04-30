@@ -342,14 +342,14 @@ const closeCarousel = () => {
                 <br />
                 <!-- Owner info moved under main image -->
                 <div class="owner-detail">
-                  <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
+                  <p class="mb-0 font-weight-bold">Hosted by {{ dormDetails.owner }}</p>
                   <p class="mb-0">Owner</p>
                 </div>
 
                 <br />
                 <hr />
                 <br />
-                <h4 class="mb-3">Contact Details</h4>
+                <h4 class="mb-3 contact-details">Contact Details</h4>
 
                 <v-row class="text-center">
                   <!-- Messenger - Consistent event handling with toggle functions -->
@@ -515,6 +515,7 @@ const closeCarousel = () => {
   border-radius: 20px;
   padding: 25px 20%;
   padding-bottom: 40px;
+  margin-bottom: 10px;
 }
 
 .details-card {
@@ -630,6 +631,10 @@ const closeCarousel = () => {
 }
 
 .owner-detail {
+  font-size: 18px;
+}
+
+.contact-details {
   font-size: 18px;
 }
 </style>
