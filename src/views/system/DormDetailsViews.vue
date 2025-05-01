@@ -423,11 +423,12 @@ const closeCarousel = () => {
                   variant="text"
                   density="comfortable"
                   @click="openReviewModal"
-                  class="ms-2 text-none"
+                  class="ms-2 text-none mb-4"
                 >
                   <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
                   View Ratings
                 </v-btn>
+                <hr class="divider" />
               </v-col>
 
               <!-- Right column: Price + Details Card -->
