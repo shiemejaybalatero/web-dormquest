@@ -10,6 +10,127 @@ const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
 
+// Dorm image carousel data
+const dormImageMap = {
+  1: {
+    main: '/Amplayo/amplayomain.png',
+    gallery: [
+      '/Amplayo/amplayomain.png',
+      '/Amplayo/amplayo.png',
+      '/Amplayo/amplayo1.jpg',
+      '/Amplayo/amplayo2.png',
+      '/Amplayo/amplayo3.png',
+    ],
+  },
+  2: {
+    main: '/BlueHeaven/bluemain.png',
+    gallery: [
+      '/BlueHeaven/bluemain.png',
+      '/BlueHeaven/blue.jpg',
+      '/BlueHeaven/blue1.jpg',
+      '/BlueHeaven/blue2.jpg',
+    ],
+  },
+  3: {
+    main: '/Blissful/blissfulmain.png',
+    gallery: [
+      '/Blissful/blissfulmain.png',
+      '/Blissful/blissful.jpg',
+      '/Blissful/blissful1.jpg',
+      '/Blissful/blissful2.jpg',
+    ],
+  },
+  4: {
+    main: '/Licayan/licayanmain.png',
+    gallery: [
+      '/Licayan/licayanmain.png',
+      '/Licayan/licayan.png',
+      '/Licayan/licayan1.png',
+      '/Licayan/licayan2.jpg',
+      '/Licayan/licayan3.jpg',
+    ],
+  },
+  5: {
+    main: '/Chelsea/chelseamain.jpg',
+    gallery: [
+      '/Chelsea/chelseamain.jpg',
+      '/Chelsea/chelsea.jpg',
+      '/Chelsea/chelsea1.jpg',
+      '/Chelsea/chelsea2.jpg',
+      '/Chelsea/chelsea3.jpg',
+    ],
+  },
+  6: {
+    main: '/TGBG/tgbgmain.png',
+    gallery: [
+      '/TGBG/tgbgmain.png',
+      '/TGBG/tgbg.png',
+      '/TGBG/tgbg1.png',
+      '/TGBG/tgbg2.png',
+      '/TGBG/tgbg3.png',
+    ],
+  },
+  7: {
+    main: '/Magdura/magduramain.png',
+    gallery: [
+      '/Magdura/magduramain.png',
+      '/Magdura/magdura.png',
+      '/Magdura/magdura1.png',
+      '/Magdura/magdura2.png',
+      '/Magdura/magdura3.png',
+    ],
+  },
+  8: {
+    main: '/Karmo/karmomain.jpg',
+    gallery: ['/Karmo/karmomain.jpg', '/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
+  },
+}
+
+// Carousel handling
+const activeImageIndices = ref({})
+const carouselIntervals = ref({})
+const isHovering = ref({}) // Track hover state for each dorm
+
+const startCarousel = (dormId) => {
+  if (!activeImageIndices.value[dormId]) {
+    activeImageIndices.value[dormId] = 0
+  }
+
+  isHovering.value[dormId] = true // Set hover state to true
+
+  // Clear any existing interval
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+  }
+
+  // Set new interval
+  carouselIntervals.value[dormId] = setInterval(() => {
+    if (dormImageMap[dormId]) {
+      const galleryLength = dormImageMap[dormId].gallery.length
+      activeImageIndices.value[dormId] = (activeImageIndices.value[dormId] + 1) % galleryLength
+    }
+  }, 1500)
+}
+
+const stopCarousel = (dormId) => {
+  isHovering.value[dormId] = false // Set hover state to false
+
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+    delete carouselIntervals.value[dormId]
+  }
+}
+
+const getActiveImage = (dorm) => {
+  if (dormImageMap[dorm.id]) {
+    if (activeImageIndices.value[dorm.id] === undefined) {
+      activeImageIndices.value[dorm.id] = 0
+    }
+    return dormImageMap[dorm.id].gallery[activeImageIndices.value[dorm.id]]
+  }
+  return dorm.image || '/default-dorm-image.jpg'
+}
+
 // After - Updated to handle "Any" as a special case
 const priceRanges = [
   { text: 'Any Price', value: 'any' },
@@ -189,6 +310,7 @@ onMounted(async () => {
           >
             <v-card
               class="hover-card dorm-card"
+              :class="{ 'light-card-darkmode': isDarkMode }"
               elevation="2"
               @click="navigateToDorm(dorm)"
               style="cursor: pointer"
@@ -274,6 +396,17 @@ onMounted(async () => {
   color: #f8f8e1;
   border-radius: 16px;
   overflow: hidden;
+}
+
+.light-card-darkmode {
+  background-color: #fbfbfb !important;
+  color: #000000 !important;
+}
+
+.light-card-darkmode .dorm-title,
+.light-card-darkmode .dorm-subtitle,
+.light-card-darkmode .dorm-text {
+  color: #000000 !important;
 }
 
 .dorm-title {
