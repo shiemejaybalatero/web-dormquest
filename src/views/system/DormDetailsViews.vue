@@ -529,10 +529,18 @@ const closeCarousel = () => {
 }
 
 .details-card {
-  background: #c7d2c6;
+  background: #fff;
+  border: 1px solid #ccc;
   border-radius: 12px;
   padding: 1rem;
   color: black;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.details-card:hover {
+  border: 1px solid #0c3b2e; /* Light blue glow border */
+  box-shadow: 0 0 10px #0c3b2e; /* Outer glow effect */
 }
 
 .dark-details-card {
@@ -549,11 +557,12 @@ const closeCarousel = () => {
 .phone-btn {
   background-color: #0c3b2e;
   color: white;
+  height: 45px;
 }
 
 .messenger-btn:hover,
 .phone-btn:hover {
-  background-color: #b19470;
+  background-color: #ffba00;
 }
 
 .cursor-pointer {
@@ -649,7 +658,7 @@ const closeCarousel = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.3); /* Light white overlay */
+  background-color: rgba(12, 59, 46, 0.5); /* Light white overlay */
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 1;
