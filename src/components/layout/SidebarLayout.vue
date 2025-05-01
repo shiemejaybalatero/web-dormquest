@@ -7,9 +7,7 @@ import { useTheme } from 'vuetify'
 const theme = useTheme()
 const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
-const formActionDefault = {
-  formProcess: false,
-}
+const formActionDefault = { formProcess: false }
 
 defineProps({
   links: {
@@ -38,7 +36,70 @@ const onLogout = async () => {
 </script>
 
 <template>
+  <!-- Mobile layout -->
+  <v-row
+    v-if="$vuetify.display.smAndDown"
+    class="sidebar-wrapper"
+    :class="{ 'horizontal-sidebar': $vuetify.display.smAndDown }"
+    no-gutters
+  >
+    <v-list
+      dense
+      nav
+      class="sidebar pa-4"
+      :class="{
+        'sidebar-dark': isDarkMode,
+        'sidebar-light': !isDarkMode,
+        'horizontal-mode': $vuetify.display.smAndDown,
+      }"
+    >
+      <router-link
+        v-for="link in links"
+        :key="link.path"
+        :to="link.path"
+        class="text-decoration-none side-path"
+      >
+        <v-list-item
+          :class="{
+            selected: route.path === link.path,
+            'selected-dark': isDarkMode && route.path === link.path,
+            'selected-light': !isDarkMode && route.path === link.path,
+          }"
+          class="mb-2 item-style"
+        >
+          <div class="d-flex align-center pl-2">
+            <v-icon :color="route.path === link.path ? '#0c3b2e' : '#ffffff'" class="mr-2">
+              {{ link.icon }}
+            </v-icon>
+            <span
+              class="font-weight text-body-1"
+              :class="{
+                'text-dark-green': route.path === link.path,
+                'text-white': route.path !== link.path,
+              }"
+            >
+              {{ link.title }}
+            </span>
+          </div>
+        </v-list-item>
+      </router-link>
+
+      <v-list-item
+        class="cursor-pointer item-style"
+        @click="onLogout"
+        :disabled="formAction.formProcess"
+      >
+        <div class="d-flex align-center pl-2">
+          <v-icon class="mr-2" color="#ffffff">mdi-logout</v-icon>
+          <span class="font-weight text-body-1 text-white">Log out</span>
+        </div>
+      </v-list-item>
+    </v-list>
+  </v-row>
+
+  <!-- Large screen layout (unchanged) -->
   <v-list
+    v-else
     dense
     nav
     class="sidebar pa-4 ma-0"
@@ -60,7 +121,15 @@ const onLogout = async () => {
       >
         <div class="d-flex align-center pl-2">
           <v-icon
-            :color="isDarkMode ? '#ffffff' : route.path === link.path ? '#0c3b2e' : '#000000'"
+            :color="
+              route.path === link.path
+                ? isDarkMode
+                  ? '#0c3b2e'
+                  : '#0c3b2e'
+                : isDarkMode
+                  ? '#ffffff'
+                  : '#ffffff'
+            "
             class="mr-2"
           >
             {{ link.icon }}
@@ -68,9 +137,8 @@ const onLogout = async () => {
           <span
             class="font-weight text-body-1"
             :class="{
-              'text-white': isDarkMode,
-              'text-dark-green': !isDarkMode && route.path === link.path,
-              'text-black': !isDarkMode && route.path !== link.path,
+              'text-dark-green': route.path === link.path,
+              'text-white': route.path !== link.path,
             }"
           >
             {{ link.title }}
@@ -79,15 +147,14 @@ const onLogout = async () => {
       </v-list-item>
     </router-link>
 
-    <!-- Logout as list item -->
     <v-list-item
       class="mt-3 mb-2 cursor-pointer"
       @click="onLogout"
       :disabled="formAction.formProcess"
     >
       <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2" :color="isDarkMode ? '#ffffff' : '#000000'"> mdi-logout </v-icon>
-        <span class="font-weight text-body-1" :class="isDarkMode ? 'text-white' : 'text-black'">
+        <v-icon class="mr-2" :color="isDarkMode ? '#ffffff' : '#ffffff'">mdi-logout</v-icon>
+        <span class="font-weight text-body-1" :class="isDarkMode ? 'text-white' : 'text-white'">
           Log out
         </span>
       </div>
@@ -98,7 +165,7 @@ const onLogout = async () => {
 <style scoped>
 /* Light Mode Styles */
 .sidebar-light {
-  background: white;
+  background: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
 }
@@ -150,5 +217,30 @@ const onLogout = async () => {
   border-radius: 16px;
   padding: 16px;
   box-sizing: border-box;
+}
+
+/* Mobile Specific */
+.sidebar-wrapper {
+  display: flex;
+}
+
+.horizontal-sidebar {
+  flex-direction: row !important;
+  overflow-x: auto;
+}
+
+.horizontal-mode {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  min-height: auto !important;
+  border-radius: 16px;
+  gap: 8px;
+}
+
+.horizontal-mode .item-style {
+  display: inline-flex;
+  min-width: 160px;
+  white-space: nowrap;
 }
 </style>
