@@ -281,6 +281,8 @@ onMounted(async () => {
 .dorm-subtitle {
   color: #c0c2a1;
   font-family: 'Nunito', sans-serif;
+  font-size: 18px !important;
+  font-weight: bold;
 }
 
 .dorm-text {
