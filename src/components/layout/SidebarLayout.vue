@@ -60,15 +60,7 @@ const onLogout = async () => {
       >
         <div class="d-flex align-center pl-2">
           <v-icon
-            :color="
-              route.path === link.path
-                ? isDarkMode
-                  ? '#0c3b2e'
-                  : '#0c3b2e'
-                : isDarkMode
-                  ? '#ffffff'
-                  : '#ffffff'
-            "
+            :color="isDarkMode ? '#ffffff' : route.path === link.path ? '#0c3b2e' : '#000000'"
             class="mr-2"
           >
             {{ link.icon }}
@@ -76,8 +68,9 @@ const onLogout = async () => {
           <span
             class="font-weight text-body-1"
             :class="{
-              'text-dark-green': route.path === link.path,
-              'text-white': route.path !== link.path,
+              'text-white': isDarkMode,
+              'text-dark-green': !isDarkMode && route.path === link.path,
+              'text-black': !isDarkMode && route.path !== link.path,
             }"
           >
             {{ link.title }}
@@ -93,8 +86,10 @@ const onLogout = async () => {
       :disabled="formAction.formProcess"
     >
       <div class="d-flex align-center pl-2">
-        <v-icon class="mr-2" :color="'#ffffff'"> mdi-logout </v-icon>
-        <span class="font-weight text-body-1 text-white">Log out</span>
+        <v-icon class="mr-2" :color="isDarkMode ? '#ffffff' : '#000000'"> mdi-logout </v-icon>
+        <span class="font-weight text-body-1" :class="isDarkMode ? 'text-white' : 'text-black'">
+          Log out
+        </span>
       </div>
     </v-list-item>
   </v-list>
@@ -103,7 +98,7 @@ const onLogout = async () => {
 <style scoped>
 /* Light Mode Styles */
 .sidebar-light {
-  background: #6d9773;
+  background: white;
   border-radius: 16px;
   min-height: 65vh;
 }

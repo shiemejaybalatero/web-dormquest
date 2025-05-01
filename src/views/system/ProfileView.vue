@@ -79,79 +79,105 @@ const handleProfileUpdated = async () => {
                   </v-col>
 
                   <v-col cols="12" md="8">
-                    <v-row>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Full Name
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{ 'value-dark': isDarkMode, 'value-light': !isDarkMode }"
-                        >
-                          {{ userProfile.fullname }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Age
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{ 'value-dark': isDarkMode, 'value-light': !isDarkMode }"
-                        >
-                          {{ userProfile.age }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Email
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{ 'value-dark': isDarkMode, 'value-light': !isDarkMode }"
-                        >
-                          {{ userProfile.email }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Gender
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{ 'value-dark': isDarkMode, 'value-light': !isDarkMode }"
-                        >
-                          {{ userProfile.gender }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6" v-if="userProfile.birthday">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Birthday
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{ 'value-dark': isDarkMode, 'value-light': !isDarkMode }"
-                        >
-                          {{ userProfile.birthday }}
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-col>
+  <v-row>
+    <v-col cols="12" sm="6">
+      <div
+        class="field-label"
+        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+      >
+        Full Name
+      </div>
+      <div
+        class="field-value"
+        :class="{
+          'value-dark': isDarkMode,
+          'value-light': !isDarkMode,
+          'border-white': isDarkMode,
+          'border-black': !isDarkMode
+        }"
+      >
+        {{ userProfile.fullname }}
+      </div>
+    </v-col>
+    <v-col cols="12" sm="6">
+      <div
+        class="field-label"
+        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+      >
+        Age
+      </div>
+      <div
+        class="field-value"
+        :class="{
+          'value-dark': isDarkMode,
+          'value-light': !isDarkMode,
+          'border-white': isDarkMode,
+          'border-black': !isDarkMode
+        }"
+      >
+        {{ userProfile.age }}
+      </div>
+    </v-col>
+    <v-col cols="12" sm="6">
+      <div
+        class="field-label"
+        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+      >
+        Email
+      </div>
+      <div
+        class="field-value"
+        :class="{
+          'value-dark': isDarkMode,
+          'value-light': !isDarkMode,
+          'border-white': isDarkMode,
+          'border-black': !isDarkMode
+        }"
+      >
+        {{ userProfile.email }}
+      </div>
+    </v-col>
+    <v-col cols="12" sm="6">
+      <div
+        class="field-label"
+        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+      >
+        Gender
+      </div>
+      <div
+        class="field-value"
+        :class="{
+          'value-dark': isDarkMode,
+          'value-light': !isDarkMode,
+          'border-white': isDarkMode,
+          'border-black': !isDarkMode
+        }"
+      >
+        {{ userProfile.gender }}
+      </div>
+    </v-col>
+    <v-col cols="12" sm="6" v-if="userProfile.birthday">
+      <div
+        class="field-label"
+        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+      >
+        Birthday
+      </div>
+      <div
+        class="field-value"
+        :class="{
+          'value-dark': isDarkMode,
+          'value-light': !isDarkMode,
+          'border-white': isDarkMode,
+          'border-black': !isDarkMode
+        }"
+      >
+        {{ userProfile.birthday }}
+      </div>
+    </v-col>
+  </v-row>
+</v-col>
+
                 </v-row>
 
                 <div class="d-flex justify-end mt-4">
@@ -190,7 +216,7 @@ const handleProfileUpdated = async () => {
 <style scoped>
 /* Light Mode Styles */
 .profile-section-light {
-  background-color: #6d9773;
+  background-color: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
   padding-top: 24px;
@@ -201,7 +227,7 @@ const handleProfileUpdated = async () => {
 }
 
 .profile-card-light {
-  background-color: #fffdf6;
+  background-color: white;
   border-radius: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   width: 100%;
@@ -215,6 +241,11 @@ const handleProfileUpdated = async () => {
   background-color: #f5f5f5;
   color: #0c3b2e;
 }
+
+.border-black {
+  border: 1px solid #000000;
+}
+
 
 /* Dark Mode Styles */
 .profile-section-dark {

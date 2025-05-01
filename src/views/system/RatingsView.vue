@@ -332,7 +332,7 @@ onMounted(async () => {
 <style scoped>
 /* Light Mode Styles */
 .ratings-section-light {
-  background-color: #6d9773;
+  background-color: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
   padding-top: 24px;

@@ -249,7 +249,7 @@ onMounted(async () => {
 }
 
 .dorm-card {
-  background-color: #2c3930;
+  background-color:#0d3a2e;
   color: #f8f8e1;
   border-radius: 16px;
 }

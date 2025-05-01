@@ -112,7 +112,7 @@ const sidebarLinks = [
 <style scoped>
 /* Light Mode Styles */
 .about-section-light {
-  background: #6d9773;
+  background: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
   display: flex;
