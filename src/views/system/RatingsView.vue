@@ -120,8 +120,12 @@ onMounted(async () => {
             :class="{ 'ratings-section-dark': isDarkMode, 'ratings-section-light': !isDarkMode }"
           >
             <div class="ratings-wrapper">
-              <div class="d-flex justify-space-between align-center mb-6 w-100">
-                <h3 class="font-weight-bold mb-0 text-white">Your Ratings</h3>
+              <!-- Header (Modified) -->
+              <div class="d-flex justify-left mb-6">
+                <h2 class="font-weight-bold mb-0 text-center">
+                  <span style="color: #ffba00">MY</span>
+                  <span style="color: white"> RATINGS</span>
+                </h2>
               </div>
 
               <v-card
@@ -260,7 +264,7 @@ onMounted(async () => {
                     class="font-weight-medium mb-4"
                     :class="{ 'text-white': isDarkMode, 'text-dark-green': !isDarkMode }"
                   >
-                    Your Ratings ({{ userRatings.length }})
+                    Ratings ({{ userRatings.length }})
                   </h4>
                   <div class="ratings-scroll">
                     <v-row>
