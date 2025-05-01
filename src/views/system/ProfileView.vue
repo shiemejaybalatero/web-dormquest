@@ -38,7 +38,6 @@ const handleProfileUpdated = async () => {
 <template>
   <AppLayout>
     <template #content>
-      <!-- <v-container> -->
       <v-row>
         <!-- Sidebar -->
         <v-col cols="12" md="3">
@@ -111,7 +110,6 @@ const handleProfileUpdated = async () => {
           </v-overlay>
         </v-col>
       </v-row>
-      <!-- </v-container>  -->
     </template>
   </AppLayout>
 
@@ -123,11 +121,9 @@ const handleProfileUpdated = async () => {
   />
 </template>
 
+/* background: linear-gradient(180deg, #dbead3, #6d9773); */
 <style scoped>
 .profile-section {
-  /*
-  background: linear-gradient(180deg, #dbead3, #6d9773);
-  */
   background-color: #0c3b2e;
   border-radius: 16px;
   min-height: 65vh;
