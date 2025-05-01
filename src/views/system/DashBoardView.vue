@@ -50,20 +50,29 @@ const handleSearch = (value) => {
 
 const filteredDorms = computed(() => {
   return boardingHouseStore.boardingHouses.filter((dorm) => {
+    // Check if price exists, if not treat as 0 for filtering
+    const dormPrice = dorm.price !== undefined ? dorm.price : 0
+
     const priceOk =
       selectedPriceRange.value === 'any' ||
-      (dorm.price >= selectedPriceRange.value[0] && dorm.price <= selectedPriceRange.value[1])
+      (dormPrice >= selectedPriceRange.value[0] && dormPrice <= selectedPriceRange.value[1])
+
+    // Check if distance exists, if not treat as infinity for filtering
+    const dormDistance = dorm.distance_to_campus !== undefined ? dorm.distance_to_campus : Infinity
 
     const distanceOk =
       selectedDistanceRange.value === 'any' ||
-      (dorm.distance_to_campus !== undefined &&
-        dorm.distance_to_campus >= selectedDistanceRange.value[0] &&
-        dorm.distance_to_campus <= selectedDistanceRange.value[1])
+      (dormDistance >= selectedDistanceRange.value[0] &&
+        dormDistance <= selectedDistanceRange.value[1])
+
+    // Safe property access for search
+    const dormName = dorm.name || ''
+    const dormAddress = dorm.address || ''
 
     const searchOk =
       searchTerm.value === '' ||
-      dorm.name.toLowerCase().includes(searchTerm.value) ||
-      dorm.address.toLowerCase().includes(searchTerm.value)
+      dormName.toLowerCase().includes(searchTerm.value) ||
+      dormAddress.toLowerCase().includes(searchTerm.value)
 
     return priceOk && distanceOk && searchOk
   })
