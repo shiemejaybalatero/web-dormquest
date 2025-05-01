@@ -80,11 +80,6 @@ async function submitComment() {
     return
   }
 
-  if (!currentUser.value) {
-    errorMessage.value = 'You must be logged in to submit a comment'
-    return
-  }
-
   loading.value = true
   errorMessage.value = ''
 
