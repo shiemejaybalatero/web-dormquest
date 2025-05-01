@@ -350,6 +350,13 @@ onBeforeUnmount(() => {
 }
 
 @media (min-width: 960px) {
+  .action-buttons,
+  .search-wrapper {
+    margin-left: 0px;
+  }
+}
+
+@media (min-width: 960px) {
   .search-wrapper {
     justify-content: flex-start; /* Align left on large screens */
     margin-left: 25%;
