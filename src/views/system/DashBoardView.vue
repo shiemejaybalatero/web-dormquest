@@ -15,6 +15,127 @@ const searchTerm = ref('')
 const theme = useTheme()
 const isDarkMode = computed(() => theme.global.current.value.dark)
 
+// Dorm image carousel data
+const dormImageMap = {
+  1: {
+    main: '/Amplayo/amplayomain.png',
+    gallery: [
+      '/Amplayo/amplayomain.png',
+      '/Amplayo/amplayo.png',
+      '/Amplayo/amplayo1.jpg',
+      '/Amplayo/amplayo2.png',
+      '/Amplayo/amplayo3.png',
+    ],
+  },
+  2: {
+    main: '/BlueHeaven/bluemain.png',
+    gallery: [
+      '/BlueHeaven/bluemain.png',
+      '/BlueHeaven/blue.jpg',
+      '/BlueHeaven/blue1.jpg',
+      '/BlueHeaven/blue2.jpg',
+    ],
+  },
+  3: {
+    main: '/Blissful/blissfulmain.png',
+    gallery: [
+      '/Blissful/blissfulmain.png',
+      '/Blissful/blissful.jpg',
+      '/Blissful/blissful1.jpg',
+      '/Blissful/blissful2.jpg',
+    ],
+  },
+  4: {
+    main: '/Licayan/licayanmain.png',
+    gallery: [
+      '/Licayan/licayanmain.png',
+      '/Licayan/licayan.png',
+      '/Licayan/licayan1.png',
+      '/Licayan/licayan2.jpg',
+      '/Licayan/licayan3.jpg',
+    ],
+  },
+  5: {
+    main: '/Chelsea/chelseamain.jpg',
+    gallery: [
+      '/Chelsea/chelseamain.jpg',
+      '/Chelsea/chelsea.jpg',
+      '/Chelsea/chelsea1.jpg',
+      '/Chelsea/chelsea2.jpg',
+      '/Chelsea/chelsea3.jpg',
+    ],
+  },
+  6: {
+    main: '/TGBG/tgbgmain.png',
+    gallery: [
+      '/TGBG/tgbgmain.png',
+      '/TGBG/tgbg.png',
+      '/TGBG/tgbg1.png',
+      '/TGBG/tgbg2.png',
+      '/TGBG/tgbg3.png',
+    ],
+  },
+  7: {
+    main: '/Magdura/magduramain.png',
+    gallery: [
+      '/Magdura/magduramain.png',
+      '/Magdura/magdura.png',
+      '/Magdura/magdura1.png',
+      '/Magdura/magdura2.png',
+      '/Magdura/magdura3.png',
+    ],
+  },
+  8: {
+    main: '/Karmo/karmomain.jpg',
+    gallery: ['/Karmo/karmomain.jpg', '/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
+  },
+}
+
+// Carousel handling
+const activeImageIndices = ref({})
+const carouselIntervals = ref({})
+const isHovering = ref({}) // New ref to track hover state for each dorm
+
+const startCarousel = (dormId) => {
+  if (!activeImageIndices.value[dormId]) {
+    activeImageIndices.value[dormId] = 0
+  }
+
+  isHovering.value[dormId] = true // Set hover state to true
+
+  // Clear any existing interval
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+  }
+
+  // Set new interval
+  carouselIntervals.value[dormId] = setInterval(() => {
+    if (dormImageMap[dormId]) {
+      const galleryLength = dormImageMap[dormId].gallery.length
+      activeImageIndices.value[dormId] = (activeImageIndices.value[dormId] + 1) % galleryLength
+    }
+  }, 1500)
+}
+
+const stopCarousel = (dormId) => {
+  isHovering.value[dormId] = false // Set hover state to false
+
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+    delete carouselIntervals.value[dormId]
+  }
+}
+
+const getActiveImage = (dorm) => {
+  if (dormImageMap[dorm.id]) {
+    if (activeImageIndices.value[dorm.id] === undefined) {
+      activeImageIndices.value[dorm.id] = 0
+    }
+    return dormImageMap[dorm.id].gallery[activeImageIndices.value[dorm.id]]
+  }
+  return dorm.image || '/default-dorm-image.jpg'
+}
+
 // After - Updated to handle "Any" as a special case
 const priceRanges = [
   { text: 'Any Price', value: 'any' },
@@ -199,12 +320,33 @@ onMounted(async () => {
               @click="navigateToDorm(dorm)"
               style="cursor: pointer"
             >
-              <v-img
-                :src="dorm.image || '/default-dorm-image.jpg'"
-                class="responsive-img"
-                cover
-                :alt="dorm.name"
-              />
+              <div
+                class="image-container"
+                @mouseenter="dormImageMap[dorm.id] && startCarousel(dorm.id)"
+                @mouseleave="stopCarousel(dorm.id)"
+              >
+                <v-img
+                  :src="
+                    dormImageMap[dorm.id]
+                      ? getActiveImage(dorm)
+                      : dorm.image || '/default-dorm-image.jpg'
+                  "
+                  class="responsive-img"
+                  cover
+                  :alt="dorm.name"
+                >
+                  <template v-if="dormImageMap[dorm.id]">
+                    <div class="carousel-indicator" :class="{ visible: isHovering[dorm.id] }">
+                      <span
+                        v-for="(_, i) in dormImageMap[dorm.id].gallery"
+                        :key="i"
+                        class="dot"
+                        :class="{ active: activeImageIndices[dorm.id] === i }"
+                      ></span>
+                    </div>
+                  </template>
+                </v-img>
+              </div>
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-2">
                   <span class="text-body-1 font-weight-medium dorm-title">{{ dorm.name }}</span>
@@ -258,6 +400,7 @@ onMounted(async () => {
   background-color: #0d3a2e;
   color: #f8f8e1;
   border-radius: 16px;
+  overflow: hidden;
 }
 
 .light-card-darkmode {
@@ -279,10 +422,9 @@ onMounted(async () => {
 }
 
 .dorm-subtitle {
-  color: #c0c2a1;
+  color: #fe4f2d;
   font-family: 'Nunito', sans-serif;
   font-size: 18px !important;
-  font-weight: bold;
 }
 
 .dorm-text {
@@ -291,6 +433,42 @@ onMounted(async () => {
 
 .responsive-img {
   height: 200px;
+  transition: opacity 0.5s ease;
+}
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-indicator.visible {
+  opacity: 1;
+}
+
+.dot {
+  height: 6px;
+  width: 6px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.active {
+  background-color: #0d3a2e;
+  width: 10px;
+  border-radius: 3px;
 }
 
 @media (min-width: 960px) {
