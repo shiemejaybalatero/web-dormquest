@@ -283,63 +283,6 @@ const closeCarousel = () => {
                   cover
                   @click="openCarouselWithMainImage()"
                 />
-
-                <!-- Owner info moved under main image -->
-                <div class="d-flex align-center mt-3">
-                  <v-img
-                    src="/account-icon.jpg"
-                    alt="Profile Image"
-                    width="36"
-                    height="36"
-                    class="mr-3"
-                    style="border-radius: 50%"
-                  />
-                  <div class="owner-detail">
-                    <p class="mb-0 font-weight-bold">{{ dormDetails.owner }}</p>
-                    <p class="mb-0">Owner</p>
-                  </div>
-                </div>
-              </v-col>
-
-              <!-- Gallery Images -->
-              <v-col cols="12" md="6">
-                <v-row dense>
-                  <v-col v-for="(img, index) in galleryImages" :key="index" cols="6" md="6">
-                    <v-img
-                      :src="img"
-                      height="170"
-                      class="rounded cursor-pointer hover-effect d-none d-sm-flex"
-                      cover
-                      @click="openCarouselWithGalleryImage(index)"
-                    />
-                  </v-col>
-                </v-row>
-
-                <!-- Rating display -->
-                <div class="d-flex align-center mt-3">
-                  <v-rating
-                    :model-value="ratingStats.average || dormDetails.rating || 0"
-                    color="amber"
-                    size="small"
-                    half-increments
-                    readonly
-                    density="compact"
-                  ></v-rating>
-                  <span class="ml-1 text-body-2">
-                    {{ displayRating }}
-                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
-                  </span>
-                  <v-btn
-                    variant="text"
-                    color="primary"
-                    density="comfortable"
-                    @click="openReviewModal"
-                    class="ms-2 text-none"
-                  >
-                    <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
-                    View Ratings
-                  </v-btn>
-                </div>
               </v-col>
 
               <!-- Gallery Images -->
