@@ -122,10 +122,10 @@ onMounted(async () => {
             <div class="ratings-wrapper">
               <!-- Header (Modified) -->
               <div class="d-flex justify-left mb-6">
-                <h2 class="font-weight-bold mb-0 text-center">
+                <h1 class="font-weight-bold mb-0 text-center">
                   <span style="color: #ffba00">MY</span>
                   <span style="color: white"> RATINGS</span>
-                </h2>
+                </h1>
               </div>
 
               <v-card
