@@ -336,7 +336,7 @@ const closeCarousel = () => {
                     @click="openReviewModal"
                     class="ms-2 text-none"
                   >
-                    <v-icon size="small" class="me-1">mdi-comment-text-outline</v-icon>
+                    <v-icon size="small" class="me-1 color-white">mdi-comment-text-outline</v-icon>
                     View Ratings
                   </v-btn>
                 </div>
@@ -526,7 +526,6 @@ const closeCarousel = () => {
 .price {
   font-size: 24px;
   font-weight: bold;
-  color: #0c3b2e;
 }
 
 .messenger-btn,

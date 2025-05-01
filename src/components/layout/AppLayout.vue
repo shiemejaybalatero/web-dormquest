@@ -15,6 +15,8 @@ const showScrollTop = ref(false)
 const drawer = ref(false)
 const search = ref('')
 const formAction = ref({ ...formActionDefault })
+// Control the visibility of the profile edit dialog
+const showProfileEditDialog = ref(false)
 const isDarkMode = ref(theme.global.name.value === 'dark')
 
 // Custom function to update theme colors based on mode
@@ -76,9 +78,6 @@ const onLogout = async () => {
   formAction.value.formProcess = false
   router.replace('/')
 }
-
-// Control the visibility of the profile edit dialog
-const showProfileEditDialog = ref(false)
 
 // Handle profile update event
 const handleProfileUpdated = () => {
@@ -304,7 +303,6 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #fbfbfb;
   font-size: larger;
 }
 
