@@ -1,28 +1,25 @@
-<!-- For AppLayout.vue -->
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useTheme } from 'vuetify' // Added missing import for theme
+import { useTheme } from 'vuetify'
 import { supabase, formActionDefault } from '@/utils/supabase'
-import { getAvatarText } from '@/utils/helper'
+import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
+import EditProfile from '@/components/system/EditProfile.vue'
 
 const route = useRoute()
 const router = useRouter()
-const theme = useTheme() // Initialize theme
-
+const theme = useTheme()
+const searchQuery = ref('')
 const showScrollTop = ref(false)
+const mainContent = ref(null)
 const drawer = ref(false)
-const search = ref('')
 const formAction = ref({ ...formActionDefault })
 
-const userData = ref({
-  initials: '',
-  email: '',
-  fullname: '',
-})
+// Theme control
+const isDarkMode = ref(theme.global.name.value === 'dark')
+
 // Control the visibility of the profile edit dialog
 const showProfileEditDialog = ref(false)
-const isDarkMode = ref(theme.global.name.value === 'dark')
 
 // Custom function to update theme colors based on mode
 function updateThemeColors() {
@@ -36,13 +33,13 @@ function updateThemeColors() {
     // Light mode: Light green colors
     theme.themes.value.light.colors.primary = '#6D9773' // Light green
     theme.themes.value.light.colors.secondary = '#FFBA00' // Keep gold accent
-    theme.themes.value.light.colors.background = '#E8F5E9' // Very light green background
-    document.body.style.setProperty('--gradient-bg-color', '#E8F5E9')
+    theme.themes.value.light.colors.background = '#FFFDF6' // Very light green background
+    document.body.style.setProperty('--gradient-bg-color', '#FFFDF6')
   }
 }
 
-// Added missing onClick function for theme toggle
-const onClick = () => {
+// Function for theme toggle
+const toggleTheme = () => {
   theme.global.name.value = theme.global.name.value === 'light' ? 'dark' : 'light'
   isDarkMode.value = theme.global.name.value === 'dark'
   updateThemeColors()
@@ -58,16 +55,27 @@ watch(
 )
 
 const handleScroll = () => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  showScrollTop.value = scrollTop > 300
+  if (!mainContent.value) return
+
+  // Check for both window and component scrolling
+  if (mainContent.value.$el) {
+    const scrollTop = mainContent.value.$el.scrollTop
+    showScrollTop.value = scrollTop > 300
+  } else {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    showScrollTop.value = scrollTop > 300
+  }
 }
 
 const scrollToTop = () => {
-  // Use window.scrollTo for more reliable scrolling behavior
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  })
+  if (mainContent.value && mainContent.value.$el) {
+    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
 }
 
 const onLogout = async () => {
@@ -84,51 +92,21 @@ const onLogout = async () => {
   router.replace('/')
 }
 
-const handleScroll = () => {
-  if (!mainContent.value) return
-  const scrollTop = mainContent.value.$el.scrollTop
-  showScrollTop.value = scrollTop > 300
-}
-
-const scrollToTop = () => {
-  if (mainContent.value) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser()
-
-  if (error) {
-    console.error('Error getting user:', error)
-    return
-  }
-
-  const metadata = data?.user?.user_metadata
-
-  if (metadata) {
-    userData.value.email = metadata.email || ''
-    userData.value.fullname = `${metadata.firstname || ''} ${metadata.lastname || ''}`.trim()
-    userData.value.initials = getAvatarText(userData.value.fullname)
-  }
-
 // Handle profile update event
 const handleProfileUpdated = () => {
-  // You might want to refresh profile data or perform other actions after update
+  // Refresh profile data after update
+  fetchUserProfile()
   console.log('Profile updated successfully')
-  fetchUserProfile() // Refresh profile data after update
 }
 
-onMounted(() => {
-  getUser()
-  if (mainContent.value) {
-    mainContent.value.$el.addEventListener('scroll', handleScroll)
-  }
 onMounted(async () => {
   // Load user profile data
   await fetchUserProfile()
 
-  // Add scroll event listener to window
+  // Add scroll event listeners
+  if (mainContent.value && mainContent.value.$el) {
+    mainContent.value.$el.addEventListener('scroll', handleScroll)
+  }
   window.addEventListener('scroll', handleScroll)
 
   // Check initial scroll position
@@ -139,7 +117,10 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  // Clean up the event listener when component is unmounted
+  // Clean up event listeners when component is unmounted
+  if (mainContent.value && mainContent.value.$el) {
+    mainContent.value.$el.removeEventListener('scroll', handleScroll)
+  }
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
@@ -147,10 +128,6 @@ onBeforeUnmount(() => {
 <template>
   <v-app :theme="isDarkMode ? 'dark' : 'light'">
     <v-navigation-drawer v-model="drawer" app temporary>
-      <v-list>
-        <v-list-item title="Dashboard" prepend-icon="mdi-view-dashboard" />
-        <v-list-item title="Settings" prepend-icon="mdi-cog" />
-        <v-list-item />
       <v-list>
         <v-list-item
           title="Dashboard"
@@ -172,12 +149,13 @@ onBeforeUnmount(() => {
         <!-- Theme toggle in navigation drawer -->
         <v-list-item
           :prepend-icon="isDarkMode ? 'mdi-weather-night' : 'mdi-weather-sunny'"
-          @click="onClick"
+          @click="toggleTheme"
         >
           <v-list-item-title>{{ isDarkMode ? 'Dark' : 'Light' }} Mode</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
+
     <v-app-bar app flat class="gradient-app-bar">
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
@@ -198,32 +176,33 @@ onBeforeUnmount(() => {
 
     <v-main
       ref="mainContent"
+      class="main-no-gap"
       :style="
         route.path === '/map'
           ? 'overflow: hidden; height: 100vh; padding: 0;'
           : 'overflow-y: auto; height: 100vh;'
       "
     >
-    <v-main ref="mainContentEl" class="main-no-gap">
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
           <v-container fluid>
             <!-- Search & Buttons -->
             <div class="d-flex align-center search-wrapper mt-3 mb-4">
               <v-text-field
-                v-model="search"
+                v-model="searchQuery"
                 placeholder="Search for dormitories or boarding house"
                 prepend-inner-icon="mdi-magnify"
                 class="search-field me-2"
                 variant="outlined"
                 rounded
                 hide-details
+                @update:model-value="$emit('search', $event)"
                 clearable
                 density="comfortable"
               />
 
               <div class="action-buttons">
-                <!-- Modified scroll to top button - outside of any specific container -->
+                <!-- Scroll to top button -->
                 <v-fade-transition>
                   <v-btn
                     v-if="showScrollTop"
@@ -272,7 +251,15 @@ onBeforeUnmount(() => {
                         }"
                         size="large"
                       >
-                        <span class="text-subtitle-2">{{ userData.initials }}</span>
+                        <template v-if="isLoadingUser">
+                          <v-progress-circular indeterminate size="24" color="primary" />
+                        </template>
+                        <v-img
+                          v-else-if="userProfile.avatar_url"
+                          :src="userProfile.avatar_url"
+                          alt="User Avatar"
+                        />
+                        <span v-else class="text-subtitle-2">{{ userProfile.initials }}</span>
                       </v-avatar>
                     </v-btn>
                   </template>
@@ -280,22 +267,29 @@ onBeforeUnmount(() => {
                     <v-card-text>
                       <div class="mx-auto text-center">
                         <v-avatar color="orange">
-                          <span class="text-h5">{{ userData.initials }}</span>
+                          <template v-if="isLoadingUser">
+                            <v-progress-circular indeterminate size="24" color="white" />
+                          </template>
+                          <v-img
+                            v-else-if="userProfile.avatar_url"
+                            :src="userProfile.avatar_url"
+                            alt="User Avatar"
+                          />
+                          <span v-else class="text-h5">{{ userProfile.initials }}</span>
                         </v-avatar>
-                        <h3>{{ userData.fullName }}</h3>
-                        <p class="text-caption mt-1">
-                          {{ userData.email }}
-                        </p>
-                        <v-divider class="my-3"></v-divider>
-                        <router-link to="/profile">
+                        <h3>{{ userProfile.fullname }}</h3>
+                        <p class="text-caption mt-1">{{ userProfile.email }}</p>
+                        <v-divider class="my-3" />
+                        <router-link to="/profile" class="no-underline">
                           <v-btn variant="text" rounded class="mx-1 personal-info">
                             Personal Information
                           </v-btn>
                         </router-link>
-                        <v-divider class="my-3"></v-divider>
-                        <v-btn variant="text" rounded> Edit Account </v-btn>
-                        <v-divider class="my-3"></v-divider>
-
+                        <v-divider class="my-3" />
+                        <v-btn variant="text" rounded @click="showProfileEditDialog = true">
+                          Edit Account
+                        </v-btn>
+                        <v-divider class="my-3" />
                         <v-btn
                           prepend-icon="mdi-logout"
                           variant="plain"
@@ -328,6 +322,7 @@ onBeforeUnmount(() => {
       </div>
     </v-main>
 
+    <!-- EditProfile component -->
     <EditProfile
       v-model="showProfileEditDialog"
       :userData="userProfile"
@@ -344,22 +339,25 @@ onBeforeUnmount(() => {
 
 .stext {
   font-size: larger;
+  color: white;
 }
 
 .gradient-bg {
-  background-color: #fbfbfb;
-  height: 100vh;
-  padding: 1rem;
-  overflow-y: auto;
-}
   background-color: var(--gradient-bg-color, #fffdf6);
   min-height: 100vh;
+  padding: 1rem;
+  overflow-y: auto;
   padding-bottom: 2rem;
 }
 
 .gradient-app-bar {
-  background: #0c3b2e;
+  background-color: #0c3b2e;
   color: #000;
+}
+
+.main-no-gap {
+  overflow-y: auto;
+  position: relative;
 }
 
 .avatar-btn {
@@ -375,18 +373,15 @@ onBeforeUnmount(() => {
   text-decoration: none;
 }
 
-.Logoname2 {
-  font-size: 12px;
-}
-
 .search-wrapper {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 40px;
 }
 
 .search-wrapper .v-btn:hover {
-  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
+  background-color: rgba(0, 128, 0, 0.1);
   transform: scale(1.1);
   transition:
     background-color 0.2s ease,
@@ -427,7 +422,6 @@ onBeforeUnmount(() => {
 }
 
 .personal-info {
-  color: black;
   text-decoration: none;
 }
 
@@ -439,19 +433,6 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 16px;
   flex-wrap: nowrap;
-}
-
-/* Makes sure v-main has proper scroll behavior */
-.main-no-gap {
-  overflow-y: auto;
-  position: relative;
-}
-
-/* Theme toggle button styling */
-.theme-toggle-wrapper {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-end;
 }
 
 @media (max-width: 600px) {
@@ -467,13 +448,6 @@ onBeforeUnmount(() => {
   .scroll-top-btn {
     bottom: 70px;
     right: 15px;
-  }
-}
-
-@media (min-width: 960px) {
-  .action-buttons,
-  .search-wrapper {
-    margin-left: 0px;
   }
 }
 

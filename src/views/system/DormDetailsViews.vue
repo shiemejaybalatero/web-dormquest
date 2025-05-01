@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
+import { useTheme } from 'vuetify' // Import useTheme to access theme state
 import AppLayout from '@/components/layout/AppLayout.vue'
 import DormitoryReview from '@/components/system/DormitoryReview.vue'
 import { supabase } from '@/utils/supabase'
@@ -16,6 +17,12 @@ const selectedImageIndex = ref(0) // Track which image was clicked
 const showReviewModal = ref(false) // Added missing declaration
 const ratingStats = ref({ average: 0, count: 0 }) // Added missing declaration
 const dormRatings = ref([]) // Added missing declaration
+
+// Get the Vuetify theme
+const theme = useTheme()
+
+// Determine if dark mode is active
+const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
@@ -80,7 +87,7 @@ const dormImageMap = {
       '/Magdura/magdura.png',
       '/Magdura/magdura1.png',
       '/Magdura/magdura2.png',
-      '/Magdura/magdur3.png',
+      '/Magdur3.png',
     ],
   },
   8: {
@@ -298,32 +305,6 @@ const closeCarousel = () => {
                     />
                   </v-col>
                 </v-row>
-
-                <!-- Rating display -->
-                <div class="d-flex align-center mt-3">
-                  <v-rating
-                    :model-value="ratingStats.average || dormDetails.rating || 0"
-                    color="amber"
-                    size="small"
-                    half-increments
-                    readonly
-                    density="compact"
-                  ></v-rating>
-                  <span class="ml-1 text-body-2">
-                    {{ displayRating }}
-                    <span class="text-caption">({{ ratingStats.count || 0 }})</span>
-                  </span>
-                  <v-btn
-                    variant="text"
-                    color="primary"
-                    density="comfortable"
-                    @click="openReviewModal"
-                    class="ms-2 text-none"
-                  >
-                    <v-icon size="small" class="me-1 color-white">mdi-comment-text-outline</v-icon>
-                    View Ratings
-                  </v-btn>
-                </div>
               </v-col>
             </v-row>
           </v-col>
@@ -364,7 +345,7 @@ const closeCarousel = () => {
                   | 3 private baths | Female dorm
                 </p>
 
-                <hr />
+                <hr class="divider" />
                 <br />
                 <!-- Owner info moved under main image -->
                 <div class="owner-detail">
@@ -373,7 +354,7 @@ const closeCarousel = () => {
                 </div>
 
                 <br />
-                <hr />
+                <hr class="divider" />
                 <br />
                 <h4 class="mb-3 contact-details">Contact Details</h4>
 
@@ -395,14 +376,13 @@ const closeCarousel = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="text"
-                          class="text-capitalize"
+                          class="text-capitalize contact-link"
                         >
                           {{ dormDetails.messenger_name }}
                         </v-btn>
                       </div>
                     </v-expand-transition>
                   </v-col>
-
                   <!-- Phone - Consistent event handling with toggle functions -->
                   <v-col cols="6">
                     <v-btn
@@ -418,7 +398,7 @@ const closeCarousel = () => {
                         <v-btn
                           :href="`tel:${dormDetails.contact_number}`"
                           variant="text"
-                          class="text-capitalize"
+                          class="text-capitalize contact-link"
                         >
                           {{ dormDetails.contact_number }}
                         </v-btn>
@@ -428,18 +408,19 @@ const closeCarousel = () => {
                 </v-row>
 
                 <br />
-                <hr />
+                <hr class="divider" />
                 <br />
                 <p class="text-body-2 d-flex align-center font-weight-bold">
-                  <v-icon class="mr-2" color="black">mdi-map-marker-outline</v-icon>
+                  <v-icon class="mr-2" :color="isDarkMode ? 'white' : 'black'"
+                    >mdi-map-marker-outline</v-icon
+                  >
                   {{ dormDetails.address }}
                 </p>
                 <p class="font-weight-bold mb-4 ps-7">{{ dormDetails.distance_to_campus }} away</p>
-                <hr />
+                <hr class="divider" />
                 <h3 class="mt-2 mb-3">Ratings</h3>
                 <v-btn
                   variant="text"
-                  color="primary"
                   density="comfortable"
                   @click="openReviewModal"
                   class="ms-2 text-none"
@@ -458,7 +439,11 @@ const closeCarousel = () => {
                   </v-btn>
                 </div>
 
-                <v-row class="details-card mx-sm-md-5 px-10" no-gutters>
+                <v-row
+                  class="details-card mx-sm-md-5 px-10"
+                  :class="{ 'dark-details-card': isDarkMode }"
+                  no-gutters
+                >
                   <v-col cols="12">
                     <div class="d-flex justify-content-between align-items-center mt-3">
                       <span class="price"
@@ -474,7 +459,7 @@ const closeCarousel = () => {
                       </v-btn>
                     </div>
                     <br />
-                    <hr />
+                    <hr class="card-divider" />
                     <br />
                   </v-col>
 
@@ -483,13 +468,13 @@ const closeCarousel = () => {
                     <p class="my-4">
                       <strong>Distance:</strong> {{ dormDetails.distance_to_campus }}
                     </p>
-                    <hr />
+                    <hr class="card-divider" />
                     <p class="my-4">
                       <strong>Room number:</strong> {{ dormDetails.number_of_room }}
                     </p>
-                    <hr />
+                    <hr class="card-divider" />
                     <p class="my-4"><strong>Amenities:</strong> {{ dormDetails.amenity }}</p>
-                    <hr />
+                    <hr class="card-divider" />
                   </v-col>
 
                   <!-- Spacer -->
@@ -500,14 +485,14 @@ const closeCarousel = () => {
                     <p class="my-4">
                       <strong>Room Capacity:</strong> {{ dormDetails.room_capacity }}
                     </p>
-                    <hr />
+                    <hr class="card-divider" />
                     <p class="my-4"><strong>Room Type:</strong> {{ dormDetails.room_type }}</p>
-                    <hr />
+                    <hr class="card-divider" />
                     <p class="my-4">
                       <strong>Availability:</strong>
                       {{ dormDetails.availability_status ? 'Yes' : 'No' }}
                     </p>
-                    <hr />
+                    <hr class="card-divider" />
                   </v-col>
                 </v-row>
               </v-col>
@@ -515,7 +500,6 @@ const closeCarousel = () => {
           </v-col>
         </v-row>
 
-        <!-- DormitoryReview Modal Component -->
         <DormitoryReview
           :dorm-id="dormId"
           :is-open="showReviewModal"
@@ -548,6 +532,12 @@ const closeCarousel = () => {
   background: #c7d2c6;
   border-radius: 12px;
   padding: 1rem;
+  color: black;
+}
+
+.dark-details-card {
+  background: #1e453e;
+  color: white;
 }
 
 .price {
@@ -557,20 +547,34 @@ const closeCarousel = () => {
 
 .messenger-btn,
 .phone-btn {
-  background-color: #0c3b2e; /* Facebook Blue */
+  background-color: #0c3b2e;
   color: white;
 }
 
-.messenger-btn:hover {
-  background-color: #b19470;
-}
-
+.messenger-btn:hover,
 .phone-btn:hover {
   background-color: #b19470;
 }
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* Theme aware dividers */
+.divider {
+  opacity: 0.2;
+}
+
+.card-divider {
+  opacity: 0.3;
+}
+
+:deep(.v-theme--dark) .contact-link {
+  color: #ffba00;
+}
+
+:deep(.v-theme--light) .contact-link {
+  color: #0c3b2e;
 }
 
 @media (max-width: 768px) {
@@ -582,6 +586,7 @@ const closeCarousel = () => {
     font-size: 14px;
   }
 }
+
 .smallcardone {
   color: #0c3b2e;
   font-weight: bold;
@@ -601,7 +606,6 @@ const closeCarousel = () => {
   text-transform: none;
 }
 
-/* Modal Carousel Overlay Styles */
 .carousel-overlay {
   position: fixed;
   top: 0;

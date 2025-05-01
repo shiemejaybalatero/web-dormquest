@@ -21,7 +21,6 @@ export default createVuetify({
           secondary: '#FFBA00', // Gold/yellow
           accent: '#81C784', // Another light green shade
           error: '#FF5252',
-          info: '#2196F3',
           success: '#4CAF50',
           warning: '#FFC107',
           background: '#E8F5E9', // Very light green background
@@ -34,7 +33,6 @@ export default createVuetify({
           secondary: '#FFBA00', // Gold/yellow
           accent: '#2E7D32', // Another green shade
           error: '#FF5252',
-          info: '#2196F3',
           success: '#4CAF50',
           warning: '#FFC107',
           background: '#0A2E23', // Darker green background

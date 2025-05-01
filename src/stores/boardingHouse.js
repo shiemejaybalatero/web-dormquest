@@ -17,7 +17,7 @@ export const useBoardingHouseStore = defineStore('boardingHouse', () => {
     try {
       const { data, error } = await supabase
         .from('dormitories')
-        .select('id, name, address, price, image')
+        .select('id, name, distance_to_campus, price, image')
         .order('id', { ascending: true })
 
       if (error) {
@@ -26,11 +26,19 @@ export const useBoardingHouseStore = defineStore('boardingHouse', () => {
         return
       }
 
+      console.log('Raw data from API:', data)
+
       boardingHouses.value = data.map((house) => ({
         ...house,
+        // Add a default distance since the column doesn't exist in the database
+        distance: 1, // Set default distance to 1km for all dormitories
+        // Ensure price is always present
+        price: house.price !== undefined ? house.price : 0,
         rating: '4.5',
         availability: `₱${house.price || 'N/A'} per month`,
       }))
+
+      console.log('Processed boarding houses:', boardingHouses.value)
     } catch (err) {
       console.error('Unexpected error:', err)
       errorMessage.value = 'An unexpected error occurred.'
