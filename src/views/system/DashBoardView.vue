@@ -152,7 +152,7 @@ onMounted(async () => {
         </v-alert>
 
         <v-row>
-          <v-col cols="12" sm="6">
+          <v-col cols="6" xs="6" sm="6">
             <v-select
               v-model="selectedPriceRange"
               :items="priceRanges"
@@ -164,7 +164,7 @@ onMounted(async () => {
               density="comfortable"
             ></v-select>
           </v-col>
-          <v-col cols="12" sm="6">
+          <v-col cols="6" xs="6" sm="6">
             <v-select
               v-model="selectedDistanceRange"
               :items="distanceRanges"

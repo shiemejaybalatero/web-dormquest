@@ -451,10 +451,10 @@ onBeforeUnmount(() => {
   }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 768px) {
   .search-wrapper {
-    justify-content: flex-start; /* Align left on large screens */
-    margin-left: 25%;
+    justify-content: center; /* Align left on large screens */
+    text-align: center;
   }
 }
 </style>
