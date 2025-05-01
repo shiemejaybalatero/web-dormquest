@@ -243,4 +243,10 @@ const onLogout = async () => {
   min-width: 160px;
   white-space: nowrap;
 }
+
+@media (min-width: 780px) {
+  .sidebar {
+    justify-content: center;
+  }
+}
 </style>
