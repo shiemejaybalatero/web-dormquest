@@ -1,12 +1,16 @@
 <script setup>
 import AppLayout from '@/components/layout/AppLayout.vue'
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import SidebarLayout from '@/components/layout/SidebarLayout.vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import { useAuthUserStore } from '@/stores/authUser'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
+import { useTheme } from 'vuetify'
 
-const route = useRoute()
+const theme = useTheme()
+const isDarkMode = computed(() => theme.global.name.value === 'dark')
+
 const router = useRouter()
 const userStore = useAuthUserStore()
 
@@ -17,11 +21,12 @@ const errorMessage = ref('')
 const averageRating = ref(0)
 const userRatings = ref([])
 
-// Function to set active sidebar item
-const activeItem = ref(route.path)
-const setActiveItem = (path) => {
-  activeItem.value = path
-}
+// Sidebar links
+const sidebarLinks = [
+  { title: 'Personal Information', icon: 'mdi-account', path: '/profile' },
+  { title: 'Ratings', icon: 'mdi-star', path: '/ratings' },
+  { title: 'About App', icon: 'mdi-information', path: '/about' },
+]
 
 // Fetch user ratings from Supabase
 const fetchUserRatings = async () => {
@@ -105,167 +110,218 @@ onMounted(async () => {
       <v-row>
         <!-- Sidebar -->
         <v-col cols="12" md="3">
-          <v-list dense nav class="sidebar pa-4">
-            <router-link to="/profile" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/profile')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/profile' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-account
-                  </v-icon>
-                  <span class="icon-name">Personal Information</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/ratings" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/ratings')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/ratings' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-star
-                  </v-icon>
-                  <span class="icon-name">Ratings</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/about" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/about')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/about' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-information
-                  </v-icon>
-                  <span class="icon-name">About App</span>
-                </div>
-              </v-list-item>
-            </router-link>
-
-            <router-link to="/" class="text-decoration-none" style="color: inherit">
-              <v-list-item class="icon-container" @mouseover="setActiveItem('/')">
-                <div class="d-flex align-center pl-2">
-                  <v-icon :color="route.path === '/' ? '#fff' : '#fff'" class="mr-2 icon">
-                    mdi-logout
-                  </v-icon>
-                  <span class="icon-name">Log Out</span>
-                </div>
-              </v-list-item>
-            </router-link>
-          </v-list>
+          <SidebarLayout :links="sidebarLinks" />
         </v-col>
 
         <!-- Ratings Section -->
         <v-col cols="12" md="9">
-          <div class="ratings-section pa-6">
-            <!-- Profile header - Updated to rely on profileView -->
-            <v-row align="center">
-              <v-col cols="12" md="3" class="text-center py-4">
-                <!-- Avatar from profileView with no upload functionality -->
-                <v-avatar size="100" color="grey-lighten-2">
-                  <!-- Show loading indicator while user data is being fetched -->
-                  <template v-if="isLoadingUser">
-                    <v-progress-circular
-                      indeterminate
-                      size="50"
-                      color="primary"
-                    ></v-progress-circular>
-                  </template>
-
-                  <!-- Show avatar if available -->
-                  <v-img
-                    v-else-if="userProfile.avatar_url"
-                    :src="userProfile.avatar_url"
-                    alt="Profile Picture"
-                  ></v-img>
-
-                  <!-- Show initials if no avatar -->
-                  <span v-else class="text-h4">{{ userProfile.initials }}</span>
-                </v-avatar>
-              </v-col>
-
-              <v-col cols="12" md="9">
-                <!-- User details -->
-                <div v-if="isLoadingUser" class="d-flex align-center">
-                  <v-skeleton-loader type="text" width="200px" class="mb-2"></v-skeleton-loader>
-                </div>
-                <template v-else>
-                  <h3 class="font-weight-bold mb-1">{{ userProfile.fullname }}</h3>
-                  <div class="text-grey-darken-1 mb-2">{{ userProfile.email }}</div>
-                </template>
-
-                <!-- Ratings section -->
-                <div class="d-flex align-center">
-                  <span class="mr-2 font-weight-bold">{{ averageRating.toFixed(1) }}</span>
-                  <v-rating
-                    :model-value="averageRating"
-                    half-increments
-                    color="#FFD700"
-                    background-color="#d0d0d0"
-                    size="24"
-                    readonly
-                  />
-                  <span class="ml-2 text-grey-darken-1">({{ userRatings.length }} ratings)</span>
-                </div>
-              </v-col>
-            </v-row>
-
-            <v-divider class="my-5" />
-
-            <!-- Loading state -->
-            <div v-if="loading" class="text-center py-5">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
-              <div class="mt-2">Loading your ratings...</div>
-            </div>
-
-            <!-- Error message -->
-            <v-alert v-if="errorMessage" type="error" class="mb-4">
-              {{ errorMessage }}
-              <div class="mt-2">
-                <v-btn @click="fetchUserRatings" variant="outlined" size="small">Try Again</v-btn>
+          <div
+            class="ratings-section d-flex flex-column align-center justify-center pa-6"
+            :class="{ 'ratings-section-dark': isDarkMode, 'ratings-section-light': !isDarkMode }"
+          >
+            <div class="ratings-wrapper">
+              <div class="d-flex justify-space-between align-center mb-6 w-100">
+                <h3 class="font-weight-bold mb-0 text-white">Your Ratings</h3>
               </div>
-            </v-alert>
 
-            <!-- No ratings message -->
-            <div
-              v-if="!loading && !errorMessage && userRatings.length === 0"
-              class="text-center py-5"
-            >
-              <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
-              <h4 class="mt-3 text-grey-darken-1">You haven't rated any dormitories yet</h4>
-              <v-btn color="primary" class="mt-3" @click="router.push({ name: 'dashboard' })">
-                Browse Dormitories
-              </v-btn>
-            </div>
+              <v-card
+                class="pa-6 ratings-card"
+                :class="{ 'ratings-card-dark': isDarkMode, 'ratings-card-light': !isDarkMode }"
+                flat
+              >
+                <!-- Profile header -->
+                <v-row align="center">
+                  <v-col cols="12" md="3" class="text-center py-4">
+                    <v-avatar size="100" color="grey-lighten-2">
+                      <!-- Show loading indicator while user data is being fetched -->
+                      <template v-if="isLoadingUser">
+                        <v-progress-circular indeterminate size="50" color="primary" />
+                      </template>
 
-            <!-- Ratings list -->
-            <template v-if="!loading && !errorMessage && userRatings.length > 0">
-              <h4 class="font-weight-medium mb-4">Your Ratings ({{ userRatings.length }})</h4>
-              <div class="ratings-scroll">
-                <v-row>
-                  <v-col cols="12" v-for="(dorm, index) in userRatings" :key="index">
-                    <div class="rating-card px-4 py-3" @click="viewDormitory(dorm.dormId)">
-                      <div class="d-flex justify-space-between align-center">
-                        <div>
-                          <div class="font-weight-medium text-subtitle-1">{{ dorm.name }}</div>
-                          <div class="text-caption text-grey-darken-1">
-                            Rated on {{ dorm.date }}
-                          </div>
-                          <div v-if="dorm.comment" class="text-body-2 mt-1">{{ dorm.comment }}</div>
-                        </div>
-                        <div class="text-right">
-                          <v-rating
-                            :model-value="dorm.rating"
-                            half-increments
-                            color="#FFD700"
-                            background-color="#d0d0d0"
-                            size="22"
-                            readonly
-                          />
-                        </div>
+                      <!-- Show avatar if available -->
+                      <v-img
+                        v-else-if="userProfile.avatar_url"
+                        :src="userProfile.avatar_url"
+                        alt="Profile Picture"
+                      />
+
+                      <!-- Show initials if no avatar -->
+                      <span v-else class="text-h4">{{ userProfile.initials }}</span>
+                    </v-avatar>
+                  </v-col>
+
+                  <v-col cols="12" md="9">
+                    <!-- User details -->
+                    <div v-if="isLoadingUser" class="d-flex align-center">
+                      <v-skeleton-loader type="text" width="200px" class="mb-2"></v-skeleton-loader>
+                    </div>
+                    <template v-else>
+                      <h3
+                        class="font-weight-bold mb-1"
+                        :class="{ 'text-white': isDarkMode, 'text-dark-green': !isDarkMode }"
+                      >
+                        {{ userProfile.fullname }}
+                      </h3>
+                      <div
+                        class="mb-2"
+                        :class="{
+                          'text-grey-lighten-1': isDarkMode,
+                          'text-grey-darken-1': !isDarkMode,
+                        }"
+                      >
+                        {{ userProfile.email }}
                       </div>
+                    </template>
+
+                    <!-- Ratings section -->
+                    <div class="d-flex align-center">
+                      <span
+                        class="mr-2 font-weight-bold"
+                        :class="{ 'text-white': isDarkMode, 'text-dark-green': !isDarkMode }"
+                      >
+                        {{ averageRating.toFixed(1) }}
+                      </span>
+                      <v-rating
+                        :model-value="averageRating"
+                        half-increments
+                        color="#FFD700"
+                        background-color="#d0d0d0"
+                        size="24"
+                        readonly
+                      />
+                      <span
+                        class="ml-2"
+                        :class="{
+                          'text-grey-lighten-1': isDarkMode,
+                          'text-grey-darken-1': !isDarkMode,
+                        }"
+                      >
+                        ({{ userRatings.length }} ratings)
+                      </span>
                     </div>
                   </v-col>
                 </v-row>
-              </div>
-            </template>
+
+                <v-divider class="my-5" :color="isDarkMode ? '#2c4c43' : '#d0d0d0'" />
+
+                <!-- Loading state -->
+                <div v-if="loading" class="text-center py-5">
+                  <v-progress-circular
+                    indeterminate
+                    :color="isDarkMode ? '#6D9773' : '#0c3b2e'"
+                  ></v-progress-circular>
+                  <div
+                    class="mt-2"
+                    :class="{ 'text-white': isDarkMode, 'text-dark-green': !isDarkMode }"
+                  >
+                    Loading your ratings...
+                  </div>
+                </div>
+
+                <!-- Error message -->
+                <v-alert v-if="errorMessage" type="error" class="mb-4">
+                  {{ errorMessage }}
+                  <div class="mt-2">
+                    <v-btn @click="fetchUserRatings" variant="outlined" size="small"
+                      >Try Again</v-btn
+                    >
+                  </div>
+                </v-alert>
+
+                <!-- No ratings message -->
+                <div
+                  v-if="!loading && !errorMessage && userRatings.length === 0"
+                  class="text-center py-5"
+                >
+                  <v-icon size="64" :color="isDarkMode ? 'grey-lighten-2' : 'grey-lighten-1'">
+                    mdi-star-outline
+                  </v-icon>
+                  <h4
+                    class="mt-3"
+                    :class="{
+                      'text-grey-lighten-1': isDarkMode,
+                      'text-grey-darken-1': !isDarkMode,
+                    }"
+                  >
+                    You haven't rated any dormitories yet
+                  </h4>
+                  <v-btn
+                    :color="isDarkMode ? '#6D9773' : '#0c3b2e'"
+                    class="mt-3"
+                    @click="router.push({ name: 'dashboard' })"
+                  >
+                    Browse Dormitories
+                  </v-btn>
+                </div>
+
+                <!-- Ratings list -->
+                <template v-if="!loading && !errorMessage && userRatings.length > 0">
+                  <h4
+                    class="font-weight-medium mb-4"
+                    :class="{ 'text-white': isDarkMode, 'text-dark-green': !isDarkMode }"
+                  >
+                    Your Ratings ({{ userRatings.length }})
+                  </h4>
+                  <div class="ratings-scroll">
+                    <v-row>
+                      <v-col cols="12" v-for="(dorm, index) in userRatings" :key="index">
+                        <div
+                          class="rating-card"
+                          :class="{
+                            'rating-card-dark': isDarkMode,
+                            'rating-card-light': !isDarkMode,
+                          }"
+                          @click="viewDormitory(dorm.dormId)"
+                        >
+                          <div class="d-flex justify-space-between align-center">
+                            <div>
+                              <div
+                                class="font-weight-medium text-subtitle-1"
+                                :class="{
+                                  'text-white': isDarkMode,
+                                  'text-dark-green': !isDarkMode,
+                                }"
+                              >
+                                {{ dorm.name }}
+                              </div>
+                              <div
+                                class="text-caption"
+                                :class="{
+                                  'text-grey-lighten-1': isDarkMode,
+                                  'text-grey-darken-1': !isDarkMode,
+                                }"
+                              >
+                                Rated on {{ dorm.date }}
+                              </div>
+                              <div
+                                v-if="dorm.comment"
+                                class="text-body-2 mt-1"
+                                :class="{
+                                  'text-grey-lighten-1': isDarkMode,
+                                  'text-grey-darken-1': !isDarkMode,
+                                }"
+                              >
+                                {{ dorm.comment }}
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <v-rating
+                                :model-value="dorm.rating"
+                                half-increments
+                                color="#FFD700"
+                                background-color="#d0d0d0"
+                                size="22"
+                                readonly
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </div>
+                </template>
+              </v-card>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -274,98 +330,88 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.sidebar {
-  min-height: 40vh;
-  background: transparent;
+/* Light Mode Styles */
+.ratings-section-light {
+  background-color: #6d9773;
   border-radius: 16px;
-}
-
-.icon-container {
+  min-height: 65vh;
+  padding-top: 24px;
+  padding-bottom: 40px;
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  justify-content: center;
 }
 
-.icon-name {
-  margin-left: 10px;
-  font-size: 14px;
-  color: #fff;
-  opacity: 0;
-  transition:
-    opacity 0.3s ease,
-    color 0.3s ease;
-  font-weight: bolder;
-}
-
-.icon-container:hover .icon-name {
-  opacity: 1;
-  font-weight: 700;
-  color: #0c3b2e;
-}
-
-.icon {
-  font-size: 25px;
-  border-radius: 100%;
-  background-color: #0c3b2e;
-  padding: 20px;
-  color: white;
-  transition:
-    background-color 0.5s ease,
-    box-shadow 0.5s ease;
-  cursor: pointer;
-}
-
-.icon-container:hover .icon {
-  background-color: #ffba00;
-  box-shadow: 0 1px 5px rgba(249, 241, 3, 0.3);
-}
-
-.icon-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 8px;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-}
-
-.icon-container:hover {
-  background-color: rgba(255, 186, 0, 0.1);
-  border-color: #ffba00;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-}
-
-.ratings-section {
-  background: white;
+.ratings-card-light {
+  background-color: #fffdf6;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
 }
 
-.rating-card {
+.rating-card-light {
   background: #f5f5f5;
   border-radius: 12px;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
   cursor: pointer;
   position: relative;
+  padding: 16px;
 }
 
-.rating-card:hover {
+.rating-card-light:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #f0f0f0;
+}
+
+/* Dark Mode Styles */
+.ratings-section-dark {
+  background-color: #0a2e23;
+  border-radius: 16px;
+  min-height: 65vh;
+  padding-top: 24px;
+  padding-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ratings-card-dark {
+  background-color: #102820;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+
+.rating-card-dark {
+  background: #1d3731;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  padding: 16px;
+}
+
+.rating-card-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #2c4c43;
+}
+
+/* Common Styles */
+.ratings-wrapper {
+  width: 100%;
+  max-width: 900px;
+}
+
+.ratings-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.rating-card {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .rating-card::after {
@@ -386,9 +432,7 @@ onMounted(async () => {
   opacity: 0.5;
 }
 
-.ratings-scroll {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 8px;
+.text-dark-green {
+  color: #0c3b2e;
 }
 </style>

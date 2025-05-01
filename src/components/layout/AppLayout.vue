@@ -1,19 +1,82 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useTheme } from 'vuetify'
 import { supabase, formActionDefault } from '@/utils/supabase'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 import EditProfile from '@/components/system/EditProfile.vue'
 
 const route = useRoute()
 const router = useRouter()
-
+const theme = useTheme()
+const searchQuery = ref('')
 const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
-const search = ref('')
-
 const formAction = ref({ ...formActionDefault })
+
+// Theme control
+const isDarkMode = ref(theme.global.name.value === 'dark')
+
+// Control the visibility of the profile edit dialog
+const showProfileEditDialog = ref(false)
+
+// Custom function to update theme colors based on mode
+function updateThemeColors() {
+  if (isDarkMode.value) {
+    // Dark mode: Deep green colors
+    theme.themes.value.dark.colors.primary = '#0C3B2E' // Deep green
+    theme.themes.value.dark.colors.secondary = '#FFBA00' // Gold accent
+    theme.themes.value.dark.colors.background = '#0A2E23' // Darker green background
+    document.body.style.setProperty('--gradient-bg-color', '#0A2E23')
+  } else {
+    // Light mode: Light green colors
+    theme.themes.value.light.colors.primary = '#6D9773' // Light green
+    theme.themes.value.light.colors.secondary = '#FFBA00' // Keep gold accent
+    theme.themes.value.light.colors.background = '#FFFDF6' // Very light green background
+    document.body.style.setProperty('--gradient-bg-color', '#FFFDF6')
+  }
+}
+
+// Function for theme toggle
+const toggleTheme = () => {
+  theme.global.name.value = theme.global.name.value === 'light' ? 'dark' : 'light'
+  isDarkMode.value = theme.global.name.value === 'dark'
+  updateThemeColors()
+}
+
+// Watch for theme changes
+watch(
+  () => theme.global.name.value,
+  () => {
+    isDarkMode.value = theme.global.name.value === 'dark'
+    updateThemeColors()
+  },
+)
+
+const handleScroll = () => {
+  if (!mainContent.value) return
+
+  // Check for both window and component scrolling
+  if (mainContent.value.$el) {
+    const scrollTop = mainContent.value.$el.scrollTop
+    showScrollTop.value = scrollTop > 300
+  } else {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    showScrollTop.value = scrollTop > 300
+  }
+}
+
+const scrollToTop = () => {
+  if (mainContent.value && mainContent.value.$el) {
+    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+}
 
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
@@ -29,24 +92,10 @@ const onLogout = async () => {
   router.replace('/')
 }
 
-const handleScroll = () => {
-  if (!mainContent.value) return
-  const scrollTop = mainContent.value.$el.scrollTop
-  showScrollTop.value = scrollTop > 300
-}
-
-const scrollToTop = () => {
-  if (mainContent.value) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
-// Control the visibility of the profile edit dialog
-const showProfileEditDialog = ref(false)
-
 // Handle profile update event
 const handleProfileUpdated = () => {
-  // You might want to refresh profile data or perform other actions after update
+  // Refresh profile data after update
+  fetchUserProfile()
   console.log('Profile updated successfully')
 }
 
@@ -54,41 +103,56 @@ onMounted(async () => {
   // Load user profile data
   await fetchUserProfile()
 
-  // Add scroll event listener
-  if (mainContent.value) {
+  // Add scroll event listeners
+  if (mainContent.value && mainContent.value.$el) {
     mainContent.value.$el.addEventListener('scroll', handleScroll)
   }
+  window.addEventListener('scroll', handleScroll)
+
+  // Check initial scroll position
+  handleScroll()
+
+  // Initialize theme colors
+  updateThemeColors()
 })
 
 onBeforeUnmount(() => {
-  if (mainContent.value) {
+  // Clean up event listeners when component is unmounted
+  if (mainContent.value && mainContent.value.$el) {
     mainContent.value.$el.removeEventListener('scroll', handleScroll)
   }
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <template>
-  <v-app>
+  <v-app :theme="isDarkMode ? 'dark' : 'light'">
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
-        <v-list>
-          <v-list-item
-            title="Dashboard"
-            prepend-icon="mdi-view-dashboard"
-            :to="{ path: '/dashboard' }"
-            router
-            exact
-          />
-          <v-list-item title="Ratings" prepend-icon="mdi-star" :to="{ path: '/ratings' }" router />
-          <v-list-item
-            title="About App"
-            prepend-icon="mdi-information"
-            :to="{ path: '/about' }"
-            router
-          />
-        </v-list>
+        <v-list-item
+          title="Dashboard"
+          prepend-icon="mdi-view-dashboard"
+          :to="{ path: '/dashboard' }"
+          router
+          exact
+        />
+        <v-list-item title="Ratings" prepend-icon="mdi-star" :to="{ path: '/ratings' }" router />
+        <v-list-item
+          title="About App"
+          prepend-icon="mdi-information"
+          :to="{ path: '/about' }"
+          router
+        />
 
-        <v-list-item />
+        <v-divider class="my-3"></v-divider>
+
+        <!-- Theme toggle in navigation drawer -->
+        <v-list-item
+          :prepend-icon="isDarkMode ? 'mdi-weather-night' : 'mdi-weather-sunny'"
+          @click="toggleTheme"
+        >
+          <v-list-item-title>{{ isDarkMode ? 'Dark' : 'Light' }} Mode</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -96,15 +160,8 @@ onBeforeUnmount(() => {
       <!-- Logo for large screens -->
       <router-link to="/dashboard" class="ml-6 Logoname d-none d-lg-block">
         <span class="ftext ms-10 font-weight-bold">DORM</span>
-        <span class="stext font-weight-bold text-white">QUEST</span>
+        <span class="stext font-weight-bold">QUEST</span>
       </router-link>
-
-      <!-- Logo for mobile/small screens not working
-      <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
-        <span class="ftext font-weight-bold text-subtitle-3">DORM</span>
-        <span class="stext font-weight-bold text-subtitle-3 ms-2">QUEST</span>
-      </router-link>
-      -->
 
       <!-- Logo for mobile/small screens -->
       <router-link to="/dashboard" class="ml-4 d-flex align-center d-lg-none text-decoration-none">
@@ -117,39 +174,47 @@ onBeforeUnmount(() => {
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
     </v-app-bar>
 
-    <v-main ref="mainContent" class="main-no-gap">
-      <!--
     <v-main
       ref="mainContent"
+      class="main-no-gap"
       :style="
         route.path === '/map'
           ? 'overflow: hidden; height: 100vh; padding: 0;'
           : 'overflow-y: auto; height: 100vh;'
       "
-    -->
-
-      >
+    >
       <div :class="route.path === '/map' ? '' : 'gradient-bg'">
         <template v-if="route.path !== '/map'">
-          <v-container>
+          <v-container fluid>
             <!-- Search & Buttons -->
-            <div class="d-flex align-center search-wrapper mb-4">
+            <div class="d-flex align-center search-wrapper mt-3 mb-4">
               <v-text-field
-                v-model="search"
+                v-model="searchQuery"
                 placeholder="Search for dormitories or boarding house"
                 prepend-inner-icon="mdi-magnify"
                 class="search-field me-2"
                 variant="outlined"
                 rounded
                 hide-details
+                @update:model-value="$emit('search', $event)"
                 clearable
                 density="comfortable"
               />
 
               <div class="action-buttons">
-                <v-btn v-if="showScrollTop" icon class="scroll-top-btn" @click="scrollToTop">
-                  <v-icon>mdi-arrow-up</v-icon>
-                </v-btn>
+                <!-- Scroll to top button -->
+                <v-fade-transition>
+                  <v-btn
+                    v-if="showScrollTop"
+                    icon
+                    class="scroll-top-btn"
+                    @click="scrollToTop"
+                    elevation="4"
+                    color="#0c3b2e"
+                  >
+                    <v-icon>mdi-arrow-up</v-icon>
+                  </v-btn>
+                </v-fade-transition>
 
                 <router-link to="/dashboard">
                   <v-btn
@@ -179,7 +244,13 @@ onBeforeUnmount(() => {
                       icon
                       v-bind="props"
                     >
-                      <v-avatar class="avatar-btn" size="large">
+                      <v-avatar
+                        class="avatar-btn"
+                        :class="{
+                          'green-btn': ['/profile', '/ratings', '/about'].includes(route.path),
+                        }"
+                        size="large"
+                      >
                         <template v-if="isLoadingUser">
                           <v-progress-circular indeterminate size="24" color="primary" />
                         </template>
@@ -209,7 +280,7 @@ onBeforeUnmount(() => {
                         <h3>{{ userProfile.fullname }}</h3>
                         <p class="text-caption mt-1">{{ userProfile.email }}</p>
                         <v-divider class="my-3" />
-                        <router-link to="/profile">
+                        <router-link to="/profile" class="no-underline">
                           <v-btn variant="text" rounded class="mx-1 personal-info">
                             Personal Information
                           </v-btn>
@@ -251,7 +322,7 @@ onBeforeUnmount(() => {
       </div>
     </v-main>
 
-    <!-- Move EditProfile here so it's always mounted -->
+    <!-- EditProfile component -->
     <EditProfile
       v-model="showProfileEditDialog"
       :userData="userProfile"
@@ -267,45 +338,26 @@ onBeforeUnmount(() => {
 }
 
 .stext {
-  color: #0c3b2e;
   font-size: larger;
+  color: white;
 }
 
-/* gi wala ang admin bg
-
 .gradient-bg {
-  background-image: url('/bg-admin.jpg');
-  height: 100vh;
+  background-color: var(--gradient-bg-color, #fffdf6);
+  min-height: 100vh;
   padding: 1rem;
   overflow-y: auto;
-}
-
-
-.gradient-bg {
-  background-color: #fffdf6;
-  height: 100vh;
-  padding: 1rem;
-  overflow-y: auto;
-}
-  */
-
-.gradient-bg {
-  background-color: #fffdf6;
-  padding: 1rem;
-  /* REMOVE height: 100vh and overflow-y: auto */
+  padding-bottom: 2rem;
 }
 
 .gradient-app-bar {
-  /* gi pulihan
-  background: linear-gradient(290deg, #fffae6, #6d9773);
-  */
   background-color: #0c3b2e;
   color: #000;
 }
-/* add */
+
 .main-no-gap {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+  overflow-y: auto;
+  position: relative;
 }
 
 .avatar-btn {
@@ -321,15 +373,11 @@ onBeforeUnmount(() => {
   text-decoration: none;
 }
 
-.Logoname2 {
-  font-size: 12px;
-}
-
 .search-wrapper {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .search-wrapper .v-btn:hover {
@@ -359,37 +407,26 @@ onBeforeUnmount(() => {
   position: fixed;
   bottom: 30px;
   right: 20px;
-  background-color: #0c3b2e;
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: white !important;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
 }
 
 .icon-color {
   color: #0c3b2e;
 }
+
 .green-btn {
   background-color: #0c3b2e !important;
   color: white !important;
 }
 
 .personal-info {
-  color: black; /* White text */
-  text-decoration: none; /* Ensures no underline */
+  text-decoration: none;
 }
 
 .no-underline {
   text-decoration: none !important;
-}
-
-.scroll-top-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 20px;
-  background-color: #0c3b2e;
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .filter-row {
@@ -406,16 +443,18 @@ onBeforeUnmount(() => {
   .filter-row > .v-col {
     flex: 1 1 0;
   }
-}
-.search-wrapper .v-btn:hover {
-  background-color: rgba(0, 128, 0, 0.1); /* Light green background */
-  transform: scale(1.1);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+
+  /* Adjust scroll-top button position on mobile */
+  .scroll-top-btn {
+    bottom: 70px;
+    right: 15px;
+  }
 }
 
-.search-wrapper .v-btn:hover .v-icon {
-  color: #2e7d32; /* Green icon color on hover */
+@media (min-width: 960px) {
+  .search-wrapper {
+    justify-content: flex-start; /* Align left on large screens */
+    margin-left: 25%;
+  }
 }
 </style>
