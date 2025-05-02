@@ -51,4 +51,39 @@ export const dormImageMap = {
     main: '/Karmo/karmomain.jpg',
     gallery: ['/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
   },
+  9: {
+    main: '/Banton/bantonmain.png',
+    gallery: [
+      '/Banton/banton.jpg',
+      '/Banton/banton1.jpg',
+      '/Banton/banton2.jpg',
+      '/Banton/banton3.jpg',
+    ],
+  },
+  10: {
+    main: '/Collegefacade/collegemain.jpg',
+    gallery: [
+      '/Collegefacade/college.jpg',
+      '/Collegefacade/college1.jpg',
+      '/Collegefacade/college2.jpg',
+      '/Collegefacade/college3.jpg',
+    ],
+  },
+  11: {
+    main: '/JP/jpmain.jpg',
+    gallery: ['/JP/jp.jpg', '/JP/jp1.jpg', '/JP/jp2.jpg', '/JP/jp3.jpg'],
+  },
+  12: {
+    main: '/Lagrange/lagmain.jpg',
+    gallery: [
+      '/Lagrange/lag.jpg',
+      '/Lagrange/lag1.jpg',
+      '/Lagrange/lag2.jpg',
+      '/Lagrange/lag3.jpg',
+    ],
+  },
+  13: {
+    main: '/MDs/mdmain.jpg',
+    gallery: ['/MDs/md.jpg', '/MDs/md1.jpg', '/MDs/md2.jpg', '/MDs/md3.jpg'],
+  },
 }
