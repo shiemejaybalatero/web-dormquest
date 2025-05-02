@@ -22,11 +22,11 @@ const priceRanges = [
 
 const distanceRanges = [
   { text: 'Any Distance', value: 'any' },
-  { text: '0 - 1km', value: [0, 1] },
-  { text: '1 - 2km', value: [1, 2] },
-  { text: '2 - 3km', value: [2, 3] },
-  { text: '3 - 5km', value: [3, 5] },
-  { text: '5 - 10km', value: [5, 10] },
+  { text: '0 - 100m', value: [0, 100] },
+  { text: '100 - 300m', value: [100, 300] },
+  { text: '300 - 600m', value: [300, 600] },
+  { text: '600 - 1000m', value: [600, 1000] },
+  { text: '1000 - 5000m', value: [1000, 5000] },
 ]
 
 // Selected values (default to "Any")
@@ -227,7 +227,7 @@ onMounted(async () => {
                 <div class="text-subtitle-2 dorm-subtitle">
                   {{ dorm.availability }}
                 </div>
-                <div class="text-body-2 dorm-text">{{ dorm.distance_to_campus }} km to campus</div>
+                <div class="text-body-2 dorm-text">{{ dorm.distance_to_campus }} m to campus</div>
               </v-card-text>
             </v-card>
           </v-col>

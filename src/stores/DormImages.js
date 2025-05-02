@@ -86,4 +86,35 @@ export const dormImageMap = {
     main: '/MDs/mdmain.jpg',
     gallery: ['/MDs/md.jpg', '/MDs/md1.jpg', '/MDs/md2.jpg', '/MDs/md3.jpg'],
   },
+  14: {
+    main: '/Justin/justinmain.jpg',
+    gallery: [
+      '/Justin/justin.jpg',
+      '/Justin/justin1.jpg',
+      '/Justin/justin2.jpg',
+      '/Justin/justin3.jpg',
+    ],
+  },
+  15: {
+    main: '/Camella/camella.jpg',
+    gallery: [
+      '/Camella/camella.jpg',
+      '/Camella/camella1.jpg',
+      '/Camella/camella2.jpg',
+      '/Camella/camella3.jpg',
+    ],
+  },
+  16: {
+    main: '/Cryshiels/crymain.jpg',
+    gallery: [
+      '/Cryshiels/cry.jpg',
+      '/Cryshiels/cry1.jpg',
+      '/Cryshiels/cry2.jpg',
+      '/Cryshiels/cry3.jpg',
+    ],
+  },
+  17: {
+    main: '/Manor/manormain.jpg',
+    gallery: ['/Manor/manor2.jpg', '/Manor/manor.jpg', '/Manor/manor1.jpg', '/Manor/manor3.jpg'],
+  },
 }
