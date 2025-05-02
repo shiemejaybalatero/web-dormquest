@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-app-bar {
-  background: linear-gradient(90deg, #0c3b2e, #fffae6);
+  background: #0c3b2e;
   color: #000;
 }
 
