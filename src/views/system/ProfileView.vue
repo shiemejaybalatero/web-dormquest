@@ -52,16 +52,20 @@ const handleProfileUpdated = async () => {
         <!-- Profile Information -->
         <v-col cols="12" md="9">
           <div
-            class="profile-section d-flex flex-column align-center justify-center pa-6"
+            class="profile-section px-4 px-md-8 py-6 py-md-10"
             :class="{ 'profile-section-dark': isDarkMode, 'profile-section-light': !isDarkMode }"
           >
             <div class="profile-wrapper">
-              <div class="d-flex justify-space-between align-center mb-6 w-100">
-                <h3 class="font-weight-bold mb-0 text-white">Profile Information</h3>
+              <!-- Header (Modified) -->
+              <div class="d-flex justify-left mb-6">
+                <h2 class="font-weight-bold mb-0 text-center">
+                  <span style="color: #ffba00">MY</span>
+                  <span style="color: white"> PROFILE</span>
+                </h2>
               </div>
 
               <v-card
-                class="pa-6 profile-card"
+                class="pa-9 profile-card"
                 :class="{ 'profile-card-dark': isDarkMode, 'profile-card-light': !isDarkMode }"
                 flat
               >
@@ -79,105 +83,104 @@ const handleProfileUpdated = async () => {
                   </v-col>
 
                   <v-col cols="12" md="8">
-  <v-row>
-    <v-col cols="12" sm="6">
-      <div
-        class="field-label"
-        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-      >
-        Full Name
-      </div>
-      <div
-        class="field-value"
-        :class="{
-          'value-dark': isDarkMode,
-          'value-light': !isDarkMode,
-          'border-white': isDarkMode,
-          'border-black': !isDarkMode
-        }"
-      >
-        {{ userProfile.fullname }}
-      </div>
-    </v-col>
-    <v-col cols="12" sm="6">
-      <div
-        class="field-label"
-        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-      >
-        Age
-      </div>
-      <div
-        class="field-value"
-        :class="{
-          'value-dark': isDarkMode,
-          'value-light': !isDarkMode,
-          'border-white': isDarkMode,
-          'border-black': !isDarkMode
-        }"
-      >
-        {{ userProfile.age }}
-      </div>
-    </v-col>
-    <v-col cols="12" sm="6">
-      <div
-        class="field-label"
-        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-      >
-        Email
-      </div>
-      <div
-        class="field-value"
-        :class="{
-          'value-dark': isDarkMode,
-          'value-light': !isDarkMode,
-          'border-white': isDarkMode,
-          'border-black': !isDarkMode
-        }"
-      >
-        {{ userProfile.email }}
-      </div>
-    </v-col>
-    <v-col cols="12" sm="6">
-      <div
-        class="field-label"
-        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-      >
-        Gender
-      </div>
-      <div
-        class="field-value"
-        :class="{
-          'value-dark': isDarkMode,
-          'value-light': !isDarkMode,
-          'border-white': isDarkMode,
-          'border-black': !isDarkMode
-        }"
-      >
-        {{ userProfile.gender }}
-      </div>
-    </v-col>
-    <v-col cols="12" sm="6" v-if="userProfile.birthday">
-      <div
-        class="field-label"
-        :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-      >
-        Birthday
-      </div>
-      <div
-        class="field-value"
-        :class="{
-          'value-dark': isDarkMode,
-          'value-light': !isDarkMode,
-          'border-white': isDarkMode,
-          'border-black': !isDarkMode
-        }"
-      >
-        {{ userProfile.birthday }}
-      </div>
-    </v-col>
-  </v-row>
-</v-col>
-
+                    <v-row>
+                      <v-col cols="12" sm="6">
+                        <div
+                          class="field-label"
+                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+                        >
+                          Full Name
+                        </div>
+                        <div
+                          class="field-value"
+                          :class="{
+                            'value-dark': isDarkMode,
+                            'value-light': !isDarkMode,
+                            'border-white': isDarkMode,
+                            'border-black': !isDarkMode,
+                          }"
+                        >
+                          {{ userProfile.fullname }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <div
+                          class="field-label"
+                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+                        >
+                          Age
+                        </div>
+                        <div
+                          class="field-value"
+                          :class="{
+                            'value-dark': isDarkMode,
+                            'value-light': !isDarkMode,
+                            'border-white': isDarkMode,
+                            'border-black': !isDarkMode,
+                          }"
+                        >
+                          {{ userProfile.age }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <div
+                          class="field-label"
+                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+                        >
+                          Email
+                        </div>
+                        <div
+                          class="field-value"
+                          :class="{
+                            'value-dark': isDarkMode,
+                            'value-light': !isDarkMode,
+                            'border-white': isDarkMode,
+                            'border-black': !isDarkMode,
+                          }"
+                        >
+                          {{ userProfile.email }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" sm="6">
+                        <div
+                          class="field-label"
+                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+                        >
+                          Gender
+                        </div>
+                        <div
+                          class="field-value"
+                          :class="{
+                            'value-dark': isDarkMode,
+                            'value-light': !isDarkMode,
+                            'border-white': isDarkMode,
+                            'border-black': !isDarkMode,
+                          }"
+                        >
+                          {{ userProfile.gender }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" sm="6" v-if="userProfile.birthday">
+                        <div
+                          class="field-label"
+                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
+                        >
+                          Birthday
+                        </div>
+                        <div
+                          class="field-value"
+                          :class="{
+                            'value-dark': isDarkMode,
+                            'value-light': !isDarkMode,
+                            'border-white': isDarkMode,
+                            'border-black': !isDarkMode,
+                          }"
+                        >
+                          {{ userProfile.birthday }}
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-col>
                 </v-row>
 
                 <div class="d-flex justify-end mt-4">
@@ -245,7 +248,6 @@ const handleProfileUpdated = async () => {
 .border-black {
   border: 1px solid #000000;
 }
-
 
 /* Dark Mode Styles */
 .profile-section-dark {

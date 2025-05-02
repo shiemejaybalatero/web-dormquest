@@ -4,16 +4,11 @@ import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
-import { useTheme } from 'vuetify'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
-
-//theme
-const theme = useTheme()
-const isDarkMode = computed(() => theme.global.current.value.dark)
 
 // After - Updated to handle "Any" as a special case
 const priceRanges = [
@@ -203,7 +198,6 @@ onMounted(async () => {
           >
             <v-card
               class="hover-card dorm-card"
-              :class="{ 'light-card-darkmode': isDarkMode }"
               elevation="2"
               @click="navigateToDorm(dorm)"
               style="cursor: pointer"
@@ -267,17 +261,6 @@ onMounted(async () => {
   background-color: #0d3a2e;
   color: #f8f8e1;
   border-radius: 16px;
-}
-
-.light-card-darkmode {
-  background-color: #fbfbfb !important;
-  color: #000000 !important;
-}
-
-.light-card-darkmode .dorm-title,
-.light-card-darkmode .dorm-subtitle,
-.light-card-darkmode .dorm-text {
-  color: #000000 !important;
 }
 
 .dorm-title {
