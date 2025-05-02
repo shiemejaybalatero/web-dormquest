@@ -1,12 +1,15 @@
 <script setup>
-import { onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useMapStore } from '@/stores/mapStore'
+import { useTheme } from 'vuetify'
 
 const router = useRouter()
 const route = useRoute()
 const mapStore = useMapStore()
+const theme = useTheme()
+const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 const viewBoardingHouseDetails = (houseId) => {
   // Convert to number if your IDs are numeric
@@ -99,23 +102,43 @@ onBeforeUnmount(() => {
 <template>
   <AppLayout>
     <template #content>
-      <div class="full-map-container">
-        <div v-if="mapStore.isLoading" class="loading-overlay">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Getting your location...</div>
+      <div
+        class="full-map-container"
+        :class="{ 'dark-theme': isDarkMode, 'light-theme': !isDarkMode }"
+      >
+        <div
+          v-if="mapStore.isLoading"
+          class="loading-overlay"
+          :class="{ 'dark-loading': isDarkMode }"
+        >
+          <div class="loading-spinner" :class="{ 'dark-spinner': isDarkMode }"></div>
+          <div class="loading-text" :class="{ 'dark-text': isDarkMode }">
+            Getting your location...
+          </div>
         </div>
-        <div v-if="mapStore.error" class="error-message">
+        <div v-if="mapStore.error" class="error-message" :class="{ 'dark-error': isDarkMode }">
           {{ mapStore.error }}
-          <button @click="mapStore.fetchBoardingHouses" class="retry-button">Retry</button>
+          <button
+            @click="mapStore.fetchBoardingHouses"
+            class="retry-button"
+            :class="{ 'dark-retry': isDarkMode }"
+          >
+            Retry
+          </button>
         </div>
         <div id="map" class="full-map"></div>
         <div class="button-container">
-          <button @click="mapStore.getUserLocation" class="map-button location-button">
+          <button
+            @click="mapStore.getUserLocation"
+            class="map-button location-button"
+            :class="{ 'dark-button': isDarkMode }"
+          >
             <i class="mdi mdi-crosshairs-gps"></i> Get Your Location
           </button>
           <button
             @click="mapStore.clearPath"
             class="map-button clear-button"
+            :class="{ 'dark-button': isDarkMode }"
             :disabled="!mapStore.hasPath"
           >
             <i class="mdi mdi-map-marker-path"></i> Clear Path
@@ -124,35 +147,50 @@ onBeforeUnmount(() => {
 
         <!-- Added accessibility options and controls -->
         <div class="map-controls">
-          <button @click="mapStore.zoomIn()" class="control-button" title="Zoom In">
+          <button
+            @click="mapStore.zoomIn()"
+            class="control-button"
+            :class="{ 'dark-control': isDarkMode }"
+            title="Zoom In"
+          >
             <i class="mdi mdi-plus"></i>
           </button>
-          <button @click="mapStore.zoomOut()" class="control-button" title="Zoom Out">
+          <button
+            @click="mapStore.zoomOut()"
+            class="control-button"
+            :class="{ 'dark-control': isDarkMode }"
+            title="Zoom Out"
+          >
             <i class="mdi mdi-minus"></i>
           </button>
-          <button @click="mapStore.resetView()" class="control-button" title="Reset View">
+          <button
+            @click="mapStore.resetView()"
+            class="control-button"
+            :class="{ 'dark-control': isDarkMode }"
+            title="Reset View"
+          >
             <i class="mdi mdi-home"></i>
           </button>
         </div>
 
         <!-- Added a legend -->
-        <div class="map-legend">
-          <h4>Map Legend</h4>
+        <div class="map-legend" :class="{ 'dark-legend': isDarkMode }">
+          <h4 :class="{ 'dark-legend-title': isDarkMode }">Map Legend</h4>
           <div class="legend-item">
             <div class="legend-color reference-marker"></div>
-            <span>Reference Point</span>
+            <span :class="{ 'dark-legend-text': isDarkMode }">Reference Point</span>
           </div>
           <div class="legend-item">
             <div class="legend-color dorm-marker"></div>
-            <span>Dormitory</span>
+            <span :class="{ 'dark-legend-text': isDarkMode }">Dormitory</span>
           </div>
           <div class="legend-item">
             <div class="legend-color user-marker"></div>
-            <span>Your Location</span>
+            <span :class="{ 'dark-legend-text': isDarkMode }">Your Location</span>
           </div>
           <div class="legend-item">
             <div class="legend-color path-line"></div>
-            <span>Path</span>
+            <span :class="{ 'dark-legend-text': isDarkMode }">Path</span>
           </div>
         </div>
       </div>
@@ -161,6 +199,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* Base Styles */
 .full-map-container {
   width: 100%;
   height: 100vh;
@@ -175,6 +214,17 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
+/* Light Theme Styles */
+.light-theme {
+  background-color: #ffffff;
+}
+
+/* Dark Theme Styles */
+.dark-theme {
+  background-color: #121212;
+}
+
+/* Button Container */
 .button-container {
   position: absolute;
   bottom: 40px;
@@ -185,6 +235,7 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
+/* Map Buttons - Light Mode */
 .map-button {
   background-color: #0c3b2e;
   color: white;
@@ -211,6 +262,17 @@ onBeforeUnmount(() => {
 .map-button:active {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Map Buttons - Dark Mode */
+.dark-button {
+  background-color: #0a2e23;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-button:hover {
+  background-color: #ffba00;
 }
 
 .map-button:disabled {
@@ -241,6 +303,7 @@ onBeforeUnmount(() => {
   background-color: #f05252;
 }
 
+/* Loading Overlay - Light Mode */
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -255,6 +318,11 @@ onBeforeUnmount(() => {
   z-index: 1001;
 }
 
+/* Loading Overlay - Dark Mode */
+.dark-loading {
+  background-color: rgba(18, 18, 18, 0.8);
+}
+
 .loading-spinner {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #0c3b2e;
@@ -264,6 +332,11 @@ onBeforeUnmount(() => {
   animation: spin 1s linear infinite;
 }
 
+.dark-spinner {
+  border: 5px solid #333333;
+  border-top: 5px solid #ffba00;
+}
+
 .loading-text {
   margin-top: 15px;
   font-size: 18px;
@@ -271,6 +344,11 @@ onBeforeUnmount(() => {
   color: #0c3b2e;
 }
 
+.dark-text {
+  color: #ffba00;
+}
+
+/* Error Message - Light Mode */
 .error-message {
   position: absolute;
   top: 20px;
@@ -290,6 +368,14 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Error Message - Dark Mode */
+.dark-error {
+  background-color: #4c1d1d;
+  border: 1px solid #b91c1c;
+  color: #fca5a5;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
 .retry-button {
   background-color: #b91c1c;
   color: white;
@@ -298,6 +384,10 @@ onBeforeUnmount(() => {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+
+.dark-retry {
+  background-color: #ef4444;
 }
 
 .retry-button:hover {
@@ -309,7 +399,7 @@ onBeforeUnmount(() => {
   margin-left: 5px;
 }
 
-/* Added map controls */
+/* Map Controls - Light Mode */
 .map-controls {
   position: absolute;
   top: 80px;
@@ -336,11 +426,24 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
 }
 
+/* Map Controls - Dark Mode */
+.dark-control {
+  background-color: #1d3731;
+  color: #ffba00;
+  border: 1px solid #2d4f47;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .control-button:hover {
   background-color: #f3f4f6;
   transform: translateY(-1px);
 }
 
+.dark-control:hover {
+  background-color: #2d4f47;
+}
+
+/* Map Legend - Light Mode */
 .map-legend {
   position: absolute;
   bottom: 40px;
@@ -354,14 +457,25 @@ onBeforeUnmount(() => {
   width: 180px;
 }
 
+/* Map Legend - Dark Mode */
+.dark-legend {
+  background-color: rgba(29, 55, 49, 0.9);
+  border: 1px solid #2d4f47;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .map-legend h4 {
   margin-top: 0;
   margin-bottom: 8px;
   text-align: center;
   font-size: 14px;
-  color: #0c3b2e;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 5px;
+}
+
+.dark-legend-title {
+  color: #ffba00;
+  border-bottom: 1px solid #2d4f47;
 }
 
 .legend-item {
@@ -369,6 +483,10 @@ onBeforeUnmount(() => {
   align-items: center;
   margin-bottom: 5px;
   font-size: 12px;
+}
+
+.dark-legend-text {
+  color: #ffffff;
 }
 
 .legend-color {
@@ -396,7 +514,6 @@ onBeforeUnmount(() => {
   height: 3px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .button-container {
     bottom: 20px;

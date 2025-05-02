@@ -143,11 +143,11 @@ const priceRanges = [
 
 const distanceRanges = [
   { text: 'Any Distance', value: 'any' },
-  { text: '0 - 1km', value: [0, 1] },
-  { text: '1 - 2km', value: [1, 2] },
-  { text: '2 - 3km', value: [2, 3] },
-  { text: '3 - 5km', value: [3, 5] },
-  { text: '5 - 10km', value: [5, 10] },
+  { text: '0 - 100m', value: [0, 100] },
+  { text: '100 - 300m', value: [100, 300] },
+  { text: '300 - 600m', value: [300, 600] },
+  { text: '600 - 1000m', value: [600, 1000] },
+  { text: '1000 - 5000m', value: [1000, 5000] },
 ]
 
 // Selected values (default to "Any")
@@ -166,20 +166,29 @@ const handleSearch = (value) => {
 
 const filteredDorms = computed(() => {
   return boardingHouseStore.boardingHouses.filter((dorm) => {
+    // Check if price exists, if not treat as 0 for filtering
+    const dormPrice = dorm.price !== undefined ? dorm.price : 0
+
     const priceOk =
       selectedPriceRange.value === 'any' ||
-      (dorm.price >= selectedPriceRange.value[0] && dorm.price <= selectedPriceRange.value[1])
+      (dormPrice >= selectedPriceRange.value[0] && dormPrice <= selectedPriceRange.value[1])
+
+    // Check if distance exists, if not treat as infinity for filtering
+    const dormDistance = dorm.distance_to_campus !== undefined ? dorm.distance_to_campus : Infinity
 
     const distanceOk =
       selectedDistanceRange.value === 'any' ||
-      (dorm.distance_to_campus !== undefined &&
-        dorm.distance_to_campus >= selectedDistanceRange.value[0] &&
-        dorm.distance_to_campus <= selectedDistanceRange.value[1])
+      (dormDistance >= selectedDistanceRange.value[0] &&
+        dormDistance <= selectedDistanceRange.value[1])
+
+    // Safe property access for search
+    const dormName = dorm.name || ''
+    const dormAddress = dorm.address || ''
 
     const searchOk =
       searchTerm.value === '' ||
-      dorm.name.toLowerCase().includes(searchTerm.value) ||
-      dorm.address.toLowerCase().includes(searchTerm.value)
+      dormName.toLowerCase().includes(searchTerm.value) ||
+      dormAddress.toLowerCase().includes(searchTerm.value)
 
     return priceOk && distanceOk && searchOk
   })
@@ -361,7 +370,7 @@ onMounted(async () => {
                 <div class="text-subtitle-2 dorm-subtitle">
                   {{ dorm.availability }}
                 </div>
-                <div class="text-body-2 dorm-text">{{ dorm.distance_to_campus }} km to campus</div>
+                <div class="text-body-2 dorm-text">{{ dorm.distance_to_campus }} m to campus</div>
               </v-card-text>
             </v-card>
           </v-col>

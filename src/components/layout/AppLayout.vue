@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, defineEmits } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { supabase, formActionDefault } from '@/utils/supabase'
@@ -14,6 +14,9 @@ const showScrollTop = ref(false)
 const mainContent = ref(null)
 const drawer = ref(false)
 const formAction = ref({ ...formActionDefault })
+
+// Define emits
+const emit = defineEmits(['search'])
 
 // Theme control
 const isDarkMode = ref(theme.global.name.value === 'dark')
@@ -37,6 +40,11 @@ function updateThemeColors() {
     document.body.style.setProperty('--gradient-bg-color', '#FFFDF6')
   }
 }
+
+// Watch for changes in the search query and emit search event
+watch(searchQuery, (newValue) => {
+  emit('search', newValue)
+})
 
 // Function for theme toggle
 const toggleTheme = () => {
@@ -196,7 +204,7 @@ onBeforeUnmount(() => {
                 variant="outlined"
                 rounded
                 hide-details
-                @update:model-value="$emit('search', $event)"
+                @update:model-value="emit('search', $event)"
                 clearable
                 density="comfortable"
               />
@@ -351,7 +359,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-app-bar {
-  background-color: #0c3b2e;
+  background: linear-gradient(90deg, #0c3b2e, #fffae6);
   color: #000;
 }
 
