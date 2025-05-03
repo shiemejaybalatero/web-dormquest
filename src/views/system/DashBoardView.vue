@@ -11,7 +11,7 @@ const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
-
+const isDarkMode = ref(false)
 // Carousel handling
 const activeImageIndices = ref({})
 const carouselIntervals = ref({})

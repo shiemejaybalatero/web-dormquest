@@ -1,543 +1,412 @@
 <script setup>
-import { onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import { useMapStore } from '@/stores/mapStore'
-import { useTheme } from 'vuetify'
+import { supabase } from '@/utils/supabase'
+// Import the dormImageMap and helper functions from the new file
+import { dormImageMap, hasDormImages } from '@/stores/DormImages'
 
 const router = useRouter()
-const route = useRoute()
-const mapStore = useMapStore()
-const theme = useTheme()
-const isDarkMode = computed(() => theme.global.name.value === 'dark')
+const boardingHouseStore = useBoardingHouseStore()
+const dormRatings = ref({})
+const searchTerm = ref('')
+const isDarkMode = ref(false)
+// Carousel handling
+const activeImageIndices = ref({})
+const carouselIntervals = ref({})
+const isHovering = ref({}) // Track hover state for each dorm
 
-const viewBoardingHouseDetails = (houseId) => {
-  // Convert to number if your IDs are numeric
-  const numericId = parseInt(houseId, 10)
-
-  // Log for debugging
-  console.log('Looking for house with ID:', houseId)
-  console.log(
-    'Available house IDs:',
-    mapStore.boardingHouses.map((h) => h.id),
-  )
-
-  // First check if the house exists in our store
-  const house = mapStore.boardingHouses.find((h) => h.id === numericId)
-
-  if (!house) {
-    console.log('House not found with ID:', houseId)
-    return
+const startCarousel = (dormId) => {
+  if (!activeImageIndices.value[dormId]) {
+    activeImageIndices.value[dormId] = 0
   }
 
-  console.log('Found house:', house.name, 'navigating to details page')
+  isHovering.value[dormId] = true // Set hover state to true
 
-  // Navigate to the dorm-details route with the house ID
-  router.push({
-    name: 'dorm-details',
-    params: { id: numericId.toString() },
+  // Clear any existing interval
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+  }
+
+  // Set new interval
+  carouselIntervals.value[dormId] = setInterval(() => {
+    if (dormImageMap[dormId]) {
+      const galleryLength = dormImageMap[dormId].gallery.length
+      activeImageIndices.value[dormId] = (activeImageIndices.value[dormId] + 1) % galleryLength
+    }
+  }, 1500)
+}
+
+const stopCarousel = (dormId) => {
+  isHovering.value[dormId] = false // Set hover state to false
+
+  if (carouselIntervals.value[dormId]) {
+    clearInterval(carouselIntervals.value[dormId])
+    delete carouselIntervals.value[dormId]
+  }
+}
+
+const getActiveImage = (dorm) => {
+  if (dormImageMap[dorm.id]) {
+    if (activeImageIndices.value[dorm.id] === undefined) {
+      activeImageIndices.value[dorm.id] = 0
+    }
+    return dormImageMap[dorm.id].gallery[activeImageIndices.value[dorm.id]]
+  }
+  return dorm.image || '/default-dorm-image.jpg'
+}
+
+// After - Updated to handle "Any" as a special case
+const priceRanges = [
+  { text: 'Any Price', value: 'any' },
+  { text: '₱500 - ₱2,000', value: [500, 2000] },
+  { text: '₱2,000 - ₱4,000', value: [2000, 4000] },
+  { text: '₱4,000 - ₱6,000', value: [4000, 6000] },
+  { text: '₱6,000 - ₱8,000', value: [6000, 8000] },
+  { text: '₱8,000 - ₱10,000', value: [8000, 10000] },
+]
+
+const distanceRanges = [
+  { text: 'Any Distance', value: 'any' },
+  { text: '0 - 100m', value: [50, 200] },
+  { text: '100 - 300m', value: [200, 400] },
+  { text: '300 - 600m', value: [400, 600] },
+  { text: '600 - 1000m', value: [600, 1000] },
+  { text: '1000 - 5000m', value: [1000, 5000] },
+]
+
+// Selected values (default to "Any")
+const selectedPriceRange = ref(priceRanges[0].value)
+const selectedDistanceRange = ref(distanceRanges[0].value)
+
+// Updated search handler that properly handles empty search input
+const handleSearch = (value) => {
+  // Check if value is null, undefined, or empty string
+  if (value === null || value === undefined || value === '') {
+    searchTerm.value = '' // Reset search term when cleared
+  } else {
+    searchTerm.value = value.toLowerCase()
+  }
+}
+
+const filteredDorms = computed(() => {
+  return boardingHouseStore.boardingHouses.filter((dorm) => {
+    // Check if price exists, if not treat as 0 for filtering
+    const dormPrice = dorm.price !== undefined ? dorm.price : 0
+
+    const priceOk =
+      selectedPriceRange.value === 'any' ||
+      (dormPrice >= selectedPriceRange.value[0] && dormPrice <= selectedPriceRange.value[1])
+
+    // Check if distance exists, if not treat as infinity for filtering
+    const dormDistance = dorm.distance_to_campus !== undefined ? dorm.distance_to_campus : Infinity
+
+    const distanceOk =
+      selectedDistanceRange.value === 'any' ||
+      (dormDistance >= selectedDistanceRange.value[0] &&
+        dormDistance <= selectedDistanceRange.value[1])
+
+    // Safe property access for search
+    const dormName = dorm.name || ''
+    const dormAddress = dorm.address || ''
+
+    const searchOk =
+      searchTerm.value === '' ||
+      dormName.toLowerCase().includes(searchTerm.value) ||
+      dormAddress.toLowerCase().includes(searchTerm.value)
+
+    return priceOk && distanceOk && searchOk
   })
-}
-
-// Setup Global Event Listeners
-const setupGlobalEventListeners = () => {
-  // Global listener for all map-related buttons
-  document.addEventListener('click', handleDocumentClick)
-}
-
-// Handle document clicks
-const handleDocumentClick = (event) => {
-  // Handle path buttons
-  mapStore.handleGlobalClick(event)
-
-  // Handle view details buttons
-  if (event.target && event.target.matches('.view-details-btn')) {
-    const houseId = event.target.getAttribute('data-house-id')
-    if (houseId) {
-      // Close any open popups before navigation
-      if (mapStore.map) mapStore.map.closePopup()
-      console.log('View details clicked for house ID:', houseId)
-      // Use setTimeout to ensure popup closure completes before navigation
-      setTimeout(() => {
-        viewBoardingHouseDetails(houseId)
-      }, 50)
-    }
-  }
-}
-
-// In your map component
-onMounted(async () => {
-  await nextTick()
-
-  // Initialize the map
-  const mapInitialized = mapStore.initializeMap('map')
-
-  if (mapInitialized) {
-    // Fetch boarding houses first
-    await mapStore.fetchBoardingHouses()
-
-    // Then set up global event listeners after data is loaded
-    setupGlobalEventListeners()
-
-    // Check if we need to highlight a specific dorm
-    if (route.query.highlight && route.query.fromDetails) {
-      const dormId = route.query.highlight
-      console.log('Focusing on dorm with ID:', dormId)
-      // Find the dorm and focus the map on it
-      const success = mapStore.focusOnDorm(dormId)
-      console.log('Focus successful:', success)
-    }
-  }
 })
 
-onBeforeUnmount(() => {
-  // Remove event listeners
-  document.removeEventListener('click', handleDocumentClick)
+const navigateToDorm = (dorm) => {
+  router.push({ name: 'dorm-details', params: { id: dorm.id } })
+}
 
-  // Clean up map resources
-  mapStore.cleanup()
+const fetchAllRatings = async () => {
+  try {
+    const { data, error } = await supabase.from('ratings').select('dormitory_id, rating_score')
+
+    if (error) {
+      console.error('Failed to fetch ratings:', error)
+      return
+    }
+
+    const ratingsByDorm = {}
+
+    if (data && data.length) {
+      data.forEach((rating) => {
+        const dormId = rating.dormitory_id
+
+        if (!ratingsByDorm[dormId]) {
+          ratingsByDorm[dormId] = {
+            scores: [],
+            average: 0,
+            count: 0,
+          }
+        }
+
+        ratingsByDorm[dormId].scores.push(rating.rating_score)
+      })
+
+      Object.keys(ratingsByDorm).forEach((dormId) => {
+        const scores = ratingsByDorm[dormId].scores
+        const sum = scores.reduce((acc, score) => acc + score, 0)
+        ratingsByDorm[dormId].average = sum / scores.length
+        ratingsByDorm[dormId].count = scores.length
+      })
+    }
+
+    dormRatings.value = ratingsByDorm
+  } catch (err) {
+    console.error('Error in fetchAllRatings:', err)
+  }
+}
+
+const getDormRating = (dormId) => {
+  const dormRating = dormRatings.value[dormId]
+
+  if (dormRating && dormRating.count > 0) {
+    return {
+      average: dormRating.average.toFixed(1),
+      count: dormRating.count,
+      hasRating: true,
+    }
+  }
+
+  return {
+    average: '0.0',
+    count: 0,
+    hasRating: false,
+  }
+}
+
+onMounted(async () => {
+  try {
+    await boardingHouseStore.fetchBoardingHouses()
+    await fetchAllRatings()
+  } catch (err) {
+    console.error('Error during component initialization:', err)
+  }
 })
 </script>
 
 <template>
-  <AppLayout>
+  <AppLayout @search="handleSearch">
     <template #content>
-      <div
-        class="full-map-container"
-        :class="{ 'dark-theme': isDarkMode, 'light-theme': !isDarkMode }"
-      >
-        <div
-          v-if="mapStore.isLoading"
-          class="loading-overlay"
-          :class="{ 'dark-loading': isDarkMode }"
-        >
-          <div class="loading-spinner" :class="{ 'dark-spinner': isDarkMode }"></div>
-          <div class="loading-text" :class="{ 'dark-text': isDarkMode }">
-            Getting your location...
-          </div>
-        </div>
-        <div v-if="mapStore.error" class="error-message" :class="{ 'dark-error': isDarkMode }">
-          {{ mapStore.error }}
-          <button
-            @click="mapStore.fetchBoardingHouses"
-            class="retry-button"
-            :class="{ 'dark-retry': isDarkMode }"
-          >
-            Retry
-          </button>
-        </div>
-        <div id="map" class="full-map"></div>
-        <div class="button-container">
-          <button
-            @click="mapStore.getUserLocation"
-            class="map-button location-button"
-            :class="{ 'dark-button': isDarkMode }"
-          >
-            <i class="mdi mdi-crosshairs-gps"></i> Get Your Location
-          </button>
-          <button
-            @click="mapStore.clearPath"
-            class="map-button clear-button"
-            :class="{ 'dark-button': isDarkMode }"
-            :disabled="!mapStore.hasPath"
-          >
-            <i class="mdi mdi-map-marker-path"></i> Clear Path
-          </button>
-        </div>
+      <v-container fluid>
+        <v-row v-if="boardingHouseStore.loading">
+          <v-col class="text-center">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            <div class="mt-2">Loading dormitories...</div>
+          </v-col>
+        </v-row>
 
-        <!-- Added accessibility options and controls -->
-        <div class="map-controls">
-          <button
-            @click="mapStore.zoomIn()"
-            class="control-button"
-            :class="{ 'dark-control': isDarkMode }"
-            title="Zoom In"
-          >
-            <i class="mdi mdi-plus"></i>
-          </button>
-          <button
-            @click="mapStore.zoomOut()"
-            class="control-button"
-            :class="{ 'dark-control': isDarkMode }"
-            title="Zoom Out"
-          >
-            <i class="mdi mdi-minus"></i>
-          </button>
-          <button
-            @click="mapStore.resetView()"
-            class="control-button"
-            :class="{ 'dark-control': isDarkMode }"
-            title="Reset View"
-          >
-            <i class="mdi mdi-home"></i>
-          </button>
-        </div>
+        <v-alert v-if="boardingHouseStore.errorMessage" type="error" class="mt-4">
+          {{ boardingHouseStore.errorMessage }}
+        </v-alert>
 
-        <!-- Added a legend -->
-        <div class="map-legend" :class="{ 'dark-legend': isDarkMode }">
-          <h4 :class="{ 'dark-legend-title': isDarkMode }">Map Legend</h4>
-          <div class="legend-item">
-            <div class="legend-color reference-marker"></div>
-            <span :class="{ 'dark-legend-text': isDarkMode }">Reference Point</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color dorm-marker"></div>
-            <span :class="{ 'dark-legend-text': isDarkMode }">Dormitory</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color user-marker"></div>
-            <span :class="{ 'dark-legend-text': isDarkMode }">Your Location</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color path-line"></div>
-            <span :class="{ 'dark-legend-text': isDarkMode }">Path</span>
-          </div>
-        </div>
-      </div>
+        <v-row>
+          <v-col cols="6" xs="6" sm="6">
+            <v-select
+              v-model="selectedPriceRange"
+              :items="priceRanges"
+              item-title="text"
+              item-value="value"
+              label="Price Range"
+              variant="outlined"
+              class="mt-4"
+              density="comfortable"
+            ></v-select>
+          </v-col>
+          <v-col cols="6" xs="6" sm="6">
+            <v-select
+              v-model="selectedDistanceRange"
+              :items="distanceRanges"
+              item-title="text"
+              item-value="value"
+              label="Distance Range"
+              variant="outlined"
+              class="mt-4"
+              density="comfortable"
+            ></v-select>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col
+            v-for="(dorm, index) in filteredDorms"
+            :key="dorm.id || index"
+            cols="12"
+            sm="6"
+            md="4"
+            class="pa-4"
+          >
+            <v-card
+              class="hover-card dorm-card"
+              :class="{ 'light-card-darkmode': isDarkMode }"
+              elevation="2"
+              @click="navigateToDorm(dorm)"
+              style="cursor: pointer"
+            >
+              <div
+                class="image-container"
+                @mouseenter="hasDormImages(dorm.id) && startCarousel(dorm.id)"
+                @mouseleave="stopCarousel(dorm.id)"
+              >
+                <v-img
+                  :src="
+                    hasDormImages(dorm.id)
+                      ? getActiveImage(dorm)
+                      : dorm.image || '/default-dorm-image.jpg'
+                  "
+                  class="responsive-img"
+                  cover
+                  :alt="dorm.name"
+                >
+                  <template v-if="hasDormImages(dorm.id)">
+                    <div class="carousel-indicator" :class="{ visible: isHovering[dorm.id] }">
+                      <span
+                        v-for="(_, i) in dormImageMap[dorm.id].gallery"
+                        :key="i"
+                        class="dot"
+                        :class="{ active: activeImageIndices[dorm.id] === i }"
+                      ></span>
+                    </div>
+                  </template>
+                </v-img>
+              </div>
+              <v-card-text>
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <span class="text-body-1 font-weight-medium dorm-title">{{ dorm.name }}</span>
+                  <div class="d-flex align-center">
+                    <v-icon color="amber" size="18">mdi-star</v-icon>
+                    <span class="ml-1 text-body-2">
+                      <template v-if="getDormRating(dorm.id).hasRating">
+                        {{ getDormRating(dorm.id).average }}
+                        <span class="text-caption"> ({{ getDormRating(dorm.id).count }}) </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-caption">No ratings</span>
+                      </template>
+                    </span>
+                  </div>
+                </div>
+                <div class="text-subtitle-2 dorm-subtitle">
+                  {{ dorm.availability }}
+                </div>
+                <div class="text-body-2 dorm-text">{{ dorm.distance_to_campus }} m to campus</div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row v-if="!boardingHouseStore.loading && filteredDorms.length === 0">
+          <v-col class="text-center">
+            <v-alert type="info"> No dormitories found matching your filters. </v-alert>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 </template>
 
 <style scoped>
-/* Base Styles */
-.full-map-container {
-  width: 100%;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+.hover-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.05);
+}
+
+.dorm-card {
+  background-color: #0d3a2e;
+  color: #f8f8e1;
+  border-radius: 16px;
   overflow: hidden;
+}
+
+.light-card-darkmode {
+  background-color: #fbfbfb !important;
+  color: #000000 !important;
+}
+
+.light-card-darkmode .dorm-title,
+.light-card-darkmode .dorm-subtitle,
+.light-card-darkmode .dorm-text {
+  color: #000000 !important;
+}
+
+.dorm-title {
+  color: #f8f8e1 !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+}
+
+.dorm-subtitle {
+  color: #fe4f2d;
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px !important;
+}
+
+.dorm-text {
+  color: #f8f8e1 !important;
+}
+
+.responsive-img {
+  height: 200px;
+  transition: opacity 0.5s ease;
+}
+
+.image-container {
   position: relative;
+  overflow: hidden;
 }
 
-.full-map {
-  width: 100%;
-  height: 100%;
-}
-
-/* Light Theme Styles */
-.light-theme {
-  background-color: #ffffff;
-}
-
-/* Dark Theme Styles */
-.dark-theme {
-  background-color: #121212;
-}
-
-/* Button Container */
-.button-container {
+.carousel-indicator {
   position: absolute;
-  bottom: 40px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Map Buttons - Light Mode */
-.map-button {
-  background-color: #0c3b2e;
-  color: white;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.map-button:hover {
-  background-color: #ffba00;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.map-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Map Buttons - Dark Mode */
-.dark-button {
-  background-color: #0a2e23;
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.dark-button:hover {
-  background-color: #ffba00;
-}
-
-.map-button:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.map-button:disabled:hover {
-  background-color: #9ca3af;
-  transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.location-button {
-  background-color: #3b82f6;
-}
-
-.location-button:hover {
-  background-color: #2563eb;
-}
-
-.clear-button {
-  background-color: #d64545;
-}
-
-.clear-button:hover {
-  background-color: #f05252;
-}
-
-/* Loading Overlay - Light Mode */
-.loading-overlay {
-  position: absolute;
-  top: 0;
+  bottom: 10px;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  z-index: 1001;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* Loading Overlay - Dark Mode */
-.dark-loading {
-  background-color: rgba(18, 18, 18, 0.8);
+.carousel-indicator.visible {
+  opacity: 1;
 }
 
-.loading-spinner {
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #0c3b2e;
+.dot {
+  height: 6px;
+  width: 6px;
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 
-.dark-spinner {
-  border: 5px solid #333333;
-  border-top: 5px solid #ffba00;
+.dot.active {
+  background-color: #0d3a2e;
+  width: 10px;
+  border-radius: 3px;
 }
 
-.loading-text {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #0c3b2e;
-}
-
-.dark-text {
-  color: #ffba00;
-}
-
-/* Error Message - Light Mode */
-.error-message {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #fee2e2;
-  border: 1px solid #f87171;
-  padding: 12px 20px;
-  border-radius: 4px;
-  color: #b91c1c;
-  font-weight: bold;
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Error Message - Dark Mode */
-.dark-error {
-  background-color: #4c1d1d;
-  border: 1px solid #b91c1c;
-  color: #fca5a5;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.retry-button {
-  background-color: #b91c1c;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.dark-retry {
-  background-color: #ef4444;
-}
-
-.retry-button:hover {
-  background-color: #dc2626;
-}
-
-.warning-icon {
-  color: #b91c1c;
-  margin-left: 5px;
-}
-
-/* Map Controls - Light Mode */
-.map-controls {
-  position: absolute;
-  top: 80px;
-  left: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.control-button {
-  background-color: white;
-  color: #0c3b2e;
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  border: 1px solid #d1d5db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
-}
-
-/* Map Controls - Dark Mode */
-.dark-control {
-  background-color: #1d3731;
-  color: #ffba00;
-  border: 1px solid #2d4f47;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.control-button:hover {
-  background-color: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.dark-control:hover {
-  background-color: #2d4f47;
-}
-
-/* Map Legend - Light Mode */
-.map-legend {
-  position: absolute;
-  bottom: 40px;
-  left: 20px;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #d1d5db;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 180px;
-}
-
-/* Map Legend - Dark Mode */
-.dark-legend {
-  background-color: rgba(29, 55, 49, 0.9);
-  border: 1px solid #2d4f47;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.map-legend h4 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  text-align: center;
-  font-size: 14px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 5px;
-}
-
-.dark-legend-title {
-  color: #ffba00;
-  border-bottom: 1px solid #2d4f47;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-  font-size: 12px;
-}
-
-.dark-legend-text {
-  color: #ffffff;
-}
-
-.legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.reference-marker {
-  background-color: #ffba00;
-}
-
-.dorm-marker {
-  background-color: #0c3b2e;
-}
-
-.user-marker {
-  background-color: #3b82f6;
-}
-
-.path-line {
-  background-color: #ff6b6b;
-  border-radius: 0;
-  height: 3px;
-}
-
-@media (max-width: 768px) {
-  .button-container {
-    bottom: 20px;
-    right: 10px;
+@media (min-width: 960px) {
+  .dorm-card {
+    height: 400px;
   }
-
-  .map-button {
-    padding: 10px 15px;
-    font-size: 14px;
-  }
-
-  .map-legend {
-    bottom: 20px;
-    left: 10px;
-    width: 150px;
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
+  .responsive-img {
+    height: 280px;
   }
 }
 </style>

@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import L from 'leaflet'
+import 'leaflet-routing-machine' // Import Leaflet Routing Machine
 import { supabase } from '@/utils/supabase'
 
 export const useMapStore = defineStore('map', () => {
@@ -9,6 +10,7 @@ export const useMapStore = defineStore('map', () => {
   const map = ref(null)
   const currentMarker = ref(null)
   const currentPath = ref(null)
+  const routingControl = ref(null) // Add routing control reference
   const currentZoom = ref(10)
   const referencePoint = [8.9555, 125.597]
   const referenceMarker = ref(null)
@@ -299,31 +301,135 @@ export const useMapStore = defineStore('map', () => {
     })
   }
 
+  // Modified drawPath function to use Leaflet Routing Machine with improved handling
   const drawPath = (fromCoords, toCoords) => {
     // Close any open popups before drawing the path
     if (map.value) map.value.closePopup()
 
-    if (currentPath.value && map.value) {
-      map.value.removeLayer(currentPath.value)
+    // Remove existing path and routing control if they exist
+    clearPath()
+
+    // Create waypoints for the routing
+    const waypoints = [L.latLng(fromCoords[0], fromCoords[1]), L.latLng(toCoords[0], toCoords[1])]
+
+    // Options for custom routing service
+    // Set to true and provide API key when ready for production
+    const useCustomRouter = false
+
+    let router = null
+    if (useCustomRouter) {
+      // Example with GraphHopper - You need to sign up for an API key
+      // Make sure to install the lrm-graphhopper package if you use this option
+      // npm install lrm-graphhopper --save
+      router = L.Routing.graphHopper('your-api-key-here', {
+        urlParameters: {
+          vehicle: 'foot', // Use 'foot' for pedestrian routing
+        },
+      })
+    } else {
+      // Fallback to OSRM with a clear warning to the user about demo limitations
+      console.warn(
+        'Using OSRM demo server. NOT SUITABLE FOR PRODUCTION. Please set up your own routing service.',
+      )
+      router = L.Routing.osrmv1({
+        serviceUrl: 'https://router.project-osrm.org/route/v1',
+        profile: 'walking', // Use walking profile for pedestrian routing
+      })
     }
 
-    currentPath.value = L.polyline([fromCoords, toCoords], {
-      color: '#ff6b6b',
-      weight: 4,
-      opacity: 0.8,
-      dashArray: '10,10',
-      lineJoin: 'round',
+    // Create routing control
+    routingControl.value = L.Routing.control({
+      waypoints: waypoints,
+      routeWhileDragging: false,
+      showAlternatives: false,
+      fitSelectedRoutes: true,
+      show: false, // Hide the routing instructions panel
+      lineOptions: {
+        styles: [
+          { color: '#ff6b6b', opacity: 0.8, weight: 5 },
+          { color: '#ffffff', opacity: 0.3, weight: 7 }, // outline
+        ],
+        addWaypoints: false,
+      },
+      createMarker: function () {
+        return null
+      }, // Don't create markers for waypoints
+      router: router,
     }).addTo(map.value)
 
-    // Use animate: false to prevent the conflict during animation
-    map.value.fitBounds(currentPath.value.getBounds(), {
-      padding: [50, 50],
-      maxZoom: 16,
-      animate: false, // This prevents the error
+    // Listen for the routesfound event to handle the route data
+    routingControl.value.on('routesfound', function (e) {
+      const routes = e.routes
+      const summary = routes[0].summary
+
+      // Calculate total distance and estimated time
+      const distance = summary.totalDistance
+      const time = summary.totalTime
+
+      // Format distance and time for display
+      const formattedDistance =
+        distance >= 1000 ? `${(distance / 1000).toFixed(2)} km` : `${Math.round(distance)} m`
+
+      // Format time (convert seconds to minutes)
+      const minutes = Math.round(time / 60)
+      const formattedTime =
+        minutes > 60 ? `${Math.floor(minutes / 60)} hr ${minutes % 60} min` : `${minutes} min`
+
+      // Show route information in a popup on the map
+      L.popup()
+        .setLatLng(L.latLng((fromCoords[0] + toCoords[0]) / 2, (fromCoords[1] + toCoords[1]) / 2))
+        .setContent(
+          `
+        <div style="text-align: center;">
+          <h4 style="margin: 0 0 8px 0;">Route Information</h4>
+          <p><strong>Distance:</strong> ${formattedDistance}</p>
+          <p><strong>Estimated Time:</strong> ${formattedTime}</p>
+        </div>
+      `,
+        )
+        .openOn(map.value)
+
+      // Fit the bounds with some padding
+      map.value.fitBounds(L.latLngBounds(waypoints), {
+        padding: [50, 50],
+        maxZoom: 16,
+      })
+    })
+
+    // Handle routing errors
+    routingControl.value.on('routingerror', function (e) {
+      console.error('Routing error:', e.error)
+
+      // Fall back to a simple straight line if routing fails
+      currentPath.value = L.polyline([fromCoords, toCoords], {
+        color: '#ff6b6b',
+        weight: 4,
+        opacity: 0.8,
+        dashArray: '10,10',
+        lineJoin: 'round',
+      }).addTo(map.value)
+
+      map.value.fitBounds(L.latLngBounds([fromCoords, toCoords]), {
+        padding: [50, 50],
+        maxZoom: 16,
+      })
+
+      // Show error message
+      error.value = 'Could not calculate a realistic path. Showing direct line instead.'
+      setTimeout(() => {
+        error.value = null
+      }, 3000)
     })
   }
 
   const clearPath = () => {
+    // Remove routing control if it exists
+    if (routingControl.value && map.value) {
+      map.value.removeControl(routingControl.value)
+      routingControl.value = null
+    }
+
+    // Remove the old polyline if it exists
     if (currentPath.value && map.value) {
       map.value.removeLayer(currentPath.value)
       currentPath.value = null
@@ -343,7 +449,7 @@ export const useMapStore = defineStore('map', () => {
   }
 
   // Getters
-  const hasPath = computed(() => !!currentPath.value)
+  const hasPath = computed(() => !!(currentPath.value || routingControl.value))
 
   // Global event handler to be called from component
   const handleGlobalClick = (event) => {
@@ -362,13 +468,14 @@ export const useMapStore = defineStore('map', () => {
 
   // Clean up function
   const cleanup = () => {
+    clearPath()
+
     if (map.value) {
       map.value.remove()
       map.value = null
     }
     markers.value = []
     currentMarker.value = null
-    currentPath.value = null
     referenceMarker.value = null
   }
 
@@ -377,6 +484,7 @@ export const useMapStore = defineStore('map', () => {
     map,
     currentMarker,
     currentPath,
+    routingControl,
     currentZoom,
     referencePoint,
     referenceMarker,
