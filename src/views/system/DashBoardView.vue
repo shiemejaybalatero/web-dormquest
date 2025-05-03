@@ -5,7 +5,7 @@ import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
 // Import the dormImageMap and helper functions from the new file
-import { dormImageMap, hasDormImages } from '@/stores/DormImages'
+import { dormImageMap, hasDormImages } from '@/stores/dormImages'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
@@ -69,9 +69,9 @@ const priceRanges = [
 
 const distanceRanges = [
   { text: 'Any Distance', value: 'any' },
-  { text: '0 - 100m', value: [50, 200] },
-  { text: '100 - 300m', value: [200, 400] },
-  { text: '300 - 600m', value: [400, 600] },
+  { text: '50 - 200m', value: [50, 200] },
+  { text: '200 - 400m', value: [200, 400] },
+  { text: '400 - 600m', value: [400, 600] },
   { text: '600 - 1000m', value: [600, 1000] },
   { text: '1000 - 5000m', value: [1000, 5000] },
 ]

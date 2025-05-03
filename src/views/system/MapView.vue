@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
+import { onMounted, onBeforeUnmount, nextTick, computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useMapStore } from '@/stores/mapStore'
@@ -10,6 +10,7 @@ const route = useRoute()
 const mapStore = useMapStore()
 const theme = useTheme()
 const isDarkMode = computed(() => theme.global.name.value === 'dark')
+const routeInfo = ref(null)
 
 const viewBoardingHouseDetails = (houseId) => {
   // Convert to number if your IDs are numeric
@@ -39,6 +40,16 @@ const viewBoardingHouseDetails = (houseId) => {
   })
 }
 
+// ORS-specific function to handle path drawing
+const handlePathDrawing = async (fromCoords, toCoords) => {
+  try {
+    routeInfo.value = null
+    await mapStore.drawPath(fromCoords, toCoords)
+  } catch (err) {
+    console.error('Error in handlePathDrawing:', err)
+  }
+}
+
 // Setup Global Event Listeners
 const setupGlobalEventListeners = () => {
   // Global listener for all map-related buttons
@@ -48,7 +59,17 @@ const setupGlobalEventListeners = () => {
 // Handle document clicks
 const handleDocumentClick = (event) => {
   // Handle path buttons
-  mapStore.handleGlobalClick(event)
+  if (event.target && event.target.matches('.path-button')) {
+    // Close any open popups before drawing the path
+    if (mapStore.map) mapStore.map.closePopup()
+
+    const fromCoords = event.target.getAttribute('data-from').split(',').map(Number)
+    const toCoords = event.target.getAttribute('data-to').split(',').map(Number)
+
+    if (fromCoords.length === 2 && toCoords.length === 2) {
+      handlePathDrawing(fromCoords, toCoords)
+    }
+  }
 
   // Handle view details buttons
   if (event.target && event.target.matches('.view-details-btn')) {
@@ -113,7 +134,7 @@ onBeforeUnmount(() => {
         >
           <div class="loading-spinner" :class="{ 'dark-spinner': isDarkMode }"></div>
           <div class="loading-text" :class="{ 'dark-text': isDarkMode }">
-            Getting your location...
+            {{ mapStore.currentPath ? 'Calculating route...' : 'Loading map data...' }}
           </div>
         </div>
         <div v-if="mapStore.error" class="error-message" :class="{ 'dark-error': isDarkMode }">
@@ -127,6 +148,17 @@ onBeforeUnmount(() => {
           </button>
         </div>
         <div id="map" class="full-map"></div>
+
+        <!-- ORS Route Info Panel (only shows when available) -->
+        <div v-if="routeInfo" class="route-info-panel" :class="{ 'dark-route-info': isDarkMode }">
+          <h4>Route Information</h4>
+          <p><strong>Distance:</strong> {{ routeInfo.distance }} km</p>
+          <p><strong>Estimated Time:</strong> {{ routeInfo.duration }} min</p>
+          <button @click="routeInfo = null" class="close-button">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+
         <div class="button-container">
           <button
             @click="mapStore.getUserLocation"
@@ -145,7 +177,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <!-- Added accessibility options and controls -->
+        <!-- Map controls -->
         <div class="map-controls">
           <button
             @click="mapStore.zoomIn()"
@@ -173,7 +205,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <!-- Added a legend -->
+        <!-- Map legend -->
         <div class="map-legend" :class="{ 'dark-legend': isDarkMode }">
           <h4 :class="{ 'dark-legend-title': isDarkMode }">Map Legend</h4>
           <div class="legend-item">
@@ -190,7 +222,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="legend-item">
             <div class="legend-color path-line"></div>
-            <span :class="{ 'dark-legend-text': isDarkMode }">Path</span>
+            <span :class="{ 'dark-legend-text': isDarkMode }">Walking Path</span>
           </div>
         </div>
       </div>
@@ -301,6 +333,62 @@ onBeforeUnmount(() => {
 
 .clear-button:hover {
   background-color: #f05252;
+}
+
+/* Route Info Panel - Light Mode */
+.route-info-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: white;
+  border-radius: 4px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-width: 250px;
+  border-left: 4px solid #ff6b6b;
+}
+
+/* Route Info Panel - Dark Mode */
+.dark-route-info {
+  background-color: #1d3731;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.route-info-panel h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #0c3b2e;
+}
+
+.dark-route-info h4 {
+  color: #ffba00;
+}
+
+.route-info-panel p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #666;
+}
+
+.dark-route-info .close-button {
+  color: #aaa;
+}
+
+.close-button:hover {
+  color: #ff6b6b;
 }
 
 /* Loading Overlay - Light Mode */
@@ -514,23 +602,6 @@ onBeforeUnmount(() => {
   height: 3px;
 }
 
-:deep(.leaflet-routing-container) {
-  display: none !important;
-}
-
-/* Hide specific Leaflet routing elements */
-:deep(.leaflet-routing-container.leaflet-control) {
-  display: none !important;
-}
-
-:deep(.leaflet-routing-alt) {
-  display: none !important;
-}
-
-:deep(.leaflet-routing-container-hide) {
-  display: none !important;
-}
-
 @media (max-width: 768px) {
   .button-container {
     bottom: 20px;
@@ -546,6 +617,13 @@ onBeforeUnmount(() => {
     bottom: 20px;
     left: 10px;
     width: 150px;
+  }
+
+  .route-info-panel {
+    top: 10px;
+    right: 10px;
+    max-width: 200px;
+    padding: 10px;
   }
 }
 
