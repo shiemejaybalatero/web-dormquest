@@ -1,13 +1,6 @@
-// src/stores/ors.js
-// This file contains utilities for working with OpenRouteService API
-
-// Function to get a route between two points using OpenRouteService
 export const getRoute = async (fromCoords, toCoords, profile = 'foot-walking', options = {}) => {
-  // Ensure your API key is correctly configured in your environment
   const apiKey =
     import.meta.env.VITE_ORS_API_KEY || '5b3ce3597851110001cf62483570601917a940dc9755c816006c72ba'
-
-  // OpenRouteService endpoint
   const endpoint = 'https://api.openrouteservice.org/v2/directions/'
 
   // Format coordinates for the API (longitude, latitude)
@@ -18,12 +11,12 @@ export const getRoute = async (fromCoords, toCoords, profile = 'foot-walking', o
     // Set up request body with options for improved routing
     const requestBody = {
       coordinates: [fromLngLat, toLngLat],
-      preference: options.preference || 'shortest', // 'shortest' for most direct route
+      preference: options.preference || 'shortest',
       instructions: options.instructions !== undefined ? options.instructions : false,
       continue_straight: options.continue_straight !== undefined ? options.continue_straight : true,
       units: 'km',
-      geometry_simplify: true, // Request simplified geometry
-      elevation: false, // No need for elevation data
+      geometry_simplify: true,
+      elevation: false,
     }
 
     // Add alternative routes if requested
@@ -41,13 +34,11 @@ export const getRoute = async (fromCoords, toCoords, profile = 'foot-walking', o
       body: JSON.stringify(requestBody),
     })
 
-    // Handle non-200 responses
     if (!response.ok) {
       const errorData = await response.json()
       throw new Error(errorData.error.message || 'Error fetching route')
     }
 
-    // Return GeoJSON data
     return await response.json()
   } catch (error) {
     console.error('Error in getRoute:', error)
@@ -66,7 +57,7 @@ export const extractRouteCoordinates = (routeData) => {
     const route = routeData.features[0]
 
     // Get coordinates from the LineString geometry
-    // The coordinates in GeoJSON are [longitude, latitude], so we need to flip them
+
     return route.geometry.coordinates.map((coord) => [coord[1], coord[0]])
   } catch (error) {
     console.error('Error extracting route coordinates:', error)

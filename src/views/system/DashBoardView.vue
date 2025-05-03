@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
-// Import the dormImageMap and helper functions from the new file
 import { dormImageMap, hasDormImages } from '@/stores/dormImages'
 
 const router = useRouter()
@@ -12,17 +11,18 @@ const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
 const isDarkMode = ref(false)
+
 // Carousel handling
 const activeImageIndices = ref({})
 const carouselIntervals = ref({})
-const isHovering = ref({}) // Track hover state for each dorm
+const isHovering = ref({})
 
 const startCarousel = (dormId) => {
-  if (!activeImageIndices.value[dormId]) {
+  if (activeImageIndices.value[dormId] === undefined) {
     activeImageIndices.value[dormId] = 0
   }
 
-  isHovering.value[dormId] = true // Set hover state to true
+  isHovering.value[dormId] = true
 
   // Clear any existing interval
   if (carouselIntervals.value[dormId]) {
@@ -45,19 +45,28 @@ const stopCarousel = (dormId) => {
     clearInterval(carouselIntervals.value[dormId])
     delete carouselIntervals.value[dormId]
   }
+
+  // Reset the active index when stopping the carousel
+  activeImageIndices.value[dormId] = undefined
 }
 
 const getActiveImage = (dorm) => {
   if (dormImageMap[dorm.id]) {
-    if (activeImageIndices.value[dorm.id] === undefined) {
-      activeImageIndices.value[dorm.id] = 0
+    // When not hovering or index is undefined, show the main image
+    if (activeImageIndices.value[dorm.id] === undefined || !isHovering.value[dorm.id]) {
+      return (
+        dormImageMap[dorm.id].main ||
+        dormImageMap[dorm.id].gallery[0] ||
+        dorm.image ||
+        '/default-dorm-image.jpg'
+      )
     }
+    // When hovering, show the gallery image at the active index
     return dormImageMap[dorm.id].gallery[activeImageIndices.value[dorm.id]]
   }
   return dorm.image || '/default-dorm-image.jpg'
 }
 
-// After - Updated to handle "Any" as a special case
 const priceRanges = [
   { text: 'Any Price', value: 'any' },
   { text: '₱500 - ₱2,000', value: [500, 2000] },

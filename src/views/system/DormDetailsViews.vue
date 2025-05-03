@@ -13,21 +13,19 @@ const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
-const showCarousel = ref(false) // Control carousel visibility
-const selectedImageIndex = ref(0) // Track which image was clicked
-const showReviewModal = ref(false) // Added missing declaration
-const ratingStats = ref({ average: 0, count: 0 }) // Added missing declaration
-const dormRatings = ref([]) // Added missing declaration
-const searchQuery = ref('') // Add search query ref for local handling
-
-// Get the Vuetify theme
+const showCarousel = ref(false)
+const selectedImageIndex = ref(0)
+const showReviewModal = ref(false)
+const ratingStats = ref({ average: 0, count: 0 })
+const dormRatings = ref([])
+const searchQuery = ref('')
 const theme = useTheme()
-
-// Determine if dark mode is active
-const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
+
+// Determine if dark mode is active
+const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 // Use a defensive approach to access store properties
 const selectedBoardingHouse = computed(() => boardingHouseStore.selectedBoardingHouse)
@@ -114,17 +112,17 @@ const refetchData = () => {
 const viewOnMap = () => {
   // Navigate to the map page with query parameters to highlight this dorm
   router.push({
-    name: 'map', // The name of your map route in your router configuration
+    name: 'map',
     query: {
-      highlight: dormId, // Pass the dormitory ID as a query parameter
-      fromDetails: true, // Flag to indicate we're coming from details page
+      highlight: dormId,
+      fromDetails: true,
     },
   })
 }
 
 // New function to handle search
 const handleSearch = async (query) => {
-  if (!query.trim()) return // Don't search if query is empty
+  if (!query.trim()) return
 
   searchQuery.value = query
 
@@ -146,7 +144,6 @@ const handleSearch = async (query) => {
       params: { id: matchingDorm.id },
     })
   } else {
-    // Optional: Handle no results found
     console.log('No dormitories found matching:', query)
     // Could show a notification/alert here
   }
@@ -161,8 +158,6 @@ const handleRatingUpdated = (stats) => {
 const handleSubmitRating = (newRating) => {
   console.log('New rating submitted:', newRating)
   dormRatings.value = [newRating, ...dormRatings.value]
-  // You might want to update the boarding house store with the new average rating
-  // boardingHouseStore.updateDormRating(dormId, ratingStats.value.average)
 }
 
 onMounted(() => {

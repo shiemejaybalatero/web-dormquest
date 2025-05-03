@@ -1,8 +1,7 @@
-// src/stores/mapStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import L from 'leaflet'
-import 'leaflet-routing-machine' // We'll still use some of the Leaflet Routing Machine features
+import 'leaflet-routing-machine'
 import { supabase } from '@/utils/supabase'
 import { getRoute, extractRouteCoordinates, getRouteInfo } from './ors'
 
@@ -334,8 +333,7 @@ export const useMapStore = defineStore('map', () => {
       }
 
       // Simplify route coordinates to make the path less complex
-      // This reduces the number of points while maintaining the general shape
-      const simplifiedCoordinates = simplifyPath(routeCoordinates, 0.0001) // Adjust tolerance as needed
+      const simplifiedCoordinates = simplifyPath(routeCoordinates, 0.0001)
 
       // Create a polyline from the simplified route coordinates
       currentPath.value = L.polyline(simplifiedCoordinates, {
@@ -343,7 +341,7 @@ export const useMapStore = defineStore('map', () => {
         weight: 5,
         opacity: 0.8,
         lineJoin: 'round',
-        lineCap: 'round', // Rounded ends for smoother appearance
+        lineCap: 'round',
       }).addTo(map.value)
 
       // Calculate center point for popup
