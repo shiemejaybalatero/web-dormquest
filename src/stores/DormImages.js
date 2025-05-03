@@ -118,3 +118,22 @@ export const dormImageMap = {
     gallery: ['/Manor/manor2.jpg', '/Manor/manor.jpg', '/Manor/manor1.jpg', '/Manor/manor3.jpg'],
   },
 }
+
+// Helper functions for image management
+export const getMainImage = (dormId) => {
+  if (dormImageMap[dormId]) {
+    return dormImageMap[dormId].main
+  }
+  return '/default-dorm-image.jpg'
+}
+
+export const getGalleryImages = (dormId) => {
+  if (dormImageMap[dormId]) {
+    return dormImageMap[dormId].gallery
+  }
+  return ['/default-dorm-image.jpg']
+}
+
+export const hasDormImages = (dormId) => {
+  return !!dormImageMap[dormId]
+}

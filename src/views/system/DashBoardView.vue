@@ -4,87 +4,13 @@ import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
+// Import the dormImageMap and helper functions from the new file
+import { dormImageMap, hasDormImages } from '@/stores/DormImages'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
-
-// Dorm image carousel data
-const dormImageMap = {
-  1: {
-    main: '/Amplayo/amplayomain.png',
-    gallery: [
-      '/Amplayo/amplayomain.png',
-      '/Amplayo/amplayo.png',
-      '/Amplayo/amplayo1.jpg',
-      '/Amplayo/amplayo2.png',
-      '/Amplayo/amplayo3.png',
-    ],
-  },
-  2: {
-    main: '/BlueHeaven/bluemain.png',
-    gallery: [
-      '/BlueHeaven/bluemain.png',
-      '/BlueHeaven/blue.jpg',
-      '/BlueHeaven/blue1.jpg',
-      '/BlueHeaven/blue2.jpg',
-    ],
-  },
-  3: {
-    main: '/Blissful/blissfulmain.png',
-    gallery: [
-      '/Blissful/blissfulmain.png',
-      '/Blissful/blissful.jpg',
-      '/Blissful/blissful1.jpg',
-      '/Blissful/blissful2.jpg',
-    ],
-  },
-  4: {
-    main: '/Licayan/licayanmain.png',
-    gallery: [
-      '/Licayan/licayanmain.png',
-      '/Licayan/licayan.png',
-      '/Licayan/licayan1.png',
-      '/Licayan/licayan2.jpg',
-      '/Licayan/licayan3.jpg',
-    ],
-  },
-  5: {
-    main: '/Chelsea/chelseamain.jpg',
-    gallery: [
-      '/Chelsea/chelseamain.jpg',
-      '/Chelsea/chelsea.jpg',
-      '/Chelsea/chelsea1.jpg',
-      '/Chelsea/chelsea2.jpg',
-      '/Chelsea/chelsea3.jpg',
-    ],
-  },
-  6: {
-    main: '/TGBG/tgbgmain.png',
-    gallery: [
-      '/TGBG/tgbgmain.png',
-      '/TGBG/tgbg.png',
-      '/TGBG/tgbg1.png',
-      '/TGBG/tgbg2.png',
-      '/TGBG/tgbg3.png',
-    ],
-  },
-  7: {
-    main: '/Magdura/magduramain.png',
-    gallery: [
-      '/Magdura/magduramain.png',
-      '/Magdura/magdura.png',
-      '/Magdura/magdura1.png',
-      '/Magdura/magdura2.png',
-      '/Magdura/magdura3.png',
-    ],
-  },
-  8: {
-    main: '/Karmo/karmomain.jpg',
-    gallery: ['/Karmo/karmomain.jpg', '/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
-  },
-}
 
 // Carousel handling
 const activeImageIndices = ref({})
@@ -134,7 +60,7 @@ const getActiveImage = (dorm) => {
 // After - Updated to handle "Any" as a special case
 const priceRanges = [
   { text: 'Any Price', value: 'any' },
-  { text: '₱0 - ₱2,000', value: [0, 2000] },
+  { text: '₱500 - ₱2,000', value: [500, 2000] },
   { text: '₱2,000 - ₱4,000', value: [2000, 4000] },
   { text: '₱4,000 - ₱6,000', value: [4000, 6000] },
   { text: '₱6,000 - ₱8,000', value: [6000, 8000] },
@@ -143,9 +69,9 @@ const priceRanges = [
 
 const distanceRanges = [
   { text: 'Any Distance', value: 'any' },
-  { text: '0 - 100m', value: [0, 100] },
-  { text: '100 - 300m', value: [100, 300] },
-  { text: '300 - 600m', value: [300, 600] },
+  { text: '0 - 100m', value: [50, 200] },
+  { text: '100 - 300m', value: [200, 400] },
+  { text: '300 - 600m', value: [400, 600] },
   { text: '600 - 1000m', value: [600, 1000] },
   { text: '1000 - 5000m', value: [1000, 5000] },
 ]
@@ -326,12 +252,12 @@ onMounted(async () => {
             >
               <div
                 class="image-container"
-                @mouseenter="dormImageMap[dorm.id] && startCarousel(dorm.id)"
+                @mouseenter="hasDormImages(dorm.id) && startCarousel(dorm.id)"
                 @mouseleave="stopCarousel(dorm.id)"
               >
                 <v-img
                   :src="
-                    dormImageMap[dorm.id]
+                    hasDormImages(dorm.id)
                       ? getActiveImage(dorm)
                       : dorm.image || '/default-dorm-image.jpg'
                   "
@@ -339,7 +265,7 @@ onMounted(async () => {
                   cover
                   :alt="dorm.name"
                 >
-                  <template v-if="dormImageMap[dorm.id]">
+                  <template v-if="hasDormImages(dorm.id)">
                     <div class="carousel-indicator" :class="{ visible: isHovering[dorm.id] }">
                       <span
                         v-for="(_, i) in dormImageMap[dorm.id].gallery"

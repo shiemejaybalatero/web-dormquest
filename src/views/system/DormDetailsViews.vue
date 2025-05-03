@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
-import { useTheme } from 'vuetify' // Import useTheme to access theme state
+import { useTheme } from 'vuetify'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import DormitoryReview from '@/components/system/DormitoryReview.vue'
 import { dormImageMap } from '@/stores/DormImages'
@@ -18,6 +18,7 @@ const selectedImageIndex = ref(0) // Track which image was clicked
 const showReviewModal = ref(false) // Added missing declaration
 const ratingStats = ref({ average: 0, count: 0 }) // Added missing declaration
 const dormRatings = ref([]) // Added missing declaration
+const searchQuery = ref('') // Add search query ref for local handling
 
 // Get the Vuetify theme
 const theme = useTheme()
@@ -32,6 +33,7 @@ const boardingHouseStore = useBoardingHouseStore()
 const selectedBoardingHouse = computed(() => boardingHouseStore.selectedBoardingHouse)
 const loading = computed(() => boardingHouseStore.loading)
 const errorMessage = computed(() => boardingHouseStore.errorMessage)
+const allBoardingHouses = computed(() => boardingHouseStore.boardingHouses || [])
 
 // Safe computed property for dorm details
 const dormDetails = computed(() => selectedBoardingHouse.value)
@@ -120,6 +122,36 @@ const viewOnMap = () => {
   })
 }
 
+// New function to handle search
+const handleSearch = async (query) => {
+  if (!query.trim()) return // Don't search if query is empty
+
+  searchQuery.value = query
+
+  // Make sure we have all boarding houses loaded
+  if (!allBoardingHouses.value.length) {
+    // If not already loaded, fetch all boarding houses
+    await boardingHouseStore.fetchBoardingHouses()
+  }
+
+  // Search for matching dormitory
+  const matchingDorm = allBoardingHouses.value.find((dorm) =>
+    dorm.name.toLowerCase().includes(query.toLowerCase()),
+  )
+
+  if (matchingDorm) {
+    // If we found a match, navigate to its details page
+    router.push({
+      name: 'dorm-details',
+      params: { id: matchingDorm.id },
+    })
+  } else {
+    // Optional: Handle no results found
+    console.log('No dormitories found matching:', query)
+    // Could show a notification/alert here
+  }
+}
+
 // Handle rating updates from the rating component
 const handleRatingUpdated = (stats) => {
   ratingStats.value = stats
@@ -138,6 +170,11 @@ onMounted(() => {
     console.log(`Mounting DormDetails with ID: ${dormId}`)
     refetchData()
     fetchRatings() // fetch ratings on load
+
+    // Make sure we have all boarding houses loaded for searching
+    if (!allBoardingHouses.value.length) {
+      boardingHouseStore.fetchBoardingHouses()
+    }
   }
 })
 
@@ -149,6 +186,7 @@ watch(
     if (!isNaN(newDormId)) {
       console.log(`Route changed to dorm ID: ${newDormId}`)
       boardingHouseStore.fetchBoardingHouseById(newDormId)
+      fetchRatings() // Refetch ratings when dorm changes
     }
   },
 )
@@ -180,7 +218,7 @@ const closeCarousel = () => {
 </script>
 
 <template>
-  <AppLayout>
+  <AppLayout @search="handleSearch">
     <template #content>
       <!-- Modal Carousel Overlay - only visible when showCarousel is true -->
       <div v-if="showCarousel" class="carousel-overlay">
