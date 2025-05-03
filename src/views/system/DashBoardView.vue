@@ -84,6 +84,83 @@ const dormImageMap = {
     main: '/Karmo/karmomain.jpg',
     gallery: ['/Karmo/karmomain.jpg', '/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
   },
+  9: {
+    main: '/Banton/bantonmain.png',
+    gallery: [
+      '/Banton/bantonmain.png',
+      '/Banton/banton.jpg',
+      '/Banton/banton1.jpg',
+      '/Banton/banton2.jpg',
+      '/Banton/banton3.jpg',
+    ],
+  },
+  10: {
+    main: '/Collegefacade/collegemain.jpg',
+    gallery: [
+      '/Collegefacade/collegemain.jpg',
+      '/Collegefacade/college.jpg',
+      '/Collegefacade/college1.jpg',
+      '/Collegefacade/college2.jpg',
+      '/Collegefacade/college3.jpg',
+    ],
+  },
+  11: {
+    main: '/JP/jpmain.jpg',
+    gallery: ['/JP/jpmain.jpg', '/JP/jp1.jpg', '/JP/jp2.jpg', '/JP/jp3.jpg'],
+  },
+  12: {
+    main: '/Lagrange/lagmain.jpg',
+    gallery: [
+      '/Lagrange/lagmain.jpg',
+      '/Lagrange/lag.jpg',
+      '/Lagrange/lag1.jpg',
+      '/Lagrange/lag2.jpg',
+      '/Lagrange/lag3.jpg',
+    ],
+  },
+  13: {
+    main: '/MDs/mdmain.jpg',
+    gallery: ['/MDs/mdmain.jpg', '/MDs/md.jpg', '/MDs/md1.jpg', '/MDs/md2.jpg', '/MDs/md3.jpg'],
+  },
+  14: {
+    main: '/Justin/justinmain.jpg',
+    gallery: [
+      '/Justin/justinmain.jpg',
+      '/Justin/justin.jpg',
+      '/Justin/justin1.jpg',
+      '/Justin/justin2.jpg',
+    ],
+  },
+  15: {
+    main: '/Camella/camellamain.jpg',
+    gallery: [
+      '/Camella/camellamain.jpg',
+      '/Camella/camella.jpg',
+      '/Camella/camella1.jpg',
+      '/Camella/camella2.jpg',
+      '/Camella/camella3.jpg',
+    ],
+  },
+  16: {
+    main: '/Cryshiels/crymain.jpg',
+    gallery: [
+      '/Cryshiels/crymain.jpg',
+      '/Cryshiels/cry.jpg',
+      '/Cryshiels/cry1.jpg',
+      '/Cryshiels/cry2.jpg',
+      '/Cryshiels/cry3.jpg',
+    ],
+  },
+  17: {
+    main: '/Manor/manormain.jpg',
+    gallery: [
+      '/Manor/manormain.jpg',
+      '/Manor/manor.jpg',
+      '/Manor/manor1.jpg',
+      '/Manor/manor2.jpg',
+      '/Manor/manor3.jpg',
+    ],
+  },
 }
 
 // Carousel handling
