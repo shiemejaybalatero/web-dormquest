@@ -148,7 +148,7 @@ function handleActiveState(event) {
           />
 
           <v-col cols="12" class="pa-0">
-            <v-subheader class="text-caption mt-1 mb-1 subheader"><i>Birthdate</i></v-subheader>
+            <v-label class="text-caption mt-1 mb-1 field-label"><i>Birthdate</i></v-label>
             <v-text-field
               v-model="formData.birthday"
               type="date"
@@ -165,7 +165,7 @@ function handleActiveState(event) {
           </div>
 
           <v-col cols="12" class="pa-0 mt-n2">
-            <v-subheader class="text-caption subheader"><i>Gender</i></v-subheader>
+            <v-label class="text-caption field-label"><i>Gender</i></v-label>
             <v-radio-group
               v-model="formData.gender"
               class="mb-n4"
@@ -303,5 +303,13 @@ h1 {
 
 .calendar {
   color: white;
+}
+
+.field-label {
+  display: block;
+  padding-left: 16px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.7);
 }
 </style>
