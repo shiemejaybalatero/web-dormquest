@@ -8,8 +8,9 @@ import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore
 import { useTheme } from 'vuetify'
 
 const theme = useTheme()
-
 const isDarkMode = computed(() => theme.global.name.value === 'dark')
+
+const drawer = ref(false)
 
 const sidebarLinks = [
   { title: 'Personal Information', icon: 'mdi-account', path: '/profile' },
@@ -28,187 +29,131 @@ onMounted(async () => {
   formAction.value.formProcess = false
 })
 
-// Function to handle profile update completion
 const handleProfileUpdated = async () => {
-  // Refresh user profile data
   await fetchUserProfile()
-
-  // Update profile image preview
   if (userProfile.value.avatar_url) {
     profileImage.value = userProfile.value.avatar_url
   }
 }
+
+const profileFields = computed(() => [
+  { label: 'Full Name', value: userProfile.value.fullname },
+  { label: 'Age', value: userProfile.value.age },
+  { label: 'Email', value: userProfile.value.email },
+  { label: 'Gender', value: userProfile.value.gender },
+  ...(userProfile.value.birthday ? [{ label: 'Birthday', value: userProfile.value.birthday }] : []),
+])
 </script>
 
 <template>
   <AppLayout>
     <template #content>
-      <v-row>
-        <!-- Sidebar -->
-        <v-col cols="12" md="3">
-          <SidebarLayout :links="sidebarLinks" />
-        </v-col>
+      <v-container fluid class="py-6">
+        <v-row>
+          <!-- Sidebar -->
+          <v-col cols="12" md="3">
+            <SidebarLayout :links="sidebarLinks" v-model:drawer="drawer" />
+          </v-col>
 
-        <!-- Profile Information -->
-        <v-col cols="12" md="9">
-          <div
-            class="profile-section px-4 px-md-8 py-6 py-md-10"
-            :class="{ 'profile-section-dark': isDarkMode, 'profile-section-light': !isDarkMode }"
-          >
-            <div class="profile-wrapper">
-              <!-- Header (Modified) -->
-              <div class="d-flex justify-left mb-6">
-                <h1 class="font-weight-bold mb-0 text-center">
-                  <span style="color: #ffba00">MY</span>
-                  <span style="color: white"> PROFILE</span>
-                </h1>
-              </div>
+          <!-- Profile Info -->
+          <v-col cols="12" md="9">
+            <div
+              class="profile-section px-4 px-md-8 py-6 py-md-10"
+              :class="isDarkMode ? 'profile-section-dark' : 'profile-section-light'"
+            >
+              <div class="profile-wrapper">
+                <!-- Header (Modified) -->
+                <div class="d-flex justify-space-between align-center mb-6">
+                  <h1 class="font-weight-bold mb-0">
+                    <span style="color: #ffba00">MY</span>
+                    <span style="color: white"> PROFILE</span>
+                  </h1>
 
-              <v-card
-                class="pa-9 profile-card"
-                :class="{ 'profile-card-dark': isDarkMode, 'profile-card-light': !isDarkMode }"
-                flat
-              >
-                <v-row>
-                  <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
-                    <v-avatar class="mt-5" size="200">
-                      <v-img
-                        :src="
-                          profileImage ||
-                          'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
-                        "
-                        cover
-                      />
-                    </v-avatar>
-                  </v-col>
-
-                  <v-col cols="12" md="8">
-                    <v-row>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Full Name
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{
-                            'value-dark': isDarkMode,
-                            'value-light': !isDarkMode,
-                            'border-white': isDarkMode,
-                            'border-black': !isDarkMode,
-                          }"
-                        >
-                          {{ userProfile.fullname }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Age
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{
-                            'value-dark': isDarkMode,
-                            'value-light': !isDarkMode,
-                            'border-white': isDarkMode,
-                            'border-black': !isDarkMode,
-                          }"
-                        >
-                          {{ userProfile.age }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Email
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{
-                            'value-dark': isDarkMode,
-                            'value-light': !isDarkMode,
-                            'border-white': isDarkMode,
-                            'border-black': !isDarkMode,
-                          }"
-                        >
-                          {{ userProfile.email }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Gender
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{
-                            'value-dark': isDarkMode,
-                            'value-light': !isDarkMode,
-                            'border-white': isDarkMode,
-                            'border-black': !isDarkMode,
-                          }"
-                        >
-                          {{ userProfile.gender }}
-                        </div>
-                      </v-col>
-                      <v-col cols="12" sm="6" v-if="userProfile.birthday">
-                        <div
-                          class="field-label"
-                          :class="{ 'label-dark': isDarkMode, 'label-light': !isDarkMode }"
-                        >
-                          Birthday
-                        </div>
-                        <div
-                          class="field-value"
-                          :class="{
-                            'value-dark': isDarkMode,
-                            'value-light': !isDarkMode,
-                            'border-white': isDarkMode,
-                            'border-black': !isDarkMode,
-                          }"
-                        >
-                          {{ userProfile.birthday }}
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-
-                <div class="d-flex justify-end mt-4">
+                  <!-- Toggle button (mobile only) -->
                   <v-btn
-                    :color="isDarkMode ? '#6D9773' : '#0c3b2e'"
-                    variant="outlined"
-                    @click="showEditDialog = true"
+                    v-if="$vuetify.display.smAndDown"
+                    icon
+                    @click="drawer = true"
+                    variant="text"
+                    color="white"
                   >
-                    Edit Profile
+                    <v-icon>mdi-menu</v-icon>
                   </v-btn>
                 </div>
-              </v-card>
-            </div>
-          </div>
 
-          <!-- Loading overlay -->
-          <v-overlay
-            :model-value="formAction.formProcess || isLoadingUser"
-            class="align-center justify-center"
-          >
-            <v-progress-circular indeterminate size="64" />
-          </v-overlay>
-        </v-col>
-      </v-row>
+                <!-- Profile Card -->
+                <v-card
+                  class="pa-5 pa-md-9 profile-card"
+                  :class="isDarkMode ? 'profile-card-dark' : 'profile-card-light'"
+                  flat
+                >
+                  <v-row>
+                    <!-- Avatar -->
+                    <v-col cols="12" md="4" class="text-center d-flex flex-column align-center">
+                      <v-avatar class="mt-4 mb-4 mb-md-0" size="160" md="200">
+                        <v-img
+                          :src="
+                            profileImage ||
+                            'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'
+                          "
+                          cover
+                        />
+                      </v-avatar>
+                    </v-col>
+
+                    <!-- Profile Fields -->
+                    <v-col cols="12" md="8">
+                      <v-row>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          v-for="(field, index) in profileFields"
+                          :key="index"
+                        >
+                          <div :class="['field-label', isDarkMode ? 'label-dark' : 'label-light']">
+                            {{ field.label }}
+                          </div>
+                          <div
+                            :class="[
+                              'field-value',
+                              isDarkMode ? 'value-dark border-white' : 'value-light border-black',
+                            ]"
+                          >
+                            {{ field.value }}
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+
+                  <!-- Edit Button -->
+                  <div class="d-flex justify-end mt-4">
+                    <v-btn
+                      :color="isDarkMode ? '#6D9773' : '#0c3b2e'"
+                      variant="outlined"
+                      @click="showEditDialog = true"
+                    >
+                      Edit Profile
+                    </v-btn>
+                  </div>
+                </v-card>
+              </div>
+            </div>
+
+            <!-- Loading overlay -->
+            <v-overlay
+              :model-value="formAction.formProcess || isLoadingUser"
+              class="align-center justify-center"
+            >
+              <v-progress-circular indeterminate size="64" />
+            </v-overlay>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
   </AppLayout>
 
-  <!-- Profile Edit Dialog Component -->
+  <!-- Edit Dialog -->
   <EditProfile
     v-model="showEditDialog"
     :userData="userProfile"
@@ -217,16 +162,29 @@ const handleProfileUpdated = async () => {
 </template>
 
 <style scoped>
-/* Light Mode Styles */
+.profile-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+}
+
+.heading-text {
+  font-size: 1.8rem;
+}
+
+@media (min-width: 768px) {
+  .heading-text {
+    font-size: 2.4rem;
+  }
+}
+
+/* Light Theme */
 .profile-section-light {
   background-color: #0c3b2e;
   border-radius: 16px;
-  min-height: 65vh;
-  padding-top: 24px;
-  padding-bottom: 40px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .profile-card-light {
@@ -249,16 +207,13 @@ const handleProfileUpdated = async () => {
   border: 1px solid #000000;
 }
 
-/* Dark Mode Styles */
+/* Dark Theme */
 .profile-section-dark {
   background-color: #0a2e23;
   border-radius: 16px;
-  min-height: 65vh;
-  padding-top: 24px;
-  padding-bottom: 40px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .profile-card-dark {
@@ -277,10 +232,8 @@ const handleProfileUpdated = async () => {
   color: #ffffff;
 }
 
-/* Common Styles */
-.profile-wrapper {
-  width: 100%;
-  max-width: 900px;
+.border-white {
+  border: 1px solid #ffffff;
 }
 
 .field-label {
@@ -296,13 +249,5 @@ const handleProfileUpdated = async () => {
   min-height: 45px;
   display: flex;
   align-items: center;
-}
-
-.theme-toggle-btn {
-  transition: transform 0.2s ease;
-}
-
-.theme-toggle-btn:hover {
-  transform: rotate(30deg);
 }
 </style>
