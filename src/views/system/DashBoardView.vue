@@ -320,7 +320,6 @@ onMounted(async () => {
     </template>
   </AppLayout>
 </template>
-
 <style scoped>
 .hover-card {
   transition:
@@ -340,6 +339,9 @@ onMounted(async () => {
   color: #f8f8e1;
   border-radius: 16px;
   overflow: hidden;
+  height: 100%; /* Make all cards fill their container */
+  display: flex;
+  flex-direction: column;
 }
 
 .light-card-darkmode {
@@ -358,26 +360,35 @@ onMounted(async () => {
   font-family: 'Nunito', sans-serif !important;
   font-size: 1.25rem !important;
   font-weight: 700 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dorm-subtitle {
   color: #fe4f2d;
   font-family: 'Nunito', sans-serif;
   font-size: 18px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dorm-text {
   color: #f8f8e1 !important;
 }
 
-.responsive-img {
-  height: 200px;
-  transition: opacity 0.5s ease;
-}
-
 .image-container {
   position: relative;
   overflow: hidden;
+  height: 200px; /* Fixed height for images */
+}
+
+.responsive-img {
+  height: 100%;
+  width: 100%;
+  transition: opacity 0.5s ease;
+  object-fit: cover;
 }
 
 .carousel-indicator {
@@ -410,11 +421,14 @@ onMounted(async () => {
   border-radius: 3px;
 }
 
+.v-card-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 @media (min-width: 960px) {
-  .dorm-card {
-    height: 400px;
-  }
-  .responsive-img {
+  .image-container {
     height: 280px;
   }
 }
