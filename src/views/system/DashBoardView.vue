@@ -320,6 +320,7 @@ onMounted(async () => {
     </template>
   </AppLayout>
 </template>
+
 <style scoped>
 .hover-card {
   transition:
@@ -382,15 +383,17 @@ onMounted(async () => {
   position: relative;
   overflow: hidden;
   height: 200px; /* Fixed height for images */
+  width: 100%;
 }
 
 .responsive-img {
   height: 100%;
   width: 100%;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
   object-fit: cover;
 }
 
+/* Improved carousel indicators */
 .carousel-indicator {
   position: absolute;
   bottom: 10px;
@@ -401,6 +404,7 @@ onMounted(async () => {
   gap: 6px;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
 .carousel-indicator.visible {
@@ -416,7 +420,7 @@ onMounted(async () => {
 }
 
 .dot.active {
-  background-color: #0d3a2e;
+  background-color: #ffffff;
   width: 10px;
   border-radius: 3px;
 }
