@@ -4,176 +4,25 @@ import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
+import { dormImageMap, hasDormImages } from '@/stores/dormImages'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
 const dormRatings = ref({})
 const searchTerm = ref('')
-
-// Dorm image carousel data
-const dormImageMap = {
-  1: {
-    main: '/Amplayo/amplayomain.png',
-    gallery: [
-      '/Amplayo/amplayomain.png',
-      '/Amplayo/amplayo.png',
-      '/Amplayo/amplayo1.jpg',
-      '/Amplayo/amplayo2.png',
-      '/Amplayo/amplayo3.png',
-    ],
-  },
-  2: {
-    main: '/BlueHeaven/bluemain.png',
-    gallery: [
-      '/BlueHeaven/bluemain.png',
-      '/BlueHeaven/blue.jpg',
-      '/BlueHeaven/blue1.jpg',
-      '/BlueHeaven/blue2.jpg',
-    ],
-  },
-  3: {
-    main: '/Blissful/blissfulmain.png',
-    gallery: [
-      '/Blissful/blissfulmain.png',
-      '/Blissful/blissful.jpg',
-      '/Blissful/blissful1.jpg',
-      '/Blissful/blissful2.jpg',
-    ],
-  },
-  4: {
-    main: '/Licayan/licayanmain.png',
-    gallery: [
-      '/Licayan/licayanmain.png',
-      '/Licayan/licayan.png',
-      '/Licayan/licayan1.png',
-      '/Licayan/licayan2.jpg',
-      '/Licayan/licayan3.jpg',
-    ],
-  },
-  5: {
-    main: '/Chelsea/chelseamain.jpg',
-    gallery: [
-      '/Chelsea/chelseamain.jpg',
-      '/Chelsea/chelsea.jpg',
-      '/Chelsea/chelsea1.jpg',
-      '/Chelsea/chelsea2.jpg',
-      '/Chelsea/chelsea3.jpg',
-    ],
-  },
-  6: {
-    main: '/TGBG/tgbgmain.png',
-    gallery: [
-      '/TGBG/tgbgmain.png',
-      '/TGBG/tgbg.png',
-      '/TGBG/tgbg1.png',
-      '/TGBG/tgbg2.png',
-      '/TGBG/tgbg3.png',
-    ],
-  },
-  7: {
-    main: '/Magdura/magduramain.png',
-    gallery: [
-      '/Magdura/magduramain.png',
-      '/Magdura/magdura.png',
-      '/Magdura/magdura1.png',
-      '/Magdura/magdura2.png',
-      '/Magdura/magdura3.png',
-    ],
-  },
-  8: {
-    main: '/Karmo/karmomain.jpg',
-    gallery: ['/Karmo/karmomain.jpg', '/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
-  },
-  9: {
-    main: '/Banton/bantonmain.png',
-    gallery: [
-      '/Banton/bantonmain.png',
-      '/Banton/banton.jpg',
-      '/Banton/banton1.jpg',
-      '/Banton/banton2.jpg',
-      '/Banton/banton3.jpg',
-    ],
-  },
-  10: {
-    main: '/Collegefacade/collegemain.jpg',
-    gallery: [
-      '/Collegefacade/collegemain.jpg',
-      '/Collegefacade/college.jpg',
-      '/Collegefacade/college1.jpg',
-      '/Collegefacade/college2.jpg',
-      '/Collegefacade/college3.jpg',
-    ],
-  },
-  11: {
-    main: '/JP/jpmain.jpg',
-    gallery: ['/JP/jpmain.jpg', '/JP/jp1.jpg', '/JP/jp2.jpg', '/JP/jp3.jpg'],
-  },
-  12: {
-    main: '/Lagrange/lagmain.jpg',
-    gallery: [
-      '/Lagrange/lagmain.jpg',
-      '/Lagrange/lag.jpg',
-      '/Lagrange/lag1.jpg',
-      '/Lagrange/lag2.jpg',
-      '/Lagrange/lag3.jpg',
-    ],
-  },
-  13: {
-    main: '/MDs/mdmain.jpg',
-    gallery: ['/MDs/mdmain.jpg', '/MDs/md.jpg', '/MDs/md1.jpg', '/MDs/md2.jpg', '/MDs/md3.jpg'],
-  },
-  14: {
-    main: '/Justin/justinmain.jpg',
-    gallery: [
-      '/Justin/justinmain.jpg',
-      '/Justin/justin.jpg',
-      '/Justin/justin1.jpg',
-      '/Justin/justin2.jpg',
-    ],
-  },
-  15: {
-    main: '/Camella/camellamain.jpg',
-    gallery: [
-      '/Camella/camellamain.jpg',
-      '/Camella/camella.jpg',
-      '/Camella/camella1.jpg',
-      '/Camella/camella2.jpg',
-      '/Camella/camella3.jpg',
-    ],
-  },
-  16: {
-    main: '/Cryshiels/crymain.jpg',
-    gallery: [
-      '/Cryshiels/crymain.jpg',
-      '/Cryshiels/cry.jpg',
-      '/Cryshiels/cry1.jpg',
-      '/Cryshiels/cry2.jpg',
-      '/Cryshiels/cry3.jpg',
-    ],
-  },
-  17: {
-    main: '/Manor/manormain.jpg',
-    gallery: [
-      '/Manor/manormain.jpg',
-      '/Manor/manor.jpg',
-      '/Manor/manor1.jpg',
-      '/Manor/manor2.jpg',
-      '/Manor/manor3.jpg',
-    ],
-  },
-}
+const isDarkMode = ref(false)
 
 // Carousel handling
 const activeImageIndices = ref({})
 const carouselIntervals = ref({})
-const isHovering = ref({}) // Track hover state for each dorm
+const isHovering = ref({})
 
 const startCarousel = (dormId) => {
-  if (!activeImageIndices.value[dormId]) {
+  if (activeImageIndices.value[dormId] === undefined) {
     activeImageIndices.value[dormId] = 0
   }
 
-  isHovering.value[dormId] = true // Set hover state to true
+  isHovering.value[dormId] = true
 
   // Clear any existing interval
   if (carouselIntervals.value[dormId]) {
@@ -196,22 +45,31 @@ const stopCarousel = (dormId) => {
     clearInterval(carouselIntervals.value[dormId])
     delete carouselIntervals.value[dormId]
   }
+
+  // Reset the active index when stopping the carousel
+  activeImageIndices.value[dormId] = undefined
 }
 
 const getActiveImage = (dorm) => {
   if (dormImageMap[dorm.id]) {
-    if (activeImageIndices.value[dorm.id] === undefined) {
-      activeImageIndices.value[dorm.id] = 0
+    // When not hovering or index is undefined, show the main image
+    if (activeImageIndices.value[dorm.id] === undefined || !isHovering.value[dorm.id]) {
+      return (
+        dormImageMap[dorm.id].main ||
+        dormImageMap[dorm.id].gallery[0] ||
+        dorm.image ||
+        '/default-dorm-image.jpg'
+      )
     }
+    // When hovering, show the gallery image at the active index
     return dormImageMap[dorm.id].gallery[activeImageIndices.value[dorm.id]]
   }
   return dorm.image || '/default-dorm-image.jpg'
 }
 
-// After - Updated to handle "Any" as a special case
 const priceRanges = [
   { text: 'Any Price', value: 'any' },
-  { text: '₱0 - ₱2,000', value: [0, 2000] },
+  { text: '₱500 - ₱2,000', value: [500, 2000] },
   { text: '₱2,000 - ₱4,000', value: [2000, 4000] },
   { text: '₱4,000 - ₱6,000', value: [4000, 6000] },
   { text: '₱6,000 - ₱8,000', value: [6000, 8000] },
@@ -220,9 +78,9 @@ const priceRanges = [
 
 const distanceRanges = [
   { text: 'Any Distance', value: 'any' },
-  { text: '0 - 100m', value: [0, 100] },
-  { text: '100 - 300m', value: [100, 300] },
-  { text: '300 - 600m', value: [300, 600] },
+  { text: '50 - 200m', value: [50, 200] },
+  { text: '200 - 400m', value: [200, 400] },
+  { text: '400 - 600m', value: [400, 600] },
   { text: '600 - 1000m', value: [600, 1000] },
   { text: '1000 - 5000m', value: [1000, 5000] },
 ]
@@ -399,12 +257,12 @@ onMounted(async () => {
             >
               <div
                 class="image-container"
-                @mouseenter="dormImageMap[dorm.id] && startCarousel(dorm.id)"
+                @mouseenter="hasDormImages(dorm.id) && startCarousel(dorm.id)"
                 @mouseleave="stopCarousel(dorm.id)"
               >
                 <v-img
                   :src="
-                    dormImageMap[dorm.id]
+                    hasDormImages(dorm.id)
                       ? getActiveImage(dorm)
                       : dorm.image || '/default-dorm-image.jpg'
                   "
@@ -412,7 +270,7 @@ onMounted(async () => {
                   cover
                   :alt="dorm.name"
                 >
-                  <template v-if="dormImageMap[dorm.id]">
+                  <template v-if="hasDormImages(dorm.id)">
                     <div class="carousel-indicator" :class="{ visible: isHovering[dorm.id] }">
                       <span
                         v-for="(_, i) in dormImageMap[dorm.id].gallery"
@@ -474,7 +332,9 @@ onMounted(async () => {
   color: #f8f8e1;
   border-radius: 16px;
   overflow: hidden;
-  height: auto; /* Remove fixed height for better responsiveness */
+  height: 100%; /* Make all cards fill their container */
+  display: flex;
+  flex-direction: column;
 }
 
 .light-card-darkmode {
@@ -493,28 +353,39 @@ onMounted(async () => {
   font-family: 'Nunito', sans-serif !important;
   font-size: 1.25rem !important;
   font-weight: 700 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dorm-subtitle {
   color: #fe4f2d;
   font-family: 'Nunito', sans-serif;
   font-size: 18px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dorm-text {
   color: #f8f8e1 !important;
 }
 
-.responsive-img {
-  height: 180px; /* Default height */
-  transition: opacity 0.5s ease;
-}
-
 .image-container {
   position: relative;
   overflow: hidden;
+  height: 200px; /* Fixed height for images */
+  width: 100%;
 }
 
+.responsive-img {
+  height: 100%;
+  width: 100%;
+  transition: opacity 0.3s ease;
+  object-fit: cover;
+}
+
+/* Improved carousel indicators */
 .carousel-indicator {
   position: absolute;
   bottom: 10px;
@@ -525,6 +396,7 @@ onMounted(async () => {
   gap: 6px;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
 .carousel-indicator.visible {
@@ -540,37 +412,19 @@ onMounted(async () => {
 }
 
 .dot.active {
-  background-color: #0d3a2e;
+  background-color: #ffffff;
   width: 10px;
   border-radius: 3px;
 }
 
-/* Tablet-specific styles */
-@media (min-width: 600px) and (max-width: 959px) {
-  .dorm-card {
-    height: 100%;
-  }
-  .responsive-img {
-    height: 220px;
-  }
-  .dorm-title {
-    font-size: 1.1rem !important;
-  }
-  .dorm-subtitle {
-    font-size: 16px !important;
-  }
+.v-card-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Desktop styles */
 @media (min-width: 960px) {
-  .responsive-img {
-    height: 250px;
-  }
-}
-
-/* Large desktop */
-@media (min-width: 1264px) {
-  .responsive-img {
+  .image-container {
     height: 280px;
   }
 }

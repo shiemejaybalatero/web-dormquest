@@ -1,10 +1,13 @@
+DORM DETAILS
+
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
-import { useTheme } from 'vuetify' // Import useTheme to access theme state
+import { useTheme } from 'vuetify'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import DormitoryReview from '@/components/system/DormitoryReview.vue'
+import { dormImageMap } from '@/stores/dormImages'
 import { supabase } from '@/utils/supabase'
 
 const route = useRoute()
@@ -12,25 +15,25 @@ const router = useRouter()
 const dormId = parseInt(route.params.id)
 const showFacebook = ref(false)
 const showContact = ref(false)
-const showCarousel = ref(false) // Control carousel visibility
-const selectedImageIndex = ref(0) // Track which image was clicked
-const showReviewModal = ref(false) // Added missing declaration
-const ratingStats = ref({ average: 0, count: 0 }) // Added missing declaration
-const dormRatings = ref([]) // Added missing declaration
-
-// Get the Vuetify theme
+const showCarousel = ref(false)
+const selectedImageIndex = ref(0)
+const showReviewModal = ref(false)
+const ratingStats = ref({ average: 0, count: 0 })
+const dormRatings = ref([])
+const searchQuery = ref('')
 const theme = useTheme()
-
-// Determine if dark mode is active
-const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 // Get the store
 const boardingHouseStore = useBoardingHouseStore()
+
+// Determine if dark mode is active
+const isDarkMode = computed(() => theme.global.name.value === 'dark')
 
 // Use a defensive approach to access store properties
 const selectedBoardingHouse = computed(() => boardingHouseStore.selectedBoardingHouse)
 const loading = computed(() => boardingHouseStore.loading)
 const errorMessage = computed(() => boardingHouseStore.errorMessage)
+const allBoardingHouses = computed(() => boardingHouseStore.boardingHouses || [])
 
 // Safe computed property for dorm details
 const dormDetails = computed(() => selectedBoardingHouse.value)
@@ -40,61 +43,6 @@ const displayRating = computed(() => {
   const rating = ratingStats.value.average || (dormDetails.value?.rating ?? 0)
   return rating.toFixed(1)
 })
-
-const dormImageMap = {
-  1: {
-    main: '/Amplayo/amplayomain.png',
-    gallery: [
-      '/Amplayo/amplayo.png',
-      '/Amplayo/amplayo1.jpg',
-      '/Amplayo/amplayo2.png',
-      '/Amplayo/amplayo3.png',
-    ],
-  },
-  2: {
-    main: '/BlueHeaven/bluemain.png',
-    gallery: ['/BlueHeaven/blue.jpg', '/BlueHeaven/blue1.jpg', '/BlueHeaven/blue2.jpg'],
-  },
-  3: {
-    main: '/Blissful/blissfulmain.png',
-    gallery: ['/Blissful/blissful.jpg', '/Blissful/blissful1.jpg', '/Blissful/blissful2.jpg'],
-  },
-  4: {
-    main: '/Licayan/licayanmain.png',
-    gallery: [
-      '/Licayan/licayan.png',
-      '/Licayan/licayan1.png',
-      '/Licayan/licayan2.jpg',
-      '/Licayan/licayan3.jpg',
-    ],
-  },
-  5: {
-    main: '/Chelsea/chelseamain.jpg',
-    gallery: [
-      '/Chelsea/chelsea.jpg',
-      '/Chelsea/chelsea1.jpg',
-      '/Chelsea/chelsea2.jpg',
-      '/Chelsea/chelsea3.jpg',
-    ],
-  },
-  6: {
-    main: '/TGBG/tgbgmain.png',
-    gallery: ['/TGBG/tgbg.png', '/TGBG/tgbg1.png', '/TGBG/tgbg2.png', '/TGBG/tgbg3.png'],
-  },
-  7: {
-    main: '/Magdura/magduramain.png',
-    gallery: [
-      '/Magdura/magdura.png',
-      '/Magdura/magdura1.png',
-      '/Magdura/magdura2.png',
-      '/Magdur3.png',
-    ],
-  },
-  8: {
-    main: '/Karmo/karmomain.jpg',
-    gallery: ['/Karmo/karmo.jpg', '/Karmo/karmo1.jpg', '/Karmo/karmo2.jpg'],
-  },
-}
 
 const defaultMainImage = '/Default/default.jpg'
 const defaultGallery = ['/Default/default.jpg']
@@ -166,12 +114,41 @@ const refetchData = () => {
 const viewOnMap = () => {
   // Navigate to the map page with query parameters to highlight this dorm
   router.push({
-    name: 'map', // The name of your map route in your router configuration
+    name: 'map',
     query: {
-      highlight: dormId, // Pass the dormitory ID as a query parameter
-      fromDetails: true, // Flag to indicate we're coming from details page
+      highlight: dormId,
+      fromDetails: true,
     },
   })
+}
+
+// New function to handle search
+const handleSearch = async (query) => {
+  if (!query.trim()) return
+
+  searchQuery.value = query
+
+  // Make sure we have all boarding houses loaded
+  if (!allBoardingHouses.value.length) {
+    // If not already loaded, fetch all boarding houses
+    await boardingHouseStore.fetchBoardingHouses()
+  }
+
+  // Search for matching dormitory
+  const matchingDorm = allBoardingHouses.value.find((dorm) =>
+    dorm.name.toLowerCase().includes(query.toLowerCase()),
+  )
+
+  if (matchingDorm) {
+    // If we found a match, navigate to its details page
+    router.push({
+      name: 'dorm-details',
+      params: { id: matchingDorm.id },
+    })
+  } else {
+    console.log('No dormitories found matching:', query)
+    // Could show a notification/alert here
+  }
 }
 
 // Handle rating updates from the rating component
@@ -183,8 +160,6 @@ const handleRatingUpdated = (stats) => {
 const handleSubmitRating = (newRating) => {
   console.log('New rating submitted:', newRating)
   dormRatings.value = [newRating, ...dormRatings.value]
-  // You might want to update the boarding house store with the new average rating
-  // boardingHouseStore.updateDormRating(dormId, ratingStats.value.average)
 }
 
 onMounted(() => {
@@ -192,6 +167,11 @@ onMounted(() => {
     console.log(`Mounting DormDetails with ID: ${dormId}`)
     refetchData()
     fetchRatings() // fetch ratings on load
+
+    // Make sure we have all boarding houses loaded for searching
+    if (!allBoardingHouses.value.length) {
+      boardingHouseStore.fetchBoardingHouses()
+    }
   }
 })
 
@@ -203,6 +183,7 @@ watch(
     if (!isNaN(newDormId)) {
       console.log(`Route changed to dorm ID: ${newDormId}`)
       boardingHouseStore.fetchBoardingHouseById(newDormId)
+      fetchRatings() // Refetch ratings when dorm changes
     }
   },
 )
@@ -234,7 +215,7 @@ const closeCarousel = () => {
 </script>
 
 <template>
-  <AppLayout>
+  <AppLayout @search="handleSearch">
     <template #content>
       <!-- Modal Carousel Overlay - only visible when showCarousel is true -->
       <div v-if="showCarousel" class="carousel-overlay">

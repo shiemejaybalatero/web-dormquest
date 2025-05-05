@@ -1,16 +1,18 @@
-// src/stores/mapStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import L from 'leaflet'
+import 'leaflet-routing-machine'
 import { supabase } from '@/utils/supabase'
+import { getRoute, extractRouteCoordinates, getRouteInfo } from './ors'
 
 export const useMapStore = defineStore('map', () => {
   // State
   const map = ref(null)
   const currentMarker = ref(null)
   const currentPath = ref(null)
+  const routingControl = ref(null)
   const currentZoom = ref(10)
-  const referencePoint = [8.9555, 125.597]
+  const referencePoint = [8.957136, 125.598628]
   const referenceMarker = ref(null)
   const boardingHouses = ref([])
   const isLoading = ref(true)
@@ -299,14 +301,189 @@ export const useMapStore = defineStore('map', () => {
     })
   }
 
-  const drawPath = (fromCoords, toCoords) => {
+  // Updated drawPath function to create more realistic paths
+  const drawPath = async (fromCoords, toCoords) => {
     // Close any open popups before drawing the path
     if (map.value) map.value.closePopup()
 
-    if (currentPath.value && map.value) {
-      map.value.removeLayer(currentPath.value)
+    // Remove existing path and routing control
+    clearPath()
+
+    // Show loading indicator
+    isLoading.value = true
+
+    try {
+      // Set the profile to 'foot-walking' for more realistic pedestrian paths
+      // You can also use 'driving-car' for vehicle routes if needed
+      const routeData = await getRoute(fromCoords, toCoords, 'foot-walking', {
+        // Add parameters to improve path quality
+        preference: 'shortest', // Use 'shortest' instead of 'recommended' for simpler paths
+        instructions: false, // We don't need turn-by-turn instructions
+        continue_straight: true, // Try to avoid unnecessary turns
+      })
+
+      // Extract coordinates from the response
+      const routeCoordinates = extractRouteCoordinates(routeData)
+
+      // Get route information (distance and duration)
+      const { duration, distanceText } = getRouteInfo(routeData)
+
+      if (routeCoordinates.length === 0) {
+        throw new Error('No route found')
+      }
+
+      // Simplify route coordinates to make the path less complex
+      const simplifiedCoordinates = simplifyPath(routeCoordinates, 0.0001)
+
+      // Create a polyline from the simplified route coordinates
+      currentPath.value = L.polyline(simplifiedCoordinates, {
+        color: '#ff6b6b',
+        weight: 5,
+        opacity: 0.8,
+        lineJoin: 'round',
+        lineCap: 'round',
+      }).addTo(map.value)
+
+      // Calculate center point for popup
+      const centerIndex = Math.floor(simplifiedCoordinates.length / 2)
+      const centerPoint = simplifiedCoordinates[centerIndex]
+
+      // Show route information in a popup with distance in appropriate units
+      L.popup()
+        .setLatLng(L.latLng(centerPoint[0], centerPoint[1]))
+        .setContent(
+          `
+          <div style="text-align: center;">
+            <h4 style="margin: 0 0 8px 0;">Route Information</h4>
+            <p><strong>Distance:</strong> ${distanceText}</p>
+            <p><strong>Estimated Time:</strong> ${duration} min</p>
+          </div>
+        `,
+        )
+        .openOn(map.value)
+
+      // Add arrow decorations to indicate direction
+      addPathDirectionMarkers(simplifiedCoordinates)
+
+      // Fit the bounds with some padding
+      const bounds = L.latLngBounds(simplifiedCoordinates)
+      map.value.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 16,
+      })
+
+      isLoading.value = false
+
+      // Return route info for potential use elsewhere
+      return {
+        distance: distanceText,
+        duration: duration,
+      }
+    } catch (err) {
+      console.error('Error getting route:', err)
+      isLoading.value = false
+      error.value = `Could not calculate route: ${err.message || 'Unknown error'}`
+
+      // Fall back to a simple direct path if routing fails
+      fallbackToDirectPath(fromCoords, toCoords)
+
+      // Show error message for 3 seconds
+      setTimeout(() => {
+        error.value = null
+      }, 3000)
+
+      return null
+    }
+  }
+
+  // Helper function to simplify path coordinates using the Douglas-Peucker algorithm
+  const simplifyPath = (points, tolerance) => {
+    if (points.length <= 2) return points
+
+    // Calculate the perpendicular distance from a point to a line
+    const perpendicularDistance = (p, p1, p2) => {
+      const [x, y] = p
+      const [x1, y1] = p1
+      const [x2, y2] = p2
+
+      // Line equation: ax + by + c = 0
+      const a = y1 - y2
+      const b = x2 - x1
+      const c = x1 * y2 - x2 * y1
+
+      // Distance = |ax + by + c| / sqrt(a² + b²)
+      return Math.abs(a * x + b * y + c) / Math.sqrt(a * a + b * b)
     }
 
+    // Find the point with the maximum distance
+    let maxDistance = 0
+    let index = 0
+
+    for (let i = 1; i < points.length - 1; i++) {
+      const distance = perpendicularDistance(points[i], points[0], points[points.length - 1])
+      if (distance > maxDistance) {
+        maxDistance = distance
+        index = i
+      }
+    }
+
+    // If max distance is greater than tolerance, recursively simplify
+    if (maxDistance > tolerance) {
+      const firstPath = simplifyPath(points.slice(0, index + 1), tolerance)
+      const secondPath = simplifyPath(points.slice(index), tolerance)
+
+      // Combine results (avoiding duplicate points)
+      return [...firstPath.slice(0, -1), ...secondPath]
+    } else {
+      // If all points are below tolerance, return just the endpoints
+      return [points[0], points[points.length - 1]]
+    }
+  }
+
+  // Add direction markers to show path direction
+  const addPathDirectionMarkers = (coordinates) => {
+    if (coordinates.length < 2 || !map.value || !currentPath.value) return
+
+    // Add an arrowhead in the middle of the path
+    if (coordinates.length >= 3) {
+      const midIndex = Math.floor(coordinates.length / 2)
+      const point1 = L.latLng(coordinates[midIndex - 1][0], coordinates[midIndex - 1][1])
+      const point2 = L.latLng(coordinates[midIndex][0], coordinates[midIndex][1])
+
+      // Get bearing between points
+      const bearing = getBearing(point1, point2)
+
+      // Create arrow marker
+      const arrowIcon = L.divIcon({
+        html: `<div style="transform: rotate(${bearing}deg); font-size: 24px; color: #ff6b6b;">→</div>`,
+        className: 'path-direction-marker',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      })
+
+      // Add marker to map
+      L.marker(point2, { icon: arrowIcon }).addTo(map.value)
+    }
+  }
+
+  // Calculate bearing between two points (for arrow direction)
+  const getBearing = (point1, point2) => {
+    const lat1 = (point1.lat * Math.PI) / 180
+    const lat2 = (point2.lat * Math.PI) / 180
+    const lng1 = (point1.lng * Math.PI) / 180
+    const lng2 = (point2.lng * Math.PI) / 180
+
+    const y = Math.sin(lng2 - lng1) * Math.cos(lat2)
+    const x =
+      Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+
+    const bearing = (Math.atan2(y, x) * 180) / Math.PI
+    return (bearing + 360) % 360
+  }
+
+  // Fallback to a simpler path when routing fails
+  const fallbackToDirectPath = (fromCoords, toCoords) => {
+    // Create a dashed line between the two points
     currentPath.value = L.polyline([fromCoords, toCoords], {
       color: '#ff6b6b',
       weight: 4,
@@ -315,19 +492,53 @@ export const useMapStore = defineStore('map', () => {
       lineJoin: 'round',
     }).addTo(map.value)
 
-    // Use animate: false to prevent the conflict during animation
-    map.value.fitBounds(currentPath.value.getBounds(), {
+    // Add a simple popup with straight-line distance
+    const distance = calculateDistance(fromCoords, toCoords)
+
+    // Place popup in the middle of the line
+    const midLat = (fromCoords[0] + toCoords[0]) / 2
+    const midLng = (fromCoords[1] + toCoords[1]) / 2
+
+    L.popup()
+      .setLatLng([midLat, midLng])
+      .setContent(
+        `
+        <div style="text-align: center;">
+          <h4 style="margin: 0 0 8px 0;">Direct Distance</h4>
+          <p><strong>Distance:</strong> ${distance}</p>
+          <p><small>(Detailed routing unavailable)</small></p>
+        </div>
+        `,
+      )
+      .openOn(map.value)
+
+    // Fit the bounds
+    map.value.fitBounds(L.latLngBounds([fromCoords, toCoords]), {
       padding: [50, 50],
       maxZoom: 16,
-      animate: false, // This prevents the error
     })
   }
 
   const clearPath = () => {
+    // Remove routing control if it exists (keeping for compatibility)
+    if (routingControl.value && map.value) {
+      map.value.removeControl(routingControl.value)
+      routingControl.value = null
+    }
+
+    // Remove the old polyline if it exists
     if (currentPath.value && map.value) {
       map.value.removeLayer(currentPath.value)
       currentPath.value = null
     }
+
+    // Remove any direction markers
+    document.querySelectorAll('.path-direction-marker').forEach((marker) => {
+      if (marker._leaflet_id && map.value) {
+        const layer = map.value._layers[marker._leaflet_id]
+        if (layer) map.value.removeLayer(layer)
+      }
+    })
   }
 
   const zoomIn = () => {
@@ -362,13 +573,14 @@ export const useMapStore = defineStore('map', () => {
 
   // Clean up function
   const cleanup = () => {
+    clearPath()
+
     if (map.value) {
       map.value.remove()
       map.value = null
     }
     markers.value = []
     currentMarker.value = null
-    currentPath.value = null
     referenceMarker.value = null
   }
 
@@ -377,6 +589,7 @@ export const useMapStore = defineStore('map', () => {
     map,
     currentMarker,
     currentPath,
+    routingControl,
     currentZoom,
     referencePoint,
     referenceMarker,
