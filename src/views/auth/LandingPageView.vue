@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+// No need to import - using public folder path directly
+</script>
 
 <template>
   <v-container fluid class="fill-height d-flex flex-column align-center justify-center bg-image">
