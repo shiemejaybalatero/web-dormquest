@@ -7,7 +7,8 @@ import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import { useTheme } from 'vuetify'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import DormitoryReview from '@/components/system/DormitoryReview.vue'
-import { dormImageMap } from '@/stores/dormImages'
+import { dormImageMap, hasDormImages } from '@/stores/DormImages.js'
+
 import { supabase } from '@/utils/supabase'
 
 const route = useRoute()

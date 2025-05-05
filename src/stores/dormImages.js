@@ -137,3 +137,5 @@ export const getGalleryImages = (dormId) => {
 export const hasDormImages = (dormId) => {
   return !!dormImageMap[dormId]
 }
+
+// Trigger git to track this file

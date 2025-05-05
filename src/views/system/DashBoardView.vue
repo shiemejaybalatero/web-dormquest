@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router'
 import { useBoardingHouseStore } from '@/stores/boardingHouse'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
-import { dormImageMap, hasDormImages } from '@/stores/dormImages'
+import { dormImageMap, hasDormImages } from '@/stores/DormImages.js'
 
 const router = useRouter()
 const boardingHouseStore = useBoardingHouseStore()
