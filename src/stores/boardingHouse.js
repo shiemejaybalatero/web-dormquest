@@ -1,4 +1,3 @@
-// stores/boardingHouse.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/utils/supabase'
@@ -31,10 +30,9 @@ export const useBoardingHouseStore = defineStore('boardingHouse', () => {
       boardingHouses.value = data.map((house) => ({
         ...house,
         // Add a default distance since the column doesn't exist in the database
-        distance: 1, // Set default distance to 1km for all dormitories
+        distance: 1,
         // Ensure price is always present
         price: house.price !== undefined ? house.price : 0,
-        rating: '4.5',
         availability: `₱${house.price || 'N/A'} per month`,
       }))
 

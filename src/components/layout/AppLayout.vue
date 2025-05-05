@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, defineEmits } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { supabase, formActionDefault } from '@/utils/supabase'
@@ -11,9 +11,12 @@ const router = useRouter()
 const theme = useTheme()
 const searchQuery = ref('')
 const showScrollTop = ref(false)
-const mainContent = ref(null)
+const mainContent = ref(null) // Ref to the v-main element
 const drawer = ref(false)
 const formAction = ref({ ...formActionDefault })
+
+// Define emits
+const emit = defineEmits(['search'])
 
 // Theme control
 const isDarkMode = ref(theme.global.name.value === 'dark')
@@ -38,6 +41,11 @@ function updateThemeColors() {
   }
 }
 
+// Watch for changes in the search query and emit search event
+watch(searchQuery, (newValue) => {
+  emit('search', newValue)
+})
+
 // Function for theme toggle
 const toggleTheme = () => {
   theme.global.name.value = theme.global.name.value === 'light' ? 'dark' : 'light'
@@ -54,22 +62,38 @@ watch(
   },
 )
 
+// Fixed handleScroll function with proper element check
 const handleScroll = () => {
+  // First check if mainContent ref exists
   if (!mainContent.value) return
 
-  // Check for both window and component scrolling
-  if (mainContent.value.$el) {
-    const scrollTop = mainContent.value.$el.scrollTop
-    showScrollTop.value = scrollTop > 300
-  } else {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  // Check if we have access to the DOM element
+  const element = mainContent.value.$el || mainContent.value
+
+  if (element) {
+    // For v-main component, use its scrollTop
+    const scrollTop =
+      typeof element.scrollTop !== 'undefined'
+        ? element.scrollTop
+        : window.pageYOffset || document.documentElement.scrollTop
+
     showScrollTop.value = scrollTop > 300
   }
 }
 
+// Fixed scrollToTop function
 const scrollToTop = () => {
-  if (mainContent.value && mainContent.value.$el) {
-    mainContent.value.$el.scrollTo({ top: 0, behavior: 'smooth' })
+  if (mainContent.value) {
+    const element = mainContent.value.$el || mainContent.value
+
+    if (element && typeof element.scrollTo === 'function') {
+      element.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    }
   } else {
     window.scrollTo({
       top: 0,
@@ -81,15 +105,21 @@ const scrollToTop = () => {
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
 
-  const { error } = await supabase.auth.signOut()
+  try {
+    const { error } = await supabase.auth.signOut()
 
-  if (error) {
-    console.error('Error during logout:', error)
-    return
+    if (error) {
+      console.error('Error during logout:', error)
+      formAction.value.formProcess = false
+      return
+    }
+
+    formAction.value.formProcess = false
+    router.replace('/')
+  } catch (err) {
+    console.error('Exception during logout:', err)
+    formAction.value.formProcess = false
   }
-
-  formAction.value.formProcess = false
-  router.replace('/')
 }
 
 // Handle profile update event
@@ -103,24 +133,38 @@ onMounted(async () => {
   // Load user profile data
   await fetchUserProfile()
 
-  // Add scroll event listeners
-  if (mainContent.value && mainContent.value.$el) {
-    mainContent.value.$el.addEventListener('scroll', handleScroll)
-  }
-  window.addEventListener('scroll', handleScroll)
-
-  // Check initial scroll position
-  handleScroll()
-
-  // Initialize theme colors
+  // Initialize theme colors first
   updateThemeColors()
+
+  // Add scroll event listeners after a brief delay to ensure DOM is ready
+  setTimeout(() => {
+    // Check if mainContent.value exists and has the DOM element
+    if (mainContent.value) {
+      const element = mainContent.value.$el || mainContent.value
+
+      if (element && typeof element.addEventListener === 'function') {
+        element.addEventListener('scroll', handleScroll)
+      }
+    }
+
+    // Always add window scroll listener as fallback
+    window.addEventListener('scroll', handleScroll)
+
+    // Check initial scroll position
+    handleScroll()
+  }, 100)
 })
 
 onBeforeUnmount(() => {
   // Clean up event listeners when component is unmounted
-  if (mainContent.value && mainContent.value.$el) {
-    mainContent.value.$el.removeEventListener('scroll', handleScroll)
+  if (mainContent.value) {
+    const element = mainContent.value.$el || mainContent.value
+
+    if (element && typeof element.removeEventListener === 'function') {
+      element.removeEventListener('scroll', handleScroll)
+    }
   }
+
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
@@ -171,7 +215,7 @@ onBeforeUnmount(() => {
 
       <v-spacer />
       <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 me-15 d-none d-lg-block" />
-      <v-img src="/23.png" alt="Logo" max-width="50" class="mr-6 logo1 d-block d-lg-none" />
+      <v-img src="/23.png" alt="Logo" max-width="40" class="mr-4 logo1 d-block d-lg-none" />
     </v-app-bar>
 
     <v-main
@@ -196,7 +240,6 @@ onBeforeUnmount(() => {
                 variant="outlined"
                 rounded
                 hide-details
-                @update:model-value="$emit('search', $event)"
                 clearable
                 density="comfortable"
               />
@@ -351,7 +394,7 @@ onBeforeUnmount(() => {
 }
 
 .gradient-app-bar {
-  background-color: #0c3b2e;
+  background: #0c3b2e;
   color: #000;
 }
 
@@ -435,6 +478,11 @@ onBeforeUnmount(() => {
   flex-wrap: nowrap;
 }
 
+.action-buttons {
+  display: flex;
+  align-items: center;
+}
+
 @media (max-width: 600px) {
   .filter-row {
     flex-direction: row;
@@ -449,12 +497,27 @@ onBeforeUnmount(() => {
     bottom: 70px;
     right: 15px;
   }
+
+  .search-wrapper {
+    flex-direction: column;
+  }
+
+  .search-field {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 768px) {
   .search-wrapper {
-    justify-content: flex-start; /* Align left on large screens */
-    margin-left: 25%;
+    justify-content: center;
+    text-align: center;
   }
 }
 </style>

@@ -1,4 +1,3 @@
-// src/stores/userStore.js
 import { ref } from 'vue'
 import { supabase } from '@/utils/supabase'
 import { getAvatarText, calculateAge } from '@/utils/helper'
