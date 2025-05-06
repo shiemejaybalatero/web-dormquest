@@ -150,13 +150,12 @@ const onLogout = async () => {
 .sidebar-light {
   background: #0c3b2e;
   border-radius: 16px;
-  min-height: 65vh;
+  min-height: 45vh;
 }
 
 .sidebar-dark {
   background: #0a2e23;
   border-radius: 16px;
-  min-height: 65vh;
 }
 
 .selected-light,
@@ -176,14 +175,5 @@ const onLogout = async () => {
 
 .text-white {
   color: white;
-}
-
-.sidebar {
-  position: sticky;
-  top: 20px;
-  align-self: flex-start;
-  border-radius: 16px;
-  padding: 16px;
-  box-sizing: border-box;
 }
 </style>

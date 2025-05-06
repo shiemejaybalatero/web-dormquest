@@ -231,7 +231,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* Base Styles */
 .full-map-container {
   width: 100%;
   height: 100vh;
@@ -246,17 +245,14 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-/* Light Theme Styles */
 .light-theme {
   background-color: #ffffff;
 }
 
-/* Dark Theme Styles */
 .dark-theme {
   background-color: #121212;
 }
 
-/* Button Container */
 .button-container {
   position: absolute;
   bottom: 40px;
@@ -267,7 +263,6 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
-/* Map Buttons - Light Mode */
 .map-button {
   background-color: #0c3b2e;
   color: white;
@@ -296,7 +291,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Map Buttons - Dark Mode */
 .dark-button {
   background-color: #0a2e23;
   color: #ffffff;
@@ -335,7 +329,6 @@ onBeforeUnmount(() => {
   background-color: #f05252;
 }
 
-/* Route Info Panel - Light Mode */
 .route-info-panel {
   position: absolute;
   top: 20px;
@@ -349,7 +342,6 @@ onBeforeUnmount(() => {
   border-left: 4px solid #ff6b6b;
 }
 
-/* Route Info Panel - Dark Mode */
 .dark-route-info {
   background-color: #1d3731;
   color: white;
@@ -391,7 +383,6 @@ onBeforeUnmount(() => {
   color: #ff6b6b;
 }
 
-/* Loading Overlay - Light Mode */
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -406,7 +397,6 @@ onBeforeUnmount(() => {
   z-index: 1001;
 }
 
-/* Loading Overlay - Dark Mode */
 .dark-loading {
   background-color: rgba(18, 18, 18, 0.8);
 }
@@ -436,7 +426,6 @@ onBeforeUnmount(() => {
   color: #ffba00;
 }
 
-/* Error Message - Light Mode */
 .error-message {
   position: absolute;
   top: 20px;
@@ -456,7 +445,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Error Message - Dark Mode */
 .dark-error {
   background-color: #4c1d1d;
   border: 1px solid #b91c1c;
@@ -487,7 +475,6 @@ onBeforeUnmount(() => {
   margin-left: 5px;
 }
 
-/* Map Controls - Light Mode */
 .map-controls {
   position: absolute;
   top: 80px;
@@ -514,7 +501,6 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
 }
 
-/* Map Controls - Dark Mode */
 .dark-control {
   background-color: #1d3731;
   color: #ffba00;
@@ -531,7 +517,6 @@ onBeforeUnmount(() => {
   background-color: #2d4f47;
 }
 
-/* Map Legend - Light Mode */
 .map-legend {
   position: absolute;
   bottom: 40px;
@@ -545,7 +530,6 @@ onBeforeUnmount(() => {
   width: 180px;
 }
 
-/* Map Legend - Dark Mode */
 .dark-legend {
   background-color: rgba(29, 55, 49, 0.9);
   border: 1px solid #2d4f47;
@@ -611,12 +595,6 @@ onBeforeUnmount(() => {
   .map-button {
     padding: 10px 15px;
     font-size: 14px;
-  }
-
-  .map-legend {
-    bottom: 20px;
-    left: 10px;
-    width: 150px;
   }
 
   .route-info-panel {
