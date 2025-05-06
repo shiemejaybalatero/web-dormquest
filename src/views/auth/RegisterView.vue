@@ -174,7 +174,7 @@ onMounted(() => {
           />
 
           <v-col cols="12" class="pa-0">
-            <v-label class="text-caption mt-1 mb-1 field-label">Birthdate</v-label>
+            <v-label class="text-caption mt-1 mb-1 field-label"><i>Birthdate</i></v-label>
             <v-menu
               v-model="birthdayMenu"
               :close-on-content-click="false"
@@ -222,7 +222,7 @@ onMounted(() => {
             <v-label class="text-caption field-label"><i>Gender</i></v-label>
             <v-radio-group
               v-model="formData.gender"
-              class="mb-n4"
+              class="mb-n4 mt-n2"
               inline
               :rules="[requiredValidator]"
             >
