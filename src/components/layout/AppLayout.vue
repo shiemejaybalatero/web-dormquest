@@ -231,7 +231,7 @@ onBeforeUnmount(() => {
         <template v-if="route.path !== '/map'">
           <v-container fluid>
             <!-- Search & Buttons -->
-            <div class="d-flex align-center search-wrapper mt-3 mb-4">
+            <div class="search-wrapper mt-3 mb-4">
               <v-text-field
                 v-model="searchQuery"
                 placeholder="Search for dormitories or boarding house"
@@ -499,7 +499,7 @@ onBeforeUnmount(() => {
   }
 
   .search-wrapper {
-    flex-direction: column;
+    flex-direction: column-reverse; /* This puts action-buttons on top and search field below */
   }
 
   .search-field {
@@ -511,6 +511,7 @@ onBeforeUnmount(() => {
   .action-buttons {
     width: 100%;
     justify-content: space-between;
+    margin-bottom: 10px;
   }
 }
 
