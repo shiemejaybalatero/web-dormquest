@@ -61,6 +61,16 @@ onMounted(() => {
   buttons.value.forEach((button) => {
     button.addEventListener('click', handleActiveState)
   })
+
+  // Apply custom styling to autofilled input fields
+  const inputs = document.querySelectorAll('input')
+  inputs.forEach((input) => {
+    input.addEventListener('animationstart', (e) => {
+      if (e.animationName === 'autofill') {
+        input.parentElement.classList.add('autofilled')
+      }
+    })
+  })
 })
 
 onUnmounted(() => {
@@ -97,8 +107,10 @@ onUnmounted(() => {
             dense
             outlined
             hide-details
-            class="mb-2"
+            class="mb-2 form-field"
             :rules="[requiredValidator, emailValidator]"
+            background-color="#0c3b2e"
+            dark
           />
           <v-text-field
             v-model="formData.password"
@@ -108,8 +120,10 @@ onUnmounted(() => {
             dense
             outlined
             hide-details
-            class="mb-4"
+            class="mb-4 form-field"
             :rules="[requiredValidator]"
+            background-color="#0c3b2e"
+            dark
           />
           <!-- Button -->
           <v-btn class="login-button w-100 py-2" color="transparent" @click="onFormSubmit"
@@ -201,5 +215,42 @@ h1 {
 
 .stext {
   color: #0c3b2e;
+}
+
+/* Fix autofill background color */
+:deep(.v-field__input:-webkit-autofill),
+:deep(.v-field__input:-webkit-autofill:hover),
+:deep(.v-field__input:-webkit-autofill:focus),
+:deep(.v-field__input:-webkit-autofill:active) {
+  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0 30px #0c3b2e inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+:deep(.form-field) {
+  --v-theme-surface: #0c3b2e !important;
+}
+
+:deep(.v-field__outline) {
+  opacity: 1 !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+@keyframes autofill {
+  from {
+    background: transparent;
+  }
+  to {
+    background: transparent;
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: autofill;
+  animation-fill-mode: both;
+}
+
+:deep(.autofilled) {
+  background-color: #0c3b2e !important;
 }
 </style>

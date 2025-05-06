@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { supabase, formActionDefault } from '@/utils/supabase'
 import {
   requiredValidator,
@@ -16,6 +16,7 @@ const router = useRouter()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const refVForm = ref()
+const birthdayMenu = ref(false)
 
 const formDataDefault = {
   firstname: '',
@@ -72,11 +73,16 @@ const onFormSubmit = () => {
   })
 }
 
-const formattedBirthday = computed(() => {
-  if (formData.value.birthday) {
-    return dayjs(formData.value.birthday).format('MMMM D, YYYY')
-  }
-  return ''
+const formattedBirthday = computed({
+  get: () => {
+    if (formData.value.birthday) {
+      return dayjs(formData.value.birthday).format('MMMM D, YYYY')
+    }
+    return ''
+  },
+  set: (val) => {
+    if (!val) formData.value.birthday = ''
+  },
 })
 
 function handleActiveState(event) {
@@ -86,6 +92,18 @@ function handleActiveState(event) {
     button.classList.remove('active-tap')
   }, 150)
 }
+
+onMounted(() => {
+  // Apply custom styling to autofilled input fields
+  const inputs = document.querySelectorAll('input')
+  inputs.forEach((input) => {
+    input.addEventListener('animationstart', (e) => {
+      if (e.animationName === 'autofill') {
+        input.parentElement.classList.add('autofilled')
+      }
+    })
+  })
+})
 </script>
 
 <template>
@@ -120,6 +138,9 @@ function handleActiveState(event) {
                 hide-details
                 density="comfortable"
                 :rules="[requiredValidator]"
+                background-color="#0a3327"
+                dark
+                class="form-field"
               />
             </v-col>
             <v-col cols="12" sm="6" class="pa-0 pl-1">
@@ -131,6 +152,9 @@ function handleActiveState(event) {
                 hide-details
                 density="comfortable"
                 :rules="[requiredValidator]"
+                background-color="#0a3327"
+                dark
+                class="form-field"
               />
             </v-col>
           </v-row>
@@ -141,28 +165,58 @@ function handleActiveState(event) {
             type="email"
             variant="outlined"
             color="green"
-            class="pb-2 pt-2"
+            class="pb-2 pt-2 form-field"
             hide-details
             density="comfortable"
             :rules="[requiredValidator, emailValidator]"
+            background-color="#0a3327"
+            dark
           />
 
           <v-col cols="12" class="pa-0">
-            <v-label class="text-caption mt-1 mb-1 field-label"><i>Birthdate</i></v-label>
-            <v-text-field
-              v-model="formData.birthday"
-              type="date"
-              color="green"
-              variant="outlined"
-              density="comfortable"
-              :rules="[requiredValidator]"
-              class="w-100"
-            />
+            <v-label class="text-caption mt-1 mb-1 field-label">Birthdate</v-label>
+            <v-menu
+              v-model="birthdayMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              min-width="auto"
+            >
+              <template v-slot:activator="{ props }">
+                <v-text-field
+                  v-model="formattedBirthday"
+                  prepend-inner-icon="mdi-calendar"
+                  readonly
+                  v-bind="props"
+                  color="green"
+                  variant="outlined"
+                  density="comfortable"
+                  class="w-100 birthdate-field"
+                  :rules="[requiredValidator]"
+                  placeholder="Select your birthday"
+                  clearable
+                  @click:clear="formData.birthday = ''"
+                />
+              </template>
+              <v-date-picker
+                v-model="formData.birthday"
+                @update:model-value="birthdayMenu = false"
+                color="#ffba00"
+                header-color="#0c3b2e"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1920-01-01"
+              >
+                <template v-slot:header="{ title }">
+                  <div class="date-picker-header">
+                    <v-btn icon @click="birthdayMenu = false" color="#ffba00">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <div class="header-title">{{ title }}</div>
+                    <div></div>
+                  </div>
+                </template>
+              </v-date-picker>
+            </v-menu>
           </v-col>
-
-          <div v-if="formattedBirthday" class="calendar text-white text-caption mt-n5 mb-3">
-            📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
-          </div>
 
           <v-col cols="12" class="pa-0 mt-n2">
             <v-label class="text-caption field-label"><i>Gender</i></v-label>
@@ -192,6 +246,9 @@ function handleActiveState(event) {
             counter
             @click:append-inner="showPassword = !showPassword"
             :rules="[requiredValidator, passwordValidator]"
+            background-color="#0a3327"
+            dark
+            class="form-field"
           />
 
           <!-- Confirm Password -->
@@ -211,6 +268,9 @@ function handleActiveState(event) {
               requiredValidator,
               confirmedValidator(formData.password_confirmation, formData.password),
             ]"
+            background-color="#0a3327"
+            dark
+            class="form-field"
           />
 
           <!-- Register Button -->
@@ -311,5 +371,112 @@ h1 {
   margin-top: 8px;
   margin-bottom: 4px;
   color: rgba(255, 255, 255, 0.7);
+}
+
+.date-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #0c3b2e;
+  color: #ffba00;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Add birthdate field specific styles */
+.birthdate-field {
+  --v-theme-surface: transparent !important;
+}
+
+:deep(.birthdate-field .v-field__input) {
+  background-color: transparent !important;
+  color: white !important;
+  min-height: 40px !important;
+}
+
+:deep(.birthdate-field .v-field__outline) {
+  opacity: 1 !important;
+  color: #2b806a !important;
+  border-width: 1px !important;
+}
+
+:deep(.v-date-picker-month) {
+  background-color: white;
+}
+
+:deep(.v-date-picker-header) {
+  background-color: #0c3b2e;
+  color: white;
+}
+
+:deep(.v-date-picker-controls .v-btn) {
+  color: #ffba00;
+}
+
+:deep(.v-date-picker-month__day--selected) {
+  background-color: #ffba00 !important;
+}
+
+:deep(.v-date-picker) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Original form field styles */
+:deep(.form-field) {
+  --v-theme-surface: #0a3327 !important;
+}
+
+:deep(.v-field__outline) {
+  opacity: 1 !important;
+  color: #2b806a !important;
+  border-width: 1px !important;
+}
+
+:deep(.v-field__field) {
+  color: white !important;
+}
+
+:deep(.v-field__input) {
+  color: white !important;
+  background-color: #0a3327 !important;
+  min-height: 40px !important;
+}
+
+:deep(.v-label) {
+  color: #6bc4a8 !important;
+  opacity: 0.9;
+}
+
+/* Fix autofill background color */
+:deep(.v-field__input:-webkit-autofill),
+:deep(.v-field__input:-webkit-autofill:hover),
+:deep(.v-field__input:-webkit-autofill:focus),
+:deep(.v-field__input:-webkit-autofill:active) {
+  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0 30px #0a3327 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+@keyframes autofill {
+  from {
+    background: transparent;
+  }
+  to {
+    background: transparent;
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: autofill;
+  animation-fill-mode: both;
+}
+
+:deep(.autofilled) {
+  background-color: #0a3327 !important;
 }
 </style>
