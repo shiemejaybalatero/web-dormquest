@@ -88,7 +88,7 @@ watch(
       profileForm.value.fullname = newData.fullname || ''
       profileForm.value.birthday = newData.birthday || ''
       profileForm.value.gender = newData.gender || ''
-      emailForm.value.newEmail = newData.email || ''
+      // REMOVED: emailForm.value.newEmail = newData.email || ''
     }
   },
   { immediate: true },
@@ -103,7 +103,7 @@ const handleFileUpload = (e) => {
 const resetForms = () => {
   // Reset all forms to initial state
   emailForm.value.currentPassword = ''
-  emailForm.value.newEmail = props.userData?.email || ''
+  emailForm.value.newEmail = '' // Always empty, not pre-filled
 
   passwordForm.value.currentPassword = ''
   passwordForm.value.newPassword = ''
@@ -147,6 +147,12 @@ const updateEmail = async () => {
     return
   }
 
+  // Add this check to prevent setting the same email
+  if (emailForm.value.newEmail === props.userData?.email) {
+    editError.value = 'New email must be different from your current email'
+    return
+  }
+
   isSaving.value = true
   editError.value = ''
   successMessage.value = ''
@@ -159,6 +165,7 @@ const updateEmail = async () => {
   if (result.success) {
     successMessage.value = 'Email updated successfully! You may need to verify your new email.'
     emailForm.value.currentPassword = ''
+    emailForm.value.newEmail = ''
     emit('profile-updated')
   } else {
     editError.value = result.error || 'Failed to update email'
