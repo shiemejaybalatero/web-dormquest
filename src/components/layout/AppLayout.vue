@@ -323,11 +323,14 @@ onBeforeUnmount(() => {
                         <h3>{{ userProfile.fullname }}</h3>
                         <p class="text-caption mt-1">{{ userProfile.email }}</p>
                         <v-divider class="my-3" />
-                        <router-link to="/profile" class="no-underline">
-                          <v-btn variant="text" rounded class="mx-1 personal-info">
-                            Personal Information
-                          </v-btn>
-                        </router-link>
+                        <v-btn
+                          variant="text"
+                          rounded
+                          class="mx-1 text-btn"
+                          @click="$router.push('/profile')"
+                        >
+                          Personal Information
+                        </v-btn>
                         <v-divider class="my-3" />
                         <v-btn variant="text" rounded @click="showProfileEditDialog = true">
                           Edit Account
@@ -466,6 +469,11 @@ onBeforeUnmount(() => {
 
 .personal-info {
   text-decoration: none;
+  color: inherit;
+}
+
+.text-btn {
+  color: inherit !important;
 }
 
 .no-underline {
@@ -492,14 +500,13 @@ onBeforeUnmount(() => {
     flex: 1 1 0;
   }
 
-  /* Adjust scroll-top button position on mobile */
   .scroll-top-btn {
     bottom: 70px;
     right: 15px;
   }
 
   .search-wrapper {
-    flex-direction: column-reverse; /* This puts action-buttons on top and search field below */
+    flex-direction: column-reverse;
   }
 
   .search-field {
