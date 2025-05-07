@@ -118,8 +118,9 @@ const profileFields = computed(() => [
                               'field-value',
                               isDarkMode ? 'value-dark border-white' : 'value-light border-black',
                             ]"
+                            :title="field.value"
                           >
-                            {{ field.value }}
+                            <span class="text-truncate d-block">{{ field.value }}</span>
                           </div>
                         </v-col>
                       </v-row>
@@ -249,5 +250,13 @@ const profileFields = computed(() => [
   min-height: 45px;
   display: flex;
   align-items: center;
+  overflow: hidden;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 </style>

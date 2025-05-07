@@ -47,7 +47,7 @@ const onSubmit = async () => {
         lastname: formData.value.lastname,
         birthday: formData.value.birthday,
         gender: formData.value.gender,
-        age: age, // Add the calculated age here
+        age: age,
       },
     },
   })
