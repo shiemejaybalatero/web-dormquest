@@ -1,5 +1,3 @@
-DORM DETAILS
-
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -281,7 +279,7 @@ const closeCarousel = () => {
                     <v-img
                       :src="img"
                       height="170"
-                      class="rounded cursor-pointer hover-effect d-none d-sm-flex"
+                      class="rounded cursor-pointer hover-effect"
                       cover
                       @click="openCarouselWithGalleryImage(index)"
                     />

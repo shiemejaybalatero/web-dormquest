@@ -128,8 +128,8 @@ onMounted(() => {
         ></AlertNotification>
 
         <v-form ref="refVForm" @submit.prevent="onFormSubmit">
-          <v-row class="ma-0 pb-2">
-            <v-col cols="12" sm="6" class="pa-0 pr-1">
+          <v-row dense class="ma-0">
+            <v-col cols="12" sm="6" class="pa-0 pr-sm-1">
               <v-text-field
                 v-model="formData.firstname"
                 label="First Name"
@@ -140,10 +140,10 @@ onMounted(() => {
                 :rules="[requiredValidator]"
                 background-color="#0a3327"
                 dark
-                class="form-field"
+                class="form-field mb-3"
               />
             </v-col>
-            <v-col cols="12" sm="6" class="pa-0 pl-1">
+            <v-col cols="12" sm="6" class="pa-0 pl-sm-1">
               <v-text-field
                 v-model="formData.lastname"
                 label="Last Name"
@@ -154,7 +154,7 @@ onMounted(() => {
                 :rules="[requiredValidator]"
                 background-color="#0a3327"
                 dark
-                class="form-field"
+                class="form-field mb-3"
               />
             </v-col>
           </v-row>
@@ -165,7 +165,7 @@ onMounted(() => {
             type="email"
             variant="outlined"
             color="green"
-            class="pb-2 pt-2 form-field"
+            class="mb-3 form-field"
             hide-details
             density="comfortable"
             :rules="[requiredValidator, emailValidator]"
@@ -190,7 +190,7 @@ onMounted(() => {
                   color="green"
                   variant="outlined"
                   density="comfortable"
-                  class="w-100 birthdate-field"
+                  class="w-100 birthdate-field mb-3"
                   :rules="[requiredValidator]"
                   placeholder="Select your birthday"
                   clearable
@@ -218,11 +218,11 @@ onMounted(() => {
             </v-menu>
           </v-col>
 
-          <v-col cols="12" class="pa-0 mt-n2">
+          <v-col cols="12" class="pa-0 mt-n2 mb-2">
             <v-label class="text-caption field-label"><i>Gender</i></v-label>
             <v-radio-group
               v-model="formData.gender"
-              class="mb-n4 mt-n2"
+              class="mb-n2"
               inline
               :rules="[requiredValidator]"
             >
@@ -248,7 +248,7 @@ onMounted(() => {
             :rules="[requiredValidator, passwordValidator]"
             background-color="#0a3327"
             dark
-            class="form-field"
+            class="form-field mb-0"
           />
 
           <!-- Confirm Password -->
@@ -270,7 +270,7 @@ onMounted(() => {
             ]"
             background-color="#0a3327"
             dark
-            class="form-field"
+            class="form-field mb-0"
           />
 
           <!-- Register Button -->
@@ -330,7 +330,7 @@ h1 {
 }
 
 .signup-title {
-  font-size: 20px;
+  font-size: 16px;
   padding-bottom: 1rem;
   color: #ffffff;
   font-family: Arial, Helvetica, sans-serif;
@@ -478,5 +478,12 @@ input:-webkit-autofill {
 
 :deep(.autofilled) {
   background-color: #0a3327 !important;
+}
+
+/* Ensure no gap between form elements on mobile */
+@media (max-width: 600px) {
+  .v-row {
+    margin: 0 !important;
+  }
 }
 </style>
