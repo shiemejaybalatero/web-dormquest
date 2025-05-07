@@ -16,7 +16,6 @@ const router = useRouter()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const refVForm = ref()
-const birthdayMenu = ref(false)
 
 const formDataDefault = {
   firstname: '',
@@ -73,16 +72,11 @@ const onFormSubmit = () => {
   })
 }
 
-const formattedBirthday = computed({
-  get: () => {
-    if (formData.value.birthday) {
-      return dayjs(formData.value.birthday).format('MMMM D, YYYY')
-    }
-    return ''
-  },
-  set: (val) => {
-    if (!val) formData.value.birthday = ''
-  },
+const formattedBirthday = computed(() => {
+  if (formData.value.birthday) {
+    return dayjs(formData.value.birthday).format('MMMM D, YYYY')
+  }
+  return ''
 })
 
 function handleActiveState(event) {
@@ -94,7 +88,6 @@ function handleActiveState(event) {
 }
 
 onMounted(() => {
-  // Apply custom styling to autofilled input fields
   const inputs = document.querySelectorAll('input')
   inputs.forEach((input) => {
     input.addEventListener('animationstart', (e) => {
@@ -175,48 +168,20 @@ onMounted(() => {
 
           <v-col cols="12" class="pa-0">
             <v-label class="text-caption mt-1 mb-1 field-label"><i>Birthdate</i></v-label>
-            <v-menu
-              v-model="birthdayMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              min-width="auto"
-            >
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  v-model="formattedBirthday"
-                  prepend-inner-icon="mdi-calendar"
-                  readonly
-                  v-bind="props"
-                  color="green"
-                  variant="outlined"
-                  density="comfortable"
-                  class="w-100 birthdate-field mb-3"
-                  :rules="[requiredValidator]"
-                  placeholder="Select your birthday"
-                  clearable
-                  @click:clear="formData.birthday = ''"
-                />
-              </template>
-              <v-date-picker
-                v-model="formData.birthday"
-                @update:model-value="birthdayMenu = false"
-                color="#ffba00"
-                header-color="#0c3b2e"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1920-01-01"
-              >
-                <template v-slot:header="{ title }">
-                  <div class="date-picker-header">
-                    <v-btn icon @click="birthdayMenu = false" color="#ffba00">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <div class="header-title">{{ title }}</div>
-                    <div></div>
-                  </div>
-                </template>
-              </v-date-picker>
-            </v-menu>
+            <v-text-field
+              v-model="formData.birthday"
+              type="date"
+              color="green"
+              variant="outlined"
+              density="comfortable"
+              :rules="[requiredValidator]"
+              class="w-100"
+            />
           </v-col>
+
+          <div v-if="formattedBirthday" class="calendar text-white text-caption mt-n5 mb-3">
+            📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
+          </div>
 
           <v-col cols="12" class="pa-0 mt-n2 mb-2">
             <v-label class="text-caption field-label"><i>Gender</i></v-label>
