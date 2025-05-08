@@ -145,7 +145,7 @@ onUnmounted(() => {
 }
 
 .bg-image {
-  background: url(/public/landing4.png);
+  background: url(/landing4.png);
   background-size: cover;
   background-position: center;
 }
