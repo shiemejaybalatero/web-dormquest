@@ -6,6 +6,7 @@ import { ref, onMounted, computed } from 'vue'
 import { formActionDefault } from '@/utils/supabase'
 import { userProfile, isLoadingUser, fetchUserProfile } from '@/stores/userStore'
 import { useTheme } from 'vuetify'
+import dayjs from 'dayjs' // Make sure to import dayjs
 
 const theme = useTheme()
 const isDarkMode = computed(() => theme.global.name.value === 'dark')
@@ -36,12 +37,20 @@ const handleProfileUpdated = async () => {
   }
 }
 
+// Format the birthday using dayjs if it exists
+const formatBirthday = (birthday) => {
+  if (!birthday) return ''
+  return dayjs(birthday).format('YYYY-MM-DD')
+}
+
 const profileFields = computed(() => [
   { label: 'Full Name', value: userProfile.value.fullname },
   { label: 'Age', value: userProfile.value.age },
   { label: 'Email', value: userProfile.value.email },
   { label: 'Gender', value: userProfile.value.gender },
-  ...(userProfile.value.birthday ? [{ label: 'Birthday', value: userProfile.value.birthday }] : []),
+  ...(userProfile.value.birthday
+    ? [{ label: 'Birthday', value: formatBirthday(userProfile.value.birthday) }]
+    : []),
 ])
 </script>
 

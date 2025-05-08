@@ -16,6 +16,7 @@ const router = useRouter()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const refVForm = ref()
+const birthdateMenu = ref(false) // For date picker menu control
 
 const formDataDefault = {
   firstname: '',
@@ -155,24 +156,54 @@ function handleActiveState(event) {
             dark
           />
 
-          <v-col cols="12" class="pa-0">
-            <v-label class="text-caption mt-1 mb-1 field-label"><i>Birthdate</i></v-label>
-            <v-text-field
-              v-model="formData.birthday"
-              type="date"
-              color="green"
-              variant="outlined"
-              density="comfortable"
-              :rules="[requiredValidator]"
-              class="w-100"
-            />
+          <!-- Improved Birthday Field with Date Picker -->
+          <v-col cols="12" class="pa-0 mb-3">
+            <v-label class="text-caption mb-1 field-label"><i>Birthdate</i></v-label>
+            <v-menu
+              v-model="birthdateMenu"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              min-width="auto"
+            >
+              <template v-slot:activator="{ props }">
+                <v-text-field
+                  v-model="formattedBirthday"
+                  class="form-field"
+                  readonly
+                  variant="outlined"
+                  prepend-inner-icon="mdi-calendar"
+                  label="Select your birthday"
+                  :rules="[requiredValidator]"
+                  v-bind="props"
+                  background-color="#0a3327"
+                  dark
+                  hide-details
+                >
+                </v-text-field>
+              </template>
+              <v-date-picker
+                v-model="formData.birthday"
+                @update:model-value="birthdateMenu = false"
+                color="#ffba00"
+                header-color="#0c3b2e"
+                width="290"
+              >
+                <template v-slot:header="{ title }">
+                  <div class="date-picker-header">
+                    <span class="header-title">{{ title }}</span>
+                    <v-btn
+                      icon="mdi-close"
+                      size="small"
+                      @click="birthdateMenu = false"
+                      color="#ffba00"
+                    ></v-btn>
+                  </div>
+                </template>
+              </v-date-picker>
+            </v-menu>
           </v-col>
 
-          <div v-if="formattedBirthday" class="calendar text-white text-caption mt-n5 mb-3">
-            📅 Selected Birthday: <strong>{{ formattedBirthday }}</strong>
-          </div>
-
-          <v-col cols="12" class="pa-0 mt-n2 mb-2">
+          <v-col cols="12" class="pa-0 mb-2">
             <v-label class="text-caption field-label"><i>Gender</i></v-label>
             <v-radio-group
               v-model="formData.gender"
@@ -202,7 +233,7 @@ function handleActiveState(event) {
             :rules="[requiredValidator, passwordValidator]"
             background-color="#0a3327"
             dark
-            class="form-field mb-0"
+            class="form-field mt-n2"
           />
 
           <!-- Confirm Password -->
@@ -224,12 +255,12 @@ function handleActiveState(event) {
             ]"
             background-color="#0a3327"
             dark
-            class="form-field mb-0"
+            class="form-field mb-n5"
           />
 
           <!-- Register Button -->
           <v-btn
-            class="register-button w-100 py-2"
+            class="register-button w-100 py-2 mt-6"
             color="transparent"
             @click="handleActiveState"
             type="submit"
@@ -315,10 +346,6 @@ h1 {
   color: #0c3b2e;
 }
 
-.calendar {
-  color: white;
-}
-
 .field-label {
   display: block;
   padding-left: 16px;
@@ -339,45 +366,6 @@ h1 {
 .header-title {
   font-weight: bold;
   font-size: 16px;
-}
-
-/* Add birthdate field specific styles */
-.birthdate-field {
-  --v-theme-surface: transparent !important;
-}
-
-:deep(.birthdate-field .v-field__input) {
-  background-color: transparent !important;
-  color: white !important;
-  min-height: 40px !important;
-}
-
-:deep(.birthdate-field .v-field__outline) {
-  opacity: 1 !important;
-  color: #2b806a !important;
-  border-width: 1px !important;
-}
-
-:deep(.v-date-picker-month) {
-  background-color: white;
-}
-
-:deep(.v-date-picker-header) {
-  background-color: #0c3b2e;
-  color: white;
-}
-
-:deep(.v-date-picker-controls .v-btn) {
-  color: #ffba00;
-}
-
-:deep(.v-date-picker-month__day--selected) {
-  background-color: #ffba00 !important;
-}
-
-:deep(.v-date-picker) {
-  border-radius: 12px;
-  overflow: hidden;
 }
 
 /* Original form field styles */
@@ -404,6 +392,29 @@ h1 {
 :deep(.v-label) {
   color: #6bc4a8 !important;
   opacity: 0.9;
+}
+
+/* Style the date picker */
+:deep(.v-date-picker) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:deep(.v-date-picker-header) {
+  background-color: #0c3b2e;
+}
+
+:deep(.v-date-picker-header__value) {
+  color: #ffba00;
+}
+
+:deep(.v-date-picker-month__day--selected) {
+  background-color: #ffba00 !important;
+  color: #0c3b2e !important;
+}
+
+:deep(.v-date-picker-controls .v-btn) {
+  color: #ffba00;
 }
 
 /* Fix autofill background color */
@@ -438,6 +449,12 @@ input:-webkit-autofill {
 @media (max-width: 600px) {
   .v-row {
     margin: 0 !important;
+  }
+
+  /* Ensure date picker is responsive */
+  :deep(.v-date-picker) {
+    width: 100% !important;
+    max-width: 290px !important;
   }
 }
 </style>
