@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { supabase, formActionDefault } from '@/utils/supabase'
 import {
   requiredValidator,
@@ -47,7 +47,7 @@ const onSubmit = async () => {
         lastname: formData.value.lastname,
         birthday: formData.value.birthday,
         gender: formData.value.gender,
-        age: age,
+        age: age, // Add the calculated age here
       },
     },
   })
@@ -86,17 +86,6 @@ function handleActiveState(event) {
     button.classList.remove('active-tap')
   }, 150)
 }
-
-onMounted(() => {
-  const inputs = document.querySelectorAll('input')
-  inputs.forEach((input) => {
-    input.addEventListener('animationstart', (e) => {
-      if (e.animationName === 'autofill') {
-        input.parentElement.classList.add('autofilled')
-      }
-    })
-  })
-})
 </script>
 
 <template>
