@@ -18,7 +18,6 @@ export const useMapStore = defineStore('map', () => {
   const isLoading = ref(true)
   const error = ref(null)
   const markers = ref([])
-  const userLocationMarker = ref(null)
 
   // Utility Functions
   const calculateDistance = (coords1, coords2) => {
@@ -50,9 +49,6 @@ export const useMapStore = defineStore('map', () => {
       return false
     }
 
-    // Clear any existing user location marker to avoid confusion
-    clearUserLocationMarker()
-
     // Pan to the marker with animation
     map.value.setView([house.coords[0], house.coords[1]], 18, {
       animate: true,
@@ -75,13 +71,6 @@ export const useMapStore = defineStore('map', () => {
     }
 
     return true
-  }
-
-  const clearUserLocationMarker = () => {
-    if (userLocationMarker.value && map.value) {
-      map.value.removeLayer(userLocationMarker.value)
-      userLocationMarker.value = null
-    }
   }
 
   const isValidCoordinates = (lat, lng) => {
@@ -224,15 +213,13 @@ export const useMapStore = defineStore('map', () => {
     }
 
     isLoading.value = true
-
-    // First clear any existing user location marker
-    clearUserLocationMarker()
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const userCoords = [position.coords.latitude, position.coords.longitude]
 
         if (map.value) {
+          if (currentMarker.value) map.value.removeLayer(currentMarker.value)
+
           map.value.closePopup()
 
           const userIcon = L.divIcon({
@@ -243,7 +230,7 @@ export const useMapStore = defineStore('map', () => {
             popupAnchor: [0, -32],
           })
 
-          userLocationMarker.value = L.marker(userCoords, { icon: userIcon }).addTo(map.value)
+          currentMarker.value = L.marker(userCoords, { icon: userIcon }).addTo(map.value)
             .bindPopup(`
             <div>
               <p><strong>Your Location</strong></p>
@@ -262,7 +249,7 @@ export const useMapStore = defineStore('map', () => {
 
           // Open popup after a short delay to avoid animation conflicts
           setTimeout(() => {
-            userLocationMarker.value.openPopup()
+            currentMarker.value.openPopup()
           }, 300)
         }
 
@@ -270,13 +257,7 @@ export const useMapStore = defineStore('map', () => {
       },
       (error) => {
         isLoading.value = false
-        console.error('Error getting user location:', error)
-        this.error = 'Unable to determine your location. Please check your browser permissions.'
-
-        // Clear the error after 5 seconds
-        setTimeout(() => {
-          this.error = null
-        }, 5000)
+        alert(`Unable to retrieve your location: ${error.message}`)
       },
       { enableHighAccuracy: true },
     )
@@ -551,9 +532,6 @@ export const useMapStore = defineStore('map', () => {
       currentPath.value = null
     }
 
-    // Also clear user location marker when clearing paths
-    clearUserLocationMarker()
-
     // Remove any direction markers
     document.querySelectorAll('.path-direction-marker').forEach((marker) => {
       if (marker._leaflet_id && map.value) {
@@ -604,7 +582,6 @@ export const useMapStore = defineStore('map', () => {
     markers.value = []
     currentMarker.value = null
     referenceMarker.value = null
-    userLocationMarker.value = null
   }
 
   return {
@@ -620,7 +597,6 @@ export const useMapStore = defineStore('map', () => {
     isLoading,
     error,
     markers,
-    userLocationMarker,
 
     // Getters
     hasPath,
@@ -629,7 +605,6 @@ export const useMapStore = defineStore('map', () => {
     initializeMap,
     fetchBoardingHouses,
     getUserLocation,
-    clearUserLocationMarker,
     clearPath,
     drawPath,
     zoomIn,
