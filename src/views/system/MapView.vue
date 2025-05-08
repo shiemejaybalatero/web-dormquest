@@ -5,6 +5,9 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 import { useMapStore } from '@/stores/mapStore'
 import { useTheme } from 'vuetify'
 
+// Make sure your main.js or index.js imports the Material Design Icons
+// import '@mdi/font/css/materialdesignicons.css'
+
 const router = useRouter()
 const route = useRoute()
 const mapStore = useMapStore()
@@ -33,6 +36,9 @@ const viewBoardingHouseDetails = (houseId) => {
 
   console.log('Found house:', house.name, 'navigating to details page')
 
+  // Make sure to clear the user location marker when viewing house details
+  mapStore.clearUserLocationMarker()
+
   // Navigate to the dorm-details route with the house ID
   router.push({
     name: 'dorm-details',
@@ -44,6 +50,8 @@ const viewBoardingHouseDetails = (houseId) => {
 const handlePathDrawing = async (fromCoords, toCoords) => {
   try {
     routeInfo.value = null
+    // Clear any existing user location marker before drawing a new path
+    mapStore.clearUserLocationMarker()
     await mapStore.drawPath(fromCoords, toCoords)
   } catch (err) {
     console.error('Error in handlePathDrawing:', err)
@@ -155,7 +163,7 @@ onBeforeUnmount(() => {
           <p><strong>Distance:</strong> {{ routeInfo.distance }} km</p>
           <p><strong>Estimated Time:</strong> {{ routeInfo.duration }} min</p>
           <button @click="routeInfo = null" class="close-button">
-            <i class="mdi mdi-close"></i>
+            <span class="mdi mdi-close"></span>
           </button>
         </div>
 
@@ -165,7 +173,7 @@ onBeforeUnmount(() => {
             class="map-button location-button"
             :class="{ 'dark-button': isDarkMode }"
           >
-            <i class="mdi mdi-crosshairs-gps"></i> Get Your Location
+            <span class="mdi mdi-crosshairs-gps"></span> Get Your Location
           </button>
           <button
             @click="mapStore.clearPath"
@@ -173,7 +181,7 @@ onBeforeUnmount(() => {
             :class="{ 'dark-button': isDarkMode }"
             :disabled="!mapStore.hasPath"
           >
-            <i class="mdi mdi-map-marker-path"></i> Clear Path
+            <span class="mdi mdi-map-marker-path"></span> Clear Path
           </button>
         </div>
 
@@ -185,7 +193,7 @@ onBeforeUnmount(() => {
             :class="{ 'dark-control': isDarkMode }"
             title="Zoom In"
           >
-            <i class="mdi mdi-plus"></i>
+            <span class="mdi mdi-plus"></span>
           </button>
           <button
             @click="mapStore.zoomOut()"
@@ -193,7 +201,7 @@ onBeforeUnmount(() => {
             :class="{ 'dark-control': isDarkMode }"
             title="Zoom Out"
           >
-            <i class="mdi mdi-minus"></i>
+            <span class="mdi mdi-minus"></span>
           </button>
           <button
             @click="mapStore.resetView()"
@@ -201,7 +209,7 @@ onBeforeUnmount(() => {
             :class="{ 'dark-control': isDarkMode }"
             title="Reset View"
           >
-            <i class="mdi mdi-home"></i>
+            <span class="mdi mdi-home"></span>
           </button>
         </div>
 
@@ -278,6 +286,12 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Add styles for MDI icons */
+.mdi {
+  font-size: 20px;
+  display: inline-flex;
 }
 
 .map-button:hover {
@@ -519,15 +533,15 @@ onBeforeUnmount(() => {
 
 .map-legend {
   position: absolute;
-  bottom: 40px;
+  bottom: 80px;
   left: 20px;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px;
+  padding: 8px;
   border-radius: 4px;
   border: 1px solid #d1d5db;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 180px;
+  width: 150px;
 }
 
 .dark-legend {
@@ -553,8 +567,8 @@ onBeforeUnmount(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
-  font-size: 12px;
+  margin-bottom: 3px;
+  font-size: 11px;
 }
 
 .dark-legend-text {
@@ -588,7 +602,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .button-container {
-    bottom: 20px;
+    bottom: 80px;
     right: 10px;
   }
 

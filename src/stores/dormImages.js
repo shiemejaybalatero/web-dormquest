@@ -96,7 +96,7 @@ export const dormImageMap = {
     ],
   },
   15: {
-    main: '/Camella/camella.jpg',
+    main: '/Camella/camellamain.jpg',
     gallery: [
       '/Camella/camella.jpg',
       '/Camella/camella1.jpg',
