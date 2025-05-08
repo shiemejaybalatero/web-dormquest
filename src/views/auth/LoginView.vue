@@ -223,7 +223,7 @@ h1 {
 :deep(.v-field__input:-webkit-autofill:focus),
 :deep(.v-field__input:-webkit-autofill:active) {
   -webkit-text-fill-color: white !important;
-  -webkit-box-shadow: 0 0 0 30px #0c3b2e inset !important;
+  -webkit-box-shadow: 0 0 0 30px #164336 inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
