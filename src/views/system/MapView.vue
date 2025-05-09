@@ -534,7 +534,7 @@ onBeforeUnmount(() => {
 /* Map Legend - Light Mode */
 .map-legend {
   position: absolute;
-  bottom: 80px;
+  bottom: 50px;
   left: 10px;
   background-color: rgba(255, 255, 255, 0.9);
   padding: 8px;
@@ -604,19 +604,13 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .button-container {
-    bottom: 80px;
+    bottom: 50px;
     right: 10px;
   }
 
   .map-button {
     padding: 10px 15px;
     font-size: 14px;
-  }
-
-  .map-legend {
-    bottom: 20px;
-    left: 10px;
-    width: 150px;
   }
 
   .route-info-panel {
